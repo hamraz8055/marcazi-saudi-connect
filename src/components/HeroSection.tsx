@@ -1,11 +1,13 @@
 import { Search, Camera, ArrowRight, ShoppingBag, Gavel } from "lucide-react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import heroPattern from "@/assets/hero-pattern.jpg";
 
 const HeroSection = () => {
   const { t } = useI18n();
+  const navigate = useNavigate();
 
   return (
     <section className="relative overflow-hidden">
@@ -98,11 +100,11 @@ const HeroSection = () => {
           transition={{ delay: 0.6, duration: 0.5 }}
           className="mt-6 flex flex-wrap items-center justify-center gap-3"
         >
-          <Button variant="outline" size="lg" className="rounded-xl border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
+          <Button variant="outline" size="lg" className="rounded-xl border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground" onClick={() => navigate("/browse")}>
             {t("hero.explore")}
             <ArrowRight className="ms-2 h-4 w-4" />
           </Button>
-          <Button variant="default" size="lg" className="rounded-xl bg-primary-foreground text-primary hover:bg-primary-foreground/90">
+          <Button variant="default" size="lg" className="rounded-xl bg-primary-foreground text-primary hover:bg-primary-foreground/90" onClick={() => navigate("/post")}>
             {t("hero.postAd")}
           </Button>
         </motion.div>

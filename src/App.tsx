@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { I18nProvider } from "@/lib/i18n";
 import { ThemeProvider } from "@/lib/theme";
 import Index from "./pages/Index";
+import Browse from "./pages/Browse";
+import PostAd from "./pages/PostAd";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,6 +22,8 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/browse" element={<Browse />} />
+              <Route path="/post" element={<PostAd />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
