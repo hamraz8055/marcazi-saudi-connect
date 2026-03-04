@@ -1,4 +1,5 @@
 import { Search, Globe, Moon, Sun, Camera, ChevronDown } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useI18n } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
 import { Button } from "@/components/ui/button";
@@ -6,17 +7,18 @@ import { Button } from "@/components/ui/button";
 const Header = () => {
   const { t, toggleLang, lang } = useI18n();
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl safe-top">
       <div className="container flex h-16 items-center justify-between gap-4">
         {/* Logo */}
-        <div className="flex items-center gap-2.5 shrink-0">
+        <button onClick={() => navigate("/")} className="flex items-center gap-2.5 shrink-0">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-lg">
             M
           </div>
           <span className="text-xl font-bold text-foreground tracking-tight">Marcazi</span>
-        </div>
+        </button>
 
         {/* City Selector - hidden on mobile */}
         <button className="hidden md:flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
@@ -25,16 +27,13 @@ const Header = () => {
         </button>
 
         {/* Search Bar - hidden on mobile */}
-        <div className="hidden md:flex flex-1 max-w-xl items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5">
+        <div
+          onClick={() => navigate("/browse")}
+          className="hidden md:flex flex-1 max-w-xl items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 cursor-pointer"
+        >
           <Search className="h-4 w-4 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder={t("nav.search")}
-            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-          />
-          <button className="text-muted-foreground hover:text-foreground transition-colors">
-            <Camera className="h-4 w-4" />
-          </button>
+          <span className="flex-1 text-sm text-muted-foreground">{t("nav.search")}</span>
+          <Camera className="h-4 w-4 text-muted-foreground" />
         </div>
 
         {/* Actions */}
@@ -53,7 +52,7 @@ const Header = () => {
           >
             {theme === "dark" ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5" />}
           </button>
-          <Button variant="default" size="sm" className="hidden sm:flex">
+          <Button variant="default" size="sm" className="hidden sm:flex" onClick={() => navigate("/post")}>
             {t("nav.postAd")}
           </Button>
         </div>
