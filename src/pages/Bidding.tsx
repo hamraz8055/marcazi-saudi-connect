@@ -190,7 +190,10 @@ const Bidding = () => {
             </button>
           </div>
 
-          <Button className="bg-gold text-gold-foreground hover:bg-gold/90">
+          <Button
+            className="bg-gold text-gold-foreground hover:bg-gold/90"
+            onClick={() => navigate(activeTab === "auctions" ? "/bidding/create-auction" : "/bidding/request-quote")}
+          >
             <Plus className="h-4 w-4 me-1" />
             {activeTab === "auctions" ? t("bidding.createAuction") : t("bidding.requestQuote")}
           </Button>
