@@ -11,6 +11,8 @@ import Browse from "./pages/Browse";
 import PostAd from "./pages/PostAd";
 import Messages from "./pages/Messages";
 import Bidding from "./pages/Bidding";
+import CreateAuction from "./pages/CreateAuction";
+import RequestQuote from "./pages/RequestQuote";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
