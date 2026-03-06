@@ -14,10 +14,14 @@ const HeroSection = () => {
       {/* Background */}
       <div className="absolute inset-0">
         <img src={heroPattern} alt="" className="h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/70 via-primary/60 to-primary/80" />
+        <div className="absolute inset-0 bg-gradient-to-b from-primary-dark/90 via-primary/80 to-primary-dark/95" />
+        {/* Geometric pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.04]" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }} />
       </div>
 
-      <div className="container relative z-10 py-16 md:py-24 text-center">
+      <div className="container relative z-10 py-16 md:py-28 text-center">
         {/* Tabs */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -25,11 +29,17 @@ const HeroSection = () => {
           transition={{ duration: 0.4 }}
           className="mx-auto mb-10 inline-flex items-center rounded-2xl bg-card/90 backdrop-blur-sm p-1.5 shadow-elevated"
         >
-          <button className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-all">
+          <button
+            onClick={() => navigate("/")}
+            className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-all"
+          >
             <ShoppingBag className="h-4 w-4" />
             {t("tab.marketplace")}
           </button>
-          <button className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <button
+            onClick={() => navigate("/bidding")}
+            className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
             <Gavel className="h-4 w-4" />
             {t("tab.bidding")}
           </button>
@@ -59,7 +69,7 @@ const HeroSection = () => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.5 }}
-          className="mx-auto mt-4 text-lg md:text-xl font-semibold text-primary-foreground/90"
+          className="mx-auto mt-4 text-lg md:text-xl font-semibold text-gold"
         >
           {t("hero.subtitle")}
         </motion.p>
@@ -100,11 +110,20 @@ const HeroSection = () => {
           transition={{ delay: 0.6, duration: 0.5 }}
           className="mt-6 flex flex-wrap items-center justify-center gap-3"
         >
-          <Button variant="outline" size="lg" className="rounded-xl border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground" onClick={() => navigate("/browse")}>
+          <Button
+            variant="outline"
+            size="lg"
+            className="rounded-xl border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
+            onClick={() => navigate("/browse")}
+          >
             {t("hero.explore")}
             <ArrowRight className="ms-2 h-4 w-4" />
           </Button>
-          <Button variant="default" size="lg" className="rounded-xl bg-primary-foreground text-primary hover:bg-primary-foreground/90" onClick={() => navigate("/post")}>
+          <Button
+            size="lg"
+            className="rounded-xl bg-gold text-gold-foreground hover:bg-gold/90 font-semibold"
+            onClick={() => navigate("/post")}
+          >
             {t("hero.postAd")}
           </Button>
         </motion.div>
