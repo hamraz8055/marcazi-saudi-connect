@@ -11,6 +11,8 @@ import Browse from "./pages/Browse";
 import PostAd from "./pages/PostAd";
 import Messages from "./pages/Messages";
 import Bidding from "./pages/Bidding";
+import CreateAuction from "./pages/CreateAuction";
+import RequestQuote from "./pages/RequestQuote";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +32,8 @@ const App = () => (
                 <Route path="/post" element={<PostAd />} />
                 <Route path="/messages" element={<Messages />} />
                 <Route path="/bidding" element={<Bidding />} />
+                <Route path="/bidding/create-auction" element={<CreateAuction />} />
+                <Route path="/bidding/request-quote" element={<RequestQuote />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
