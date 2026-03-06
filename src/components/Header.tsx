@@ -52,7 +52,11 @@ const Header = () => {
           >
             {theme === "dark" ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5" />}
           </button>
-          <Button variant="default" size="sm" className="hidden sm:flex" onClick={() => navigate("/post")}>
+          <Button
+            size="sm"
+            className="hidden sm:flex bg-gold text-gold-foreground hover:bg-gold/90"
+            onClick={() => navigate("/post")}
+          >
             {t("nav.postAd")}
           </Button>
         </div>

@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Browse from "./pages/Browse";
 import PostAd from "./pages/PostAd";
 import Messages from "./pages/Messages";
+import Bidding from "./pages/Bidding";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
                 <Route path="/browse" element={<Browse />} />
                 <Route path="/post" element={<PostAd />} />
                 <Route path="/messages" element={<Messages />} />
+                <Route path="/bidding" element={<Bidding />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
