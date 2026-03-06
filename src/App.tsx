@@ -32,6 +32,8 @@ const App = () => (
                 <Route path="/post" element={<PostAd />} />
                 <Route path="/messages" element={<Messages />} />
                 <Route path="/bidding" element={<Bidding />} />
+                <Route path="/bidding/create-auction" element={<CreateAuction />} />
+                <Route path="/bidding/request-quote" element={<RequestQuote />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
