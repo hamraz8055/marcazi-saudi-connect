@@ -82,12 +82,10 @@ const RequestQuote = () => {
         <div className="flex items-center gap-1 mb-8">
           {STEPS.map((s, i) => (
             <div key={s} className="flex-1 flex flex-col items-center gap-1.5">
-              <div className={`w-full h-1.5 rounded-full transition-colors ${
-                i <= step ? "bg-primary" : "bg-muted"
-              }`} />
-              <span className={`text-[10px] font-medium ${
-                i <= step ? "text-primary" : "text-muted-foreground"
-              }`}>
+              <div className={`w-full h-1.5 rounded-full transition-colors ${i <= step ? "bidding-gradient" : "bg-muted"
+                }`} />
+              <span className={`text-[10px] font-medium ${i <= step ? "text-bidding" : "text-muted-foreground"
+                }`}>
                 {t(s)}
               </span>
             </div>
@@ -121,15 +119,14 @@ const RequestQuote = () => {
                           <button
                             key={cat.id}
                             onClick={() => updateField("category", cat.id)}
-                            className={`flex items-center gap-2 rounded-xl border-2 p-3 transition-all text-sm ${
-                              formData.category === cat.id
-                                ? "border-primary bg-primary-light"
-                                : "border-border bg-card hover:border-primary/30"
-                            }`}
+                            className={`flex items-center gap-2 rounded-xl border-2 p-3 transition-all text-sm ${formData.category === cat.id
+                                ? "border-violet-500 bg-violet-50"
+                                : "border-border bg-card hover:border-violet-500/30"
+                              }`}
                           >
                             <Icon className="h-4 w-4 shrink-0" />
                             <span className="font-medium text-foreground">{t(cat.key)}</span>
-                            {formData.category === cat.id && <Check className="ms-auto h-4 w-4 text-primary" />}
+                            {formData.category === cat.id && <Check className="ms-auto h-4 w-4 text-violet-600" />}
                           </button>
                         );
                       })}
@@ -252,9 +249,8 @@ const RequestQuote = () => {
                         <button
                           key={u.value}
                           onClick={() => updateField("urgency", u.value)}
-                          className={`rounded-xl border-2 py-2.5 text-sm font-medium transition-all ${
-                            formData.urgency === u.value ? u.color : "border-border bg-card text-muted-foreground"
-                          }`}
+                          className={`rounded-xl border-2 py-2.5 text-sm font-medium transition-all ${formData.urgency === u.value ? u.color : "border-border bg-card text-muted-foreground"
+                            }`}
                         >
                           {t(u.key)}
                         </button>
@@ -284,9 +280,8 @@ const RequestQuote = () => {
                   <label className="flex items-center gap-3 cursor-pointer">
                     <div
                       onClick={() => updateField("deliveryRequired", !formData.deliveryRequired)}
-                      className={`relative w-11 h-6 rounded-full transition-colors ${
-                        formData.deliveryRequired ? "bg-primary" : "bg-muted"
-                      }`}
+                      className={`relative w-11 h-6 rounded-full transition-colors ${formData.deliveryRequired ? "bidding-gradient" : "bg-muted"
+                        }`}
                     >
                       <motion.div
                         className="absolute top-1 h-4 w-4 rounded-full bg-primary-foreground shadow-sm"
@@ -316,9 +311,8 @@ const RequestQuote = () => {
                         <FileText className="h-3 w-3" />
                         {t("bidding.quotations")}
                       </span>
-                      <span className={`rounded-lg border px-2.5 py-1 text-xs font-semibold ${
-                        URGENCY.find(u => u.value === formData.urgency)?.color || ""
-                      }`}>
+                      <span className={`rounded-lg border px-2.5 py-1 text-xs font-semibold ${URGENCY.find(u => u.value === formData.urgency)?.color || ""
+                        }`}>
                         {t(`quote.${formData.urgency}`)}
                       </span>
                     </div>
@@ -346,7 +340,7 @@ const RequestQuote = () => {
                       </div>
                       <div>
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{t("quote.budgetRange")}</p>
-                        <p className="text-lg font-bold text-primary flex items-center gap-1">
+                        <p className="text-lg font-bold text-bidding flex items-center gap-1">
                           <DollarSign className="h-4 w-4" />
                           {formData.budgetMin ? Number(formData.budgetMin).toLocaleString() : "0"} - {formData.budgetMax ? Number(formData.budgetMax).toLocaleString() : "∞"} {t("listing.sar")}
                         </p>
@@ -399,7 +393,7 @@ const RequestQuote = () => {
           ) : (
             <Button
               onClick={() => navigate("/bidding")}
-              className="rounded-xl bg-primary text-primary-foreground"
+              className="rounded-xl bidding-gradient border-0 text-white"
             >
               <ClipboardList className="h-4 w-4 me-1" />
               {t("quote.publish")}
