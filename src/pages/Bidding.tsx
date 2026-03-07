@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Gavel, ShoppingBag, Clock, Users, DollarSign, ArrowRight, Search, Shield, TrendingUp, FileText, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -6,6 +6,30 @@ import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import BottomTabBar from "@/components/BottomTabBar";
+import ImageFallback from "@/components/ImageFallback";
+
+// Parse "2d 14h" into total seconds for countdown
+const parseEndTime = (endsIn: string): number => {
+  let totalSeconds = 0;
+  const dayMatch = endsIn.match(/(\d+)d/);
+  const hourMatch = endsIn.match(/(\d+)h/);
+  const minMatch = endsIn.match(/(\d+)m/);
+  if (dayMatch) totalSeconds += parseInt(dayMatch[1]) * 86400;
+  if (hourMatch) totalSeconds += parseInt(hourMatch[1]) * 3600;
+  if (minMatch) totalSeconds += parseInt(minMatch[1]) * 60;
+  return totalSeconds;
+};
+
+const formatCountdown = (totalSeconds: number): string => {
+  if (totalSeconds <= 0) return "Ended";
+  const d = Math.floor(totalSeconds / 86400);
+  const h = Math.floor((totalSeconds % 86400) / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  if (d > 0) return `${d}d ${h}h ${m}m`;
+  if (h > 0) return `${h}h ${m}m ${s.toString().padStart(2, "0")}s`;
+  return `${m}m ${s.toString().padStart(2, "0")}s`;
+};
 
 const mockAuctions = [
   {
@@ -48,7 +72,7 @@ const mockAuctions = [
     currentBid: 85000,
     startingPrice: 50000,
     totalBids: 42,
-    endsIn: "12h 30m",
+    endsIn: "0d 12h 30m",
     seller: { en: "Premium Numbers", ar: "أرقام مميزة" },
     verified: true,
   },
@@ -86,6 +110,26 @@ const Bidding = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"auctions" | "quotations">("auctions");
 
+  // Countdown timer state
+  const [countdowns, setCountdowns] = useState<Record<number, number>>(() => {
+    const initial: Record<number, number> = {};
+    mockAuctions.forEach((a) => { initial[a.id] = parseEndTime(a.endsIn); });
+    return initial;
+  });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCountdowns((prev) => {
+        const next: Record<number, number> = {};
+        for (const [id, secs] of Object.entries(prev)) {
+          next[Number(id)] = Math.max(0, secs - 1);
+        }
+        return next;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -97,7 +141,6 @@ const Bidding = () => {
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }} />
         <div className="container relative z-10 py-10 md:py-16">
-          {/* Navigation toggle */}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -106,11 +149,15 @@ const Bidding = () => {
             <button
               onClick={() => navigate("/")}
               className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Go to Marketplace"
             >
               <ShoppingBag className="h-4 w-4" />
               {t("tab.marketplace")}
             </button>
-            <button className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-all">
+            <button
+              className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-all"
+              aria-label="Bidding section active"
+            >
               <Gavel className="h-4 w-4" />
               {t("tab.bidding")}
             </button>
@@ -133,7 +180,6 @@ const Bidding = () => {
             {t("bidding.subtitle")}
           </motion.p>
 
-          {/* Stats */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
@@ -158,17 +204,13 @@ const Bidding = () => {
       </section>
 
       <div className="container py-8 pb-24 md:pb-8">
-        {/* Tab switcher */}
         <div className="flex items-center justify-between mb-8">
           <div className="relative inline-flex items-center rounded-full bg-muted p-1">
             <motion.div
               className="absolute h-[calc(100%-8px)] rounded-full bg-primary"
               layout
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              style={{
-                width: "50%",
-                left: activeTab === "auctions" ? "4px" : "50%",
-              }}
+              style={{ width: "50%", left: activeTab === "auctions" ? "4px" : "50%" }}
             />
             <button
               onClick={() => setActiveTab("auctions")}
@@ -207,7 +249,6 @@ const Bidding = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
             >
-              {/* How it works */}
               <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
                   { icon: Search, title: t("bidding.howFind"), desc: t("bidding.howFindDesc") },
@@ -226,56 +267,61 @@ const Bidding = () => {
                 ))}
               </div>
 
-              {/* Auction Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-5">
-                {mockAuctions.map((auction, i) => (
-                  <motion.article
-                    key={auction.id}
-                    initial={{ opacity: 0, y: 15 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.08 }}
-                    className="group cursor-pointer rounded-2xl border border-border bg-card overflow-hidden shadow-card hover:shadow-elevated transition-all"
-                  >
-                    <div className="flex flex-col md:flex-row">
-                      <div className="relative w-full md:w-48 aspect-[4/3] md:aspect-auto overflow-hidden shrink-0">
-                        <img src={auction.image} alt={auction.title[lang]} className="h-full w-full object-cover" loading="lazy" />
-                        <div className="absolute top-3 start-3 flex items-center gap-1.5 rounded-lg bg-destructive/90 text-destructive-foreground px-2.5 py-1 text-xs font-bold">
-                          <Clock className="h-3 w-3" />
-                          {auction.endsIn}
-                        </div>
-                      </div>
-                      <div className="flex-1 p-5">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-xs text-muted-foreground">{auction.seller[lang]}</span>
-                          {auction.verified && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-gold-light text-gold px-2 py-0.5 text-[10px] font-bold">
-                              <Shield className="h-2.5 w-2.5" />
-                              {t("bidding.verified")}
-                            </span>
-                          )}
-                        </div>
-                        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                          {auction.title[lang]}
-                        </h3>
-                        <div className="mt-3 flex items-end gap-4">
-                          <div>
-                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{t("bidding.currentBid")}</p>
-                            <p className="text-xl font-bold text-primary">{auction.currentBid.toLocaleString()} {t("listing.sar")}</p>
-                          </div>
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <Users className="h-3.5 w-3.5" />
-                            {auction.totalBids} {t("bidding.bids")}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                {mockAuctions.map((auction, i) => {
+                  const remaining = countdowns[auction.id] ?? 0;
+                  const isUrgent = remaining < 86400; // less than 1 day
+                  return (
+                    <motion.article
+                      key={auction.id}
+                      initial={{ opacity: 0, y: 15 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: i * 0.08 }}
+                      className="group cursor-pointer rounded-2xl border border-border bg-card overflow-hidden shadow-card hover:shadow-elevated transition-all"
+                    >
+                      <div className="flex flex-col md:flex-row">
+                        <div className="relative w-full md:w-48 aspect-[4/3] md:aspect-auto overflow-hidden shrink-0">
+                          <ImageFallback src={auction.image} alt={auction.title[lang]} className="h-full w-full object-cover" loading="lazy" />
+                          <div className={`absolute top-3 start-3 flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold ${
+                            isUrgent ? "bg-destructive/90 text-destructive-foreground animate-pulse" : "bg-destructive/90 text-destructive-foreground"
+                          }`}>
+                            <Clock className="h-3 w-3" />
+                            {formatCountdown(remaining)}
                           </div>
                         </div>
-                        <Button size="sm" className="mt-4 bg-gold text-gold-foreground hover:bg-gold/90">
-                          {t("bidding.placeBid")}
-                          <ArrowRight className="h-3.5 w-3.5 ms-1" />
-                        </Button>
+                        <div className="flex-1 p-5">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-xs text-muted-foreground">{auction.seller[lang]}</span>
+                            {auction.verified && (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-gold-light text-gold px-2 py-0.5 text-[10px] font-bold">
+                                <Shield className="h-2.5 w-2.5" />
+                                {t("bidding.verified")}
+                              </span>
+                            )}
+                          </div>
+                          <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                            {auction.title[lang]}
+                          </h3>
+                          <div className="mt-3 flex items-end gap-4">
+                            <div>
+                              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{t("bidding.currentBid")}</p>
+                              <p className="text-xl font-bold text-primary">{auction.currentBid.toLocaleString()} {t("listing.sar")}</p>
+                            </div>
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Users className="h-3.5 w-3.5" />
+                              {auction.totalBids} {t("bidding.bids")}
+                            </div>
+                          </div>
+                          <Button size="sm" className="mt-4 bg-gold text-gold-foreground hover:bg-gold/90">
+                            {t("bidding.placeBid")}
+                            <ArrowRight className="h-3.5 w-3.5 ms-1" />
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  </motion.article>
-                ))}
+                    </motion.article>
+                  );
+                })}
               </div>
             </motion.div>
           ) : (
@@ -285,7 +331,6 @@ const Bidding = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
             >
-              {/* How quotations work */}
               <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
                   { icon: FileText, title: t("bidding.qPost"), desc: t("bidding.qPostDesc") },
@@ -304,7 +349,6 @@ const Bidding = () => {
                 ))}
               </div>
 
-              {/* Quotation cards */}
               <div className="space-y-4">
                 {mockQuotations.map((q, i) => (
                   <motion.div

@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
-import heroPattern from "@/assets/hero-pattern.jpg";
 
 const HeroSection = () => {
   const { t } = useI18n();
@@ -11,15 +10,11 @@ const HeroSection = () => {
 
   return (
     <section className="relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0">
-        <img src={heroPattern} alt="" className="h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-b from-primary-dark/90 via-primary/80 to-primary-dark/95" />
-        {/* Geometric pattern overlay */}
-        <div className="absolute inset-0 opacity-[0.04]" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }} />
-      </div>
+      {/* Background — pure CSS gradient, no image for LCP */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary-dark to-primary" />
+      <div className="absolute inset-0 opacity-[0.04]" style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+      }} />
 
       <div className="container relative z-10 py-16 md:py-28 text-center">
         {/* Tabs */}
@@ -32,6 +27,7 @@ const HeroSection = () => {
           <button
             onClick={() => navigate("/")}
             className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-all"
+            aria-label="Marketplace tab active"
           >
             <ShoppingBag className="h-4 w-4" />
             {t("tab.marketplace")}
@@ -39,23 +35,24 @@ const HeroSection = () => {
           <button
             onClick={() => navigate("/bidding")}
             className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Switch to bidding"
           >
             <Gavel className="h-4 w-4" />
             {t("tab.bidding")}
           </button>
         </motion.div>
 
-        {/* Saudi flag icon */}
+        {/* Saudi flag */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1, duration: 0.4 }}
           className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-card/90 backdrop-blur-sm shadow-elevated text-2xl"
+          aria-hidden="true"
         >
           🇸🇦
         </motion.div>
 
-        {/* Heading */}
         <motion.h1
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
@@ -90,16 +87,15 @@ const HeroSection = () => {
           transition={{ delay: 0.5, duration: 0.5 }}
           className="mx-auto mt-8 max-w-xl"
         >
-          <div className="flex items-center gap-2 rounded-2xl bg-card/95 backdrop-blur-sm px-5 py-3.5 shadow-elevated">
+          <div
+            className="flex items-center gap-2 rounded-2xl bg-card/95 backdrop-blur-sm px-5 py-3.5 shadow-elevated cursor-pointer"
+            onClick={() => navigate("/browse")}
+            role="search"
+            aria-label="Search listings"
+          >
             <Search className="h-5 w-5 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder={t("nav.search")}
-              className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground text-foreground"
-            />
-            <button className="text-muted-foreground hover:text-foreground transition-colors">
-              <Camera className="h-5 w-5" />
-            </button>
+            <span className="flex-1 text-sm text-muted-foreground text-start">{t("nav.search")}</span>
+            <Camera className="h-5 w-5 text-muted-foreground" />
           </div>
         </motion.div>
 
