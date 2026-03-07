@@ -62,7 +62,7 @@ const CreateAuction = () => {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
-    const newImages = Array.from(files).slice(0, 10 - formData.images.length).map((f) => URL.createObjectURL(f));
+    const newImages = Array.from(files).slice(0, 10 - formData.images.length).map((f) => URL.createObjectURL(f as File));
     updateField("images", [...formData.images, ...newImages]);
   };
 
@@ -99,12 +99,10 @@ const CreateAuction = () => {
         <div className="flex items-center gap-1 mb-8">
           {STEPS.map((s, i) => (
             <div key={s} className="flex-1 flex flex-col items-center gap-1.5">
-              <div className={`w-full h-1.5 rounded-full transition-colors ${
-                i <= step ? "bg-gold" : "bg-muted"
-              }`} />
-              <span className={`text-[10px] font-medium ${
-                i <= step ? "text-gold" : "text-muted-foreground"
-              }`}>
+              <div className={`w-full h-1.5 rounded-full transition-colors ${i <= step ? "bg-gold" : "bg-muted"
+                }`} />
+              <span className={`text-[10px] font-medium ${i <= step ? "text-gold" : "text-muted-foreground"
+                }`}>
                 {t(s)}
               </span>
             </div>
@@ -134,11 +132,10 @@ const CreateAuction = () => {
                         <button
                           key={cat.id}
                           onClick={() => { updateField("category", cat.id); updateField("subcategory", ""); }}
-                          className={`flex items-center gap-3 rounded-xl border-2 p-4 transition-all ${
-                            formData.category === cat.id
-                              ? "border-gold bg-gold-light"
-                              : "border-border bg-card hover:border-gold/30"
-                          }`}
+                          className={`flex items-center gap-3 rounded-xl border-2 p-4 transition-all ${formData.category === cat.id
+                            ? "border-gold bg-gold-light"
+                            : "border-border bg-card hover:border-gold/30"
+                            }`}
                         >
                           <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${cat.color}`}>
                             <Icon className="h-5 w-5" />
@@ -160,11 +157,10 @@ const CreateAuction = () => {
                           <button
                             key={sub.id}
                             onClick={() => updateField("subcategory", sub.id)}
-                            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                              formData.subcategory === sub.id
-                                ? "bg-gold text-gold-foreground"
-                                : "bg-muted text-muted-foreground hover:bg-muted/80"
-                            }`}
+                            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${formData.subcategory === sub.id
+                              ? "bg-gold text-gold-foreground"
+                              : "bg-muted text-muted-foreground hover:bg-muted/80"
+                              }`}
                           >
                             {sub.name[lang]}
                           </button>
@@ -208,11 +204,10 @@ const CreateAuction = () => {
                         <button
                           key={c}
                           onClick={() => updateField("condition", c)}
-                          className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                            formData.condition === c
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-muted text-muted-foreground hover:bg-muted/80"
-                          }`}
+                          className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${formData.condition === c
+                            ? "bidding-gradient border-0 text-white"
+                            : "bg-muted text-muted-foreground hover:bg-muted/80"
+                            }`}
                         >
                           {t(`auction.${c}`)}
                         </button>
@@ -318,11 +313,10 @@ const CreateAuction = () => {
                         <button
                           key={d.days}
                           onClick={() => updateField("duration", d.days)}
-                          className={`flex items-center justify-center gap-1.5 rounded-xl border-2 py-2.5 text-sm font-medium transition-all ${
-                            formData.duration === d.days
-                              ? "border-gold bg-gold-light text-foreground"
-                              : "border-border bg-card text-muted-foreground hover:border-gold/30"
-                          }`}
+                          className={`flex items-center justify-center gap-1.5 rounded-xl border-2 py-2.5 text-sm font-medium transition-all ${formData.duration === d.days
+                            ? "border-gold bg-gold-light text-foreground"
+                            : "border-border bg-card text-muted-foreground hover:border-gold/30"
+                            }`}
                         >
                           <Calendar className="h-3.5 w-3.5" />
                           {t(d.key)}
@@ -393,7 +387,7 @@ const CreateAuction = () => {
                       <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border">
                         <div>
                           <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{t("auction.startingPrice")}</p>
-                          <p className="text-lg font-bold text-primary">
+                          <p className="text-lg font-bold text-bidding">
                             {formData.startingPrice ? `${Number(formData.startingPrice).toLocaleString()} ${t("listing.sar")}` : "—"}
                           </p>
                         </div>
@@ -452,7 +446,7 @@ const CreateAuction = () => {
           ) : (
             <Button
               onClick={() => navigate("/bidding")}
-              className="rounded-xl bg-gold text-gold-foreground hover:bg-gold/90"
+              className="rounded-xl bidding-gradient border-0 text-white hover:opacity-90"
             >
               <Gavel className="h-4 w-4 me-1" />
               {t("auction.publish")}

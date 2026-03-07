@@ -105,7 +105,7 @@ const Browse = () => {
               aria-label="Search listings"
             />
             {search && (
-              <button onClick={() => setSearch("")} className="text-muted-foreground hover:text-foreground" aria-label="Clear search">
+              <button aria-label="Clear search" onClick={() => setSearch("")} className="text-muted-foreground hover:text-foreground">
                 <X className="h-4 w-4" />
               </button>
             )}
@@ -126,9 +126,8 @@ const Browse = () => {
                 <button
                   key={type}
                   onClick={() => setListingType(type)}
-                  className={`relative z-10 px-4 py-1.5 text-xs font-semibold rounded-full transition-colors ${
-                    listingType === type ? "text-primary-foreground" : "text-muted-foreground"
-                  }`}
+                  className={`relative z-10 px-4 py-1.5 text-xs font-semibold rounded-full transition-colors ${listingType === type ? "text-primary-foreground" : "text-muted-foreground"
+                    }`}
                 >
                   {type === "all" ? t("browse.allCategories").split(" ")[0] : t(`browse.${type}`)}
                 </button>
@@ -174,9 +173,8 @@ const Browse = () => {
                       <div className="p-1">
                         <button
                           onClick={() => { setSelectedCity(null); setShowCityDropdown(false); }}
-                          className={`w-full text-start px-3 py-2 text-sm rounded-lg transition-colors ${
-                            !selectedCity ? "bg-primary/10 text-primary font-semibold" : "text-foreground hover:bg-muted"
-                          }`}
+                          className={`w-full text-start px-3 py-2 text-sm rounded-lg transition-colors ${!selectedCity ? "bg-primary/10 text-primary font-semibold" : "text-foreground hover:bg-muted"
+                            }`}
                         >
                           {t("browse.allCities")}
                         </button>
@@ -197,9 +195,8 @@ const Browse = () => {
                                 <button
                                   key={city.id}
                                   onClick={() => { setSelectedCity(city.id); setShowCityDropdown(false); setCitySearch(""); }}
-                                  className={`w-full text-start px-3 py-2 text-sm rounded-lg transition-colors ${
-                                    selectedCity === city.id ? "bg-primary/10 text-primary font-semibold" : "text-foreground hover:bg-muted"
-                                  }`}
+                                  className={`w-full text-start px-3 py-2 text-sm rounded-lg transition-colors ${selectedCity === city.id ? "bg-primary/10 text-primary font-semibold" : "text-foreground hover:bg-muted"
+                                    }`}
                                 >
                                   {city.name[lang]}
                                 </button>
@@ -229,9 +226,8 @@ const Browse = () => {
             <div className="rounded-xl border border-border bg-card p-3">
               <button
                 onClick={() => handleCategoryChange(null)}
-                className={`w-full text-start px-3 py-2.5 text-sm rounded-lg transition-colors mb-1 ${
-                  !selectedCategory ? "bg-primary text-primary-foreground font-semibold" : "text-foreground hover:bg-muted"
-                }`}
+                className={`w-full text-start px-3 py-2.5 text-sm rounded-lg transition-colors mb-1 ${!selectedCategory ? "bg-primary text-primary-foreground font-semibold" : "text-foreground hover:bg-muted"
+                  }`}
               >
                 {t("browse.allCategories")}
               </button>
@@ -241,9 +237,8 @@ const Browse = () => {
                   <button
                     key={cat.id}
                     onClick={() => handleCategoryChange(cat.id)}
-                    className={`w-full flex items-center gap-2.5 text-start px-3 py-2.5 text-sm rounded-lg transition-colors ${
-                      selectedCategory === cat.id ? "bg-primary text-primary-foreground font-semibold" : "text-foreground hover:bg-muted"
-                    }`}
+                    className={`w-full flex items-center gap-2.5 text-start px-3 py-2.5 text-sm rounded-lg transition-colors ${selectedCategory === cat.id ? "bg-primary text-primary-foreground font-semibold" : "text-foreground hover:bg-muted"
+                      }`}
                   >
                     <Icon className="h-4 w-4 shrink-0" />
                     {t(cat.key)}
@@ -282,9 +277,8 @@ const Browse = () => {
                         loading="lazy"
                       />
                       <div className="absolute top-3 start-3">
-                        <span className={`inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-semibold ${
-                          listing.type === "sale" ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"
-                        }`}>
+                        <span className={`inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-semibold ${listing.type === "sale" ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"
+                          }`}>
                           {t(`listing.${listing.type}`)}
                         </span>
                       </div>
