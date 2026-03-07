@@ -90,14 +90,6 @@
     background-image: var(--hero-gradient);
   }
 
-  .bidding-gradient {
-    @apply bg-gradient-to-r from-violet-600 to-purple-600 text-white;
-  }
-
-  .text-bidding {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-purple-600;
-  }
-
   .shadow-card {
     box-shadow: var(--shadow-card);
   }

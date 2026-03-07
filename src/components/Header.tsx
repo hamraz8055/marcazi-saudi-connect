@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Search, Globe, Camera, ChevronDown, MapPin, X } from "lucide-react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -20,8 +20,6 @@ const majorCities = [
 const Header = () => {
   const { t, toggleLang, lang } = useI18n();
   const navigate = useNavigate();
-  const location = useLocation();
-  const isBidding = location.pathname.startsWith("/bidding");
   const [selectedCity, setSelectedCity] = useState("all");
   const [showCityDropdown, setShowCityDropdown] = useState(false);
 
@@ -31,14 +29,12 @@ const Header = () => {
     <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl safe-top">
       <div className="container flex h-16 items-center justify-between gap-4">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2.5 shrink-0" aria-label="Go to homepage">
-          <img
-            src="/logo.png"
-            alt="Marcazi - Saudi Premier Resource Marketplace"
-            className="h-8 md:h-10 w-auto object-contain shrink-0"
-          />
+        <button onClick={() => navigate("/")} className="flex items-center gap-2.5 shrink-0" aria-label="Go to homepage">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-lg">
+            M
+          </div>
           <span className="text-xl font-bold text-foreground tracking-tight">Marcazi</span>
-        </Link>
+        </button>
 
         {/* City Selector */}
         <div className="relative hidden md:block">
@@ -67,10 +63,11 @@ const Header = () => {
                     <button
                       key={city.id}
                       onClick={() => { setSelectedCity(city.id); setShowCityDropdown(false); }}
-                      className={`w-full text-start px-4 py-2.5 text-sm transition-colors ${selectedCity === city.id
+                      className={`w-full text-start px-4 py-2.5 text-sm transition-colors ${
+                        selectedCity === city.id
                           ? "bg-primary/10 text-primary font-semibold"
                           : "text-foreground hover:bg-muted"
-                        }`}
+                      }`}
                     >
                       {city[lang]}
                     </button>
@@ -104,10 +101,10 @@ const Header = () => {
           </button>
           <Button
             size="sm"
-            className={`hidden sm:flex ${isBidding ? 'bidding-gradient border-0' : 'bg-gold text-gold-foreground hover:bg-gold/90'}`}
-            onClick={() => navigate(isBidding ? "/bidding/create-auction" : "/post")}
+            className="hidden sm:flex bg-gold text-gold-foreground hover:bg-gold/90"
+            onClick={() => navigate("/post")}
           >
-            {isBidding ? t("bidding.postAuction") : t("nav.postAd")}
+            {t("nav.postAd")}
           </Button>
         </div>
       </div>

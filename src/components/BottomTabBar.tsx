@@ -24,22 +24,19 @@ const BottomTabBar = () => {
       <div className="flex items-center justify-around px-2 py-1.5">
         {tabs.map((tab) => {
           const Icon = tab.icon;
-          const isActive = location.pathname === tab.path || (tab.path === '/bidding' && location.pathname.startsWith('/bidding'));
-          const isBidding = location.pathname.startsWith('/bidding');
-
-          let colorClass = "text-muted-foreground hover:text-foreground";
-          if (tab.primary) {
-            colorClass = isBidding ? "text-bidding" : "text-primary";
-          } else if (isActive) {
-            colorClass = isBidding ? "text-bidding" : "text-primary";
-          }
-
+          const isActive = location.pathname === tab.path;
           return (
             <button
               key={tab.key}
               onClick={() => navigate(tab.path)}
               aria-label={t(tab.key)}
-              className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors ${colorClass}`}
+              className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors ${
+                tab.primary
+                  ? "text-primary"
+                  : isActive
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground"
+              }`}
             >
               <Icon className={`${tab.primary ? "h-7 w-7" : "h-5 w-5"}`} />
               {tab.showBadge && user && totalUnread > 0 && (

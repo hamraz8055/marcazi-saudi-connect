@@ -99,10 +99,11 @@ const FeaturedListings = () => {
                   loading="lazy"
                 />
                 <div className="absolute top-3 start-3">
-                  <span className={`inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-semibold ${listing.type === "sale"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-accent text-accent-foreground"
-                    }`}>
+                  <span className={`inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-semibold ${
+                    listing.type === "sale"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-accent text-accent-foreground"
+                  }`}>
                     {t(`listing.${listing.type}`)}
                   </span>
                 </div>

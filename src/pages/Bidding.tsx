@@ -122,7 +122,7 @@ const Bidding = () => {
       setCountdowns((prev) => {
         const next: Record<number, number> = {};
         for (const [id, secs] of Object.entries(prev)) {
-          next[Number(id)] = Math.max(0, (secs as number) - 1);
+          next[Number(id)] = Math.max(0, secs - 1);
         }
         return next;
       });
@@ -135,7 +135,7 @@ const Bidding = () => {
       <Header />
 
       {/* Hero Banner */}
-      <section className="relative overflow-hidden bidding-gradient">
+      <section className="relative overflow-hidden bg-primary">
         <div className="absolute inset-0 bg-gradient-to-br from-primary-dark/60 to-transparent" />
         <div className="absolute inset-0 opacity-[0.04]" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
@@ -155,7 +155,7 @@ const Bidding = () => {
               {t("tab.marketplace")}
             </button>
             <button
-              className="flex items-center gap-2 rounded-xl bidding-gradient border-0 px-5 py-2.5 text-sm font-semibold text-white transition-all"
+              className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-all"
               aria-label="Bidding section active"
             >
               <Gavel className="h-4 w-4" />
@@ -207,23 +207,25 @@ const Bidding = () => {
         <div className="flex items-center justify-between mb-8">
           <div className="relative inline-flex items-center rounded-full bg-muted p-1">
             <motion.div
-              className="absolute h-[calc(100%-8px)] rounded-full bidding-gradient"
+              className="absolute h-[calc(100%-8px)] rounded-full bg-primary"
               layout
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
               style={{ width: "50%", left: activeTab === "auctions" ? "4px" : "50%" }}
             />
             <button
               onClick={() => setActiveTab("auctions")}
-              className={`relative z-10 flex items-center gap-2 px-5 py-2 text-sm font-semibold rounded-full transition-colors ${activeTab === "auctions" ? "text-primary-foreground" : "text-muted-foreground"
-                }`}
+              className={`relative z-10 flex items-center gap-2 px-5 py-2 text-sm font-semibold rounded-full transition-colors ${
+                activeTab === "auctions" ? "text-primary-foreground" : "text-muted-foreground"
+              }`}
             >
               <Gavel className="h-4 w-4" />
               {t("bidding.auctions")}
             </button>
             <button
               onClick={() => setActiveTab("quotations")}
-              className={`relative z-10 flex items-center gap-2 px-5 py-2 text-sm font-semibold rounded-full transition-colors ${activeTab === "quotations" ? "text-primary-foreground" : "text-muted-foreground"
-                }`}
+              className={`relative z-10 flex items-center gap-2 px-5 py-2 text-sm font-semibold rounded-full transition-colors ${
+                activeTab === "quotations" ? "text-primary-foreground" : "text-muted-foreground"
+              }`}
             >
               <FileText className="h-4 w-4" />
               {t("bidding.quotations")}
@@ -281,8 +283,9 @@ const Bidding = () => {
                       <div className="flex flex-col md:flex-row">
                         <div className="relative w-full md:w-48 aspect-[4/3] md:aspect-auto overflow-hidden shrink-0">
                           <ImageFallback src={auction.image} alt={auction.title[lang]} className="h-full w-full object-cover" loading="lazy" />
-                          <div className={`absolute top-3 start-3 flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold ${isUrgent ? "bg-destructive/90 text-destructive-foreground animate-pulse" : "bg-destructive/90 text-destructive-foreground"
-                            }`}>
+                          <div className={`absolute top-3 start-3 flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold ${
+                            isUrgent ? "bg-destructive/90 text-destructive-foreground animate-pulse" : "bg-destructive/90 text-destructive-foreground"
+                          }`}>
                             <Clock className="h-3 w-3" />
                             {formatCountdown(remaining)}
                           </div>
@@ -376,7 +379,7 @@ const Bidding = () => {
                       <Button size="sm" variant="outline" className="text-xs">
                         {t("bidding.viewDetails")}
                       </Button>
-                      <Button size="sm" className="text-xs bidding-gradient border-0 text-white">
+                      <Button size="sm" className="text-xs bg-primary text-primary-foreground">
                         {t("bidding.submitQuote")}
                         <ArrowRight className="h-3 w-3 ms-1" />
                       </Button>
