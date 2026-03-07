@@ -15,7 +15,7 @@ export default {
   	extend: {
   		fontFamily: {
   			sans: [
-  				'Source Sans Pro',
+  				'Roboto',
   				'ui-sans-serif',
   				'system-ui',
   				'sans-serif',
@@ -39,7 +39,7 @@ export default {
   				'serif'
   			],
   			mono: [
-  				'Space Mono',
+  				'Inconsolata',
   				'ui-monospace',
   				'SFMono-Regular',
   				'Menlo',
