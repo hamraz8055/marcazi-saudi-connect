@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Eye, MapPin, Heart } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import ImageFallback from "@/components/ImageFallback";
 
 const listings = [
   {
@@ -90,9 +91,8 @@ const FeaturedListings = () => {
               transition={{ delay: i * 0.08, duration: 0.4 }}
               className="group cursor-pointer rounded-2xl border border-border bg-card overflow-hidden shadow-card hover:shadow-elevated transition-all duration-300"
             >
-              {/* Image */}
               <div className="relative aspect-[4/3] overflow-hidden">
-                <img
+                <ImageFallback
                   src={listing.image}
                   alt={listing.title[lang]}
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -107,12 +107,14 @@ const FeaturedListings = () => {
                     {t(`listing.${listing.type}`)}
                   </span>
                 </div>
-                <button className="absolute top-3 end-3 flex h-8 w-8 items-center justify-center rounded-full bg-card/80 backdrop-blur-sm text-muted-foreground hover:text-destructive transition-colors">
+                <button
+                  className="absolute top-3 end-3 flex h-8 w-8 items-center justify-center rounded-full bg-card/80 backdrop-blur-sm text-muted-foreground hover:text-destructive transition-colors"
+                  aria-label={`Save ${listing.title[lang]} to favorites`}
+                >
                   <Heart className="h-4 w-4" />
                 </button>
               </div>
 
-              {/* Content */}
               <div className="p-4">
                 <h3 className="font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
                   {listing.title[lang]}

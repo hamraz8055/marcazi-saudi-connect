@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    --background: 40 20% 97%;
+    --background: 50 20% 97%;
     --foreground: 220 40% 10%;
 
     --card: 0 0% 100%;
@@ -58,46 +58,6 @@
 
     --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
     --font-arabic: 'Noto Kufi Arabic', system-ui, sans-serif;
-  }
-
-  .dark {
-    --background: 220 35% 6%;
-    --foreground: 40 20% 96%;
-
-    --card: 220 30% 10%;
-    --card-foreground: 40 20% 96%;
-
-    --popover: 220 30% 10%;
-    --popover-foreground: 40 20% 96%;
-
-    --primary: 150 55% 40%;
-    --primary-foreground: 0 0% 100%;
-
-    --primary-light: 150 25% 16%;
-    --primary-dark: 150 60% 30%;
-
-    --secondary: 220 25% 15%;
-    --secondary-foreground: 40 20% 96%;
-
-    --muted: 220 25% 15%;
-    --muted-foreground: 220 15% 60%;
-
-    --accent: 42 70% 50%;
-    --accent-foreground: 220 35% 6%;
-
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 40 20% 96%;
-
-    --border: 220 25% 16%;
-    --input: 220 25% 16%;
-    --ring: 150 55% 40%;
-
-    --gold: 42 70% 50%;
-    --gold-foreground: 0 0% 100%;
-    --gold-light: 42 30% 16%;
-
-    --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.25);
-    --shadow-elevated: 0 10px 30px -5px hsl(0 0% 0% / 0.4);
   }
 }
 

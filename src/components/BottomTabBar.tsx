@@ -20,7 +20,7 @@ const BottomTabBar = () => {
   const { totalUnread } = useConversations();
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-50 md:hidden border-t border-border bg-card/95 backdrop-blur-xl safe-bottom">
+    <nav className="fixed bottom-0 inset-x-0 z-50 md:hidden border-t border-border bg-card/95 backdrop-blur-xl safe-bottom" aria-label="Main navigation">
       <div className="flex items-center justify-around px-2 py-1.5">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -29,6 +29,7 @@ const BottomTabBar = () => {
             <button
               key={tab.key}
               onClick={() => navigate(tab.path)}
+              aria-label={t(tab.key)}
               className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors ${
                 tab.primary
                   ? "text-primary"

@@ -1,13 +1,14 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, MapPin, X, ChevronDown, Eye, Heart, SlidersHorizontal } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { useSearchParams } from "react-router-dom";
 import { categories } from "@/lib/categories";
 import { saudiCities, regions, getCitiesByRegion } from "@/lib/cities";
 import Header from "@/components/Header";
 import BottomTabBar from "@/components/BottomTabBar";
+import ImageFallback from "@/components/ImageFallback";
 
-// Mock listings data
 const allListings = [
   { id: 1, title: { en: "CAT 320 Excavator", ar: "حفارة كاتربيلر 320" }, category: "equipment", price: 285000, city: "riyadh", views: 1240, type: "sale" as const, image: "https://images.unsplash.com/photo-1580901368919-7738efb0f228?w=400&h=300&fit=crop" },
   { id: 2, title: { en: "Modern Villa - Al Nakheel", ar: "فيلا حديثة - النخيل" }, category: "property", price: 2500000, city: "jeddah", views: 3420, type: "sale" as const, image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400&h=300&fit=crop" },
@@ -25,13 +26,32 @@ const allListings = [
 
 const Browse = () => {
   const { t, lang } = useI18n();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(searchParams.get("category"));
   const [listingType, setListingType] = useState<"all" | "sale" | "rent">("all");
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [citySearch, setCitySearch] = useState("");
   const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+
+  // Sync URL params
+  useEffect(() => {
+    const cat = searchParams.get("category");
+    if (cat && categories.some((c) => c.id === cat)) {
+      setSelectedCategory(cat);
+    }
+  }, [searchParams]);
+
+  const handleCategoryChange = (catId: string | null) => {
+    setSelectedCategory(catId);
+    if (catId) {
+      setSearchParams({ category: catId });
+    } else {
+      setSearchParams({});
+    }
+    setShowFilters(false);
+  };
 
   const filteredListings = useMemo(() => {
     return allListings.filter((listing) => {
@@ -67,7 +87,6 @@ const Browse = () => {
       <Header />
 
       <div className="container py-6 pb-24 md:pb-6">
-        {/* Page header */}
         <div className="mb-6">
           <h1 className="text-2xl md:text-3xl font-bold text-foreground">{t("browse.title")}</h1>
           <p className="mt-1 text-muted-foreground">{t("browse.subtitle")}</p>
@@ -75,7 +94,6 @@ const Browse = () => {
 
         {/* Search + Filter bar */}
         <div className="flex flex-col gap-4 mb-6">
-          {/* Search */}
           <div className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-3">
             <Search className="h-5 w-5 text-muted-foreground shrink-0" />
             <input
@@ -84,24 +102,23 @@ const Browse = () => {
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t("nav.search")}
               className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+              aria-label="Search listings"
             />
             {search && (
-              <button onClick={() => setSearch("")} className="text-muted-foreground hover:text-foreground">
+              <button onClick={() => setSearch("")} className="text-muted-foreground hover:text-foreground" aria-label="Clear search">
                 <X className="h-4 w-4" />
               </button>
             )}
           </div>
 
-          {/* Filter toggle + Sale/Rent pill */}
           <div className="flex items-center gap-3 flex-wrap">
-            {/* Sale / Rent pill toggle */}
             <div className="relative inline-flex items-center rounded-full bg-muted p-1">
               <motion.div
                 className="absolute h-[calc(100%-8px)] rounded-full bg-primary"
                 layout
                 transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 style={{
-                  width: listingType === "all" ? "33.33%" : "33.33%",
+                  width: "33.33%",
                   left: listingType === "all" ? "4px" : listingType === "sale" ? "33.33%" : "66.66%",
                 }}
               />
@@ -123,6 +140,7 @@ const Browse = () => {
               <button
                 onClick={() => setShowCityDropdown(!showCityDropdown)}
                 className="flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                aria-label="Filter by city"
               >
                 <MapPin className="h-4 w-4 text-muted-foreground" />
                 <span className="text-foreground">{selectedCityName}</span>
@@ -148,6 +166,7 @@ const Browse = () => {
                             onChange={(e) => setCitySearch(e.target.value)}
                             placeholder={t("browse.searchCity")}
                             className="flex-1 bg-transparent text-xs outline-none placeholder:text-muted-foreground"
+                            aria-label="Search cities"
                           />
                         </div>
                       </div>
@@ -195,10 +214,10 @@ const Browse = () => {
               </AnimatePresence>
             </div>
 
-            {/* Filter toggle (mobile) */}
             <button
               onClick={() => setShowFilters(!showFilters)}
               className="flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-2 text-sm md:hidden"
+              aria-label="Toggle filters"
             >
               <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
             </button>
@@ -206,11 +225,10 @@ const Browse = () => {
         </div>
 
         <div className="flex gap-6">
-          {/* Category sidebar - desktop */}
           <aside className={`shrink-0 ${showFilters ? "block" : "hidden"} md:block w-full md:w-56`}>
             <div className="rounded-xl border border-border bg-card p-3">
               <button
-                onClick={() => setSelectedCategory(null)}
+                onClick={() => handleCategoryChange(null)}
                 className={`w-full text-start px-3 py-2.5 text-sm rounded-lg transition-colors mb-1 ${
                   !selectedCategory ? "bg-primary text-primary-foreground font-semibold" : "text-foreground hover:bg-muted"
                 }`}
@@ -222,7 +240,7 @@ const Browse = () => {
                 return (
                   <button
                     key={cat.id}
-                    onClick={() => { setSelectedCategory(cat.id); setShowFilters(false); }}
+                    onClick={() => handleCategoryChange(cat.id)}
                     className={`w-full flex items-center gap-2.5 text-start px-3 py-2.5 text-sm rounded-lg transition-colors ${
                       selectedCategory === cat.id ? "bg-primary text-primary-foreground font-semibold" : "text-foreground hover:bg-muted"
                     }`}
@@ -235,7 +253,6 @@ const Browse = () => {
             </div>
           </aside>
 
-          {/* Listings grid */}
           <div className="flex-1 min-w-0">
             <div className="mb-4 text-sm text-muted-foreground">
               {filteredListings.length} {t("browse.results")}
@@ -258,7 +275,7 @@ const Browse = () => {
                     className="group cursor-pointer rounded-2xl border border-border bg-card overflow-hidden shadow-card hover:shadow-elevated transition-all duration-300"
                   >
                     <div className="relative aspect-[4/3] overflow-hidden">
-                      <img
+                      <ImageFallback
                         src={listing.image}
                         alt={listing.title[lang]}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -271,7 +288,10 @@ const Browse = () => {
                           {t(`listing.${listing.type}`)}
                         </span>
                       </div>
-                      <button className="absolute top-3 end-3 flex h-8 w-8 items-center justify-center rounded-full bg-card/80 backdrop-blur-sm text-muted-foreground hover:text-destructive transition-colors">
+                      <button
+                        className="absolute top-3 end-3 flex h-8 w-8 items-center justify-center rounded-full bg-card/80 backdrop-blur-sm text-muted-foreground hover:text-destructive transition-colors"
+                        aria-label={`Save ${listing.title[lang]} to favorites`}
+                      >
                         <Heart className="h-4 w-4" />
                       </button>
                     </div>
