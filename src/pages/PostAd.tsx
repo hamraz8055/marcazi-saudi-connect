@@ -182,9 +182,11 @@ const PostAd = () => {
       if (isJobs) {
         if (formData.employmentType === "internship" && formData.paidInternship && formData.price) {
           price = Number(formData.price);
-        } else if (formData.employmentType === "freelance" && formData.price) {
+        } else if (formData.employmentType === "freelance" && !formData.freelanceBudgetTbd && formData.price) {
           price = Number(formData.price);
-        } else if (formData.salaryNegotiable || formData.contactForPrice) {
+        } else if (formData.employmentType === "freelance" && formData.freelanceBudgetTbd) {
+          contactForPrice = true;
+        } else if (formData.salaryType === "negotiable" || formData.contactForPrice) {
           contactForPrice = true;
         }
       } else if (isVehicle && formData.listingType === "rent") {
