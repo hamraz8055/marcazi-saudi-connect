@@ -48,6 +48,19 @@ const translations: Record<string, Record<Lang, string>> = {
   "cta.start": { en: "Get Started Free", ar: "ابدأ مجاناً" },
   "footer.rights": { en: "All rights reserved.", ar: "جميع الحقوق محفوظة." },
 
+  // Pages
+  "page.about": { en: "About", ar: "عن مركزي" },
+  "page.contact": { en: "Contact", ar: "تواصل معنا" },
+  "page.profile": { en: "Profile", ar: "حسابي" },
+  "page.favorites": { en: "Favorites", ar: "المفضلة" },
+  "page.notifications": { en: "Notifications", ar: "الإشعارات" },
+  "page.listing": { en: "Listing Details", ar: "تفاصيل الإعلان" },
+  "page.notFound": { en: "Page Not Found", ar: "الصفحة غير موجودة" },
+  "page.messages": { en: "Messages", ar: "الرسائل" },
+  "about.desc": { en: "Learn about Marcazi, Saudi Arabia's premier B2B marketplace", ar: "تعرف على مركزي، السوق الرقمي الأول في المملكة" },
+  "post.cover": { en: "Cover", ar: "غلاف" },
+  "bidding.postAuction": { en: "Post Auction", ar: "نشر مزاد" },
+
   // Bidding
   "bidding.title": { en: "Bidding Marketplace", ar: "سوق المزايدات" },
   "bidding.subtitle": { en: "Auction your items or request quotes from verified suppliers across Saudi Arabia", ar: "زايد على منتجاتك أو اطلب عروض أسعار من موردين معتمدين في المملكة" },
