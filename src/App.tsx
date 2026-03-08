@@ -18,6 +18,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Profile from "./pages/Profile";
 import MyAds from "./pages/MyAds";
+import ApplicationsDashboard from "./pages/ApplicationsDashboard";
 import Favorites from "./pages/Favorites";
 import Notifications from "./pages/Notifications";
 import ListingDetail from "./pages/ListingDetail";
@@ -53,6 +54,7 @@ const App = () => (
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/my-ads" element={<MyAds />} />
+                <Route path="/my-ads/applications/:listingId" element={<ApplicationsDashboard />} />
                 <Route path="/account" element={<Profile />} />
                 <Route path="/favorites" element={<Favorites />} />
                 <Route path="/favourites" element={<Favorites />} />

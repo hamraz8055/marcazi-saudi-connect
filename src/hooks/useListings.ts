@@ -18,6 +18,14 @@ export interface Listing {
   status: string | null;
   created_at: string;
   updated_at: string;
+  employment_type?: string | null;
+  salary_min?: number | null;
+  salary_max?: number | null;
+  hourly_rate?: number | null;
+  salary_negotiable?: boolean | null;
+  contract_duration?: string | null;
+  required_skills?: string[] | null;
+  company_logo_url?: string | null;
 }
 
 export function useListings(filters?: {

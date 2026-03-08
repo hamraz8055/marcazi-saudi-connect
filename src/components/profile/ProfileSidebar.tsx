@@ -1,5 +1,5 @@
 import { useI18n } from "@/lib/i18n";
-import { User, Briefcase, MapPin, Phone, Shield, AlertTriangle, Settings } from "lucide-react";
+import { User, Briefcase, MapPin, Phone, Shield, AlertTriangle, Settings, FileText } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
@@ -39,6 +39,10 @@ const ProfileSidebar = ({ activeSection, onSectionChange }: Props) => {
           <div className={itemClass("job-profile")} onClick={() => onSectionChange("job-profile")}>
             <Briefcase className="h-4 w-4" />
             {lang === "ar" ? "الملف الوظيفي" : "Job Profile"}
+          </div>
+          <div className={itemClass("my-applications")} onClick={() => onSectionChange("my-applications")}>
+            <FileText className="h-4 w-4" />
+            {lang === "ar" ? "طلباتي" : "My Applications"}
           </div>
           <div className={itemClass("addresses")} onClick={() => onSectionChange("addresses")}>
             <MapPin className="h-4 w-4" />

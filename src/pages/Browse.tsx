@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, MapPin, X, ChevronDown, ChevronRight, Eye, Heart, SlidersHorizontal, ArrowUpDown } from "lucide-react";
+import JobListingCard from "@/components/JobListingCard";
 import { useI18n } from "@/lib/i18n";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { categories } from "@/lib/categories";
@@ -367,7 +368,19 @@ const Browse = () => {
             ) : (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {displayedListings.map((listing, i) => (
+                  {displayedListings.map((listing, i) => {
+                    if (listing.category === "jobs") {
+                      return (
+                        <JobListingCard
+                          key={listing.id}
+                          listing={listing}
+                          index={i}
+                          isFavorite={isFavorite(listing.id)}
+                          onFavorite={(e: React.MouseEvent) => handleFav(e, listing.id)}
+                        />
+                      );
+                    }
+                    return (
                     <motion.article key={listing.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.3 }}
                       onClick={() => navigate(`/listing/${listing.id}`)}
                       className="group cursor-pointer rounded-2xl border border-border bg-card overflow-hidden shadow-card hover:shadow-elevated transition-all duration-300">
@@ -399,7 +412,8 @@ const Browse = () => {
                         </div>
                       </div>
                     </motion.article>
-                  ))}
+                    );
+                  })}
                 </div>
                 {displayCount < filteredListings.length && (
                   <div className="mt-8 text-center">

@@ -9,9 +9,11 @@ import BottomTabBar from "@/components/BottomTabBar";
 import PageMeta from "@/components/PageMeta";
 import AuthDialog from "@/components/AuthDialog";
 import ImageFallback from "@/components/ImageFallback";
+import JobListingCard from "@/components/JobListingCard";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Eye, Edit, Trash2, Plus, LogIn, MapPin } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Eye, Edit, Trash2, Plus, LogIn, MapPin, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { saudiCities } from "@/lib/cities";
 import { toast } from "@/components/ui/sonner";
@@ -24,12 +26,23 @@ const MyAds = () => {
   const [showAuth, setShowAuth] = useState(false);
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [appCounts, setAppCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     if (!user) { setLoading(false); return; }
     const fetch = async () => {
       const { data } = await supabase.from("listings").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
-      setListings((data as Listing[]) || []);
+      const myListings = (data as Listing[]) || [];
+      setListings(myListings);
+
+      // Fetch application counts for job listings
+      const jobIds = myListings.filter(l => l.category === "jobs").map(l => l.id);
+      if (jobIds.length > 0) {
+        const { data: apps } = await supabase.from("applications").select("listing_id").in("listing_id", jobIds);
+        const counts: Record<string, number> = {};
+        (apps || []).forEach((a: any) => { counts[a.listing_id] = (counts[a.listing_id] || 0) + 1; });
+        setAppCounts(counts);
+      }
       setLoading(false);
     };
     fetch();
@@ -46,40 +59,26 @@ const MyAds = () => {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <PageMeta titleKey="page.profile" />
-        <Header />
-        <div className="container py-10 pb-24">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[1,2,3].map(i => <Skeleton key={i} className="h-64 rounded-2xl" />)}
-          </div>
-        </div>
-        <BottomTabBar />
-      </div>
+      <div className="min-h-screen bg-background"><PageMeta titleKey="page.profile" /><Header />
+        <div className="container py-10 pb-24"><div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1,2,3].map(i => <Skeleton key={i} className="h-64 rounded-2xl" />)}</div></div><BottomTabBar /></div>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background">
-        <PageMeta titleKey="page.profile" />
-        <Header />
+      <div className="min-h-screen bg-background"><PageMeta titleKey="page.profile" /><Header />
         <div className="flex flex-col items-center justify-center py-32 gap-4 text-center">
           <LogIn className="h-12 w-12 text-muted-foreground/40" />
           <h2 className="text-xl font-bold">{lang === "ar" ? "سجل الدخول لعرض إعلاناتك" : "Sign in to view your ads"}</h2>
           <Button onClick={() => setShowAuth(true)} className="gap-2"><LogIn className="h-4 w-4" />{lang === "ar" ? "تسجيل الدخول" : "Sign In"}</Button>
-        </div>
-        <AuthDialog open={showAuth} onOpenChange={setShowAuth} />
-        <Footer />
-        <BottomTabBar />
-      </div>
+        </div><AuthDialog open={showAuth} onOpenChange={setShowAuth} /><Footer /><BottomTabBar /></div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <PageMeta titleKey="page.profile" />
-      <Header />
+      <PageMeta titleKey="page.profile" /><Header />
       <div className="container py-10 pb-24 md:pb-10">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-foreground">{lang === "ar" ? "إعلاناتي" : "My Ads"}</h1>
@@ -90,9 +89,7 @@ const MyAds = () => {
           <div className="flex flex-col items-center py-20 text-center gap-4">
             <Plus className="h-12 w-12 text-muted-foreground/40" />
             <p className="font-semibold">{lang === "ar" ? "لم تنشر أي إعلانات بعد" : "You haven't posted any ads yet"}</p>
-            <Button onClick={() => navigate("/post")} className="gap-2">
-              <Plus className="h-4 w-4" />{lang === "ar" ? "أضف إعلانك الأول" : "Post Your First Ad"}
-            </Button>
+            <Button onClick={() => navigate("/post")} className="gap-2"><Plus className="h-4 w-4" />{lang === "ar" ? "أضف إعلانك الأول" : "Post Your First Ad"}</Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -117,6 +114,12 @@ const MyAds = () => {
                     <span className="flex items-center gap-1"><Eye className="h-3.5 w-3.5" />{(listing.views || 0).toLocaleString()}</span>
                   </div>
                   <div className="mt-3 flex gap-2">
+                    {listing.category === "jobs" && (
+                      <Button size="sm" variant="outline" className="flex-1 gap-1 text-xs"
+                        onClick={() => navigate(`/my-ads/applications/${listing.id}`)}>
+                        <Users className="h-3.5 w-3.5" />{appCounts[listing.id] || 0} {lang === "ar" ? "طلبات" : "Applications"}
+                      </Button>
+                    )}
                     <Button size="sm" variant="outline" className="flex-1 gap-1 text-xs" onClick={() => navigate(`/listing/${listing.id}`)}>
                       <Edit className="h-3.5 w-3.5" />{lang === "ar" ? "تعديل" : "Edit"}
                     </Button>
@@ -130,8 +133,7 @@ const MyAds = () => {
           </div>
         )}
       </div>
-      <Footer />
-      <BottomTabBar />
+      <Footer /><BottomTabBar />
     </div>
   );
 };

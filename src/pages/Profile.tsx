@@ -16,9 +16,10 @@ import PhoneNumbersSection from "@/components/profile/PhoneNumbersSection";
 import SecuritySection from "@/components/profile/SecuritySection";
 import DeactivateSection from "@/components/profile/DeactivateSection";
 import VerificationSection from "@/components/profile/VerificationSection";
+import MyApplicationsSection from "@/components/profile/MyApplicationsSection";
 import { useSearchParams } from "react-router-dom";
 
-export type ProfileSection = "basic-info" | "job-profile" | "addresses" | "phone-numbers" | "security" | "deactivate" | "verify";
+export type ProfileSection = "basic-info" | "job-profile" | "addresses" | "phone-numbers" | "security" | "deactivate" | "verify" | "my-applications";
 
 const Profile = () => {
   const { user, loading: authLoading } = useAuth();
@@ -78,6 +79,7 @@ const Profile = () => {
       case "security": return <SecuritySection />;
       case "deactivate": return <DeactivateSection />;
       case "verify": return <VerificationSection />;
+      case "my-applications": return <MyApplicationsSection />;
       default: return <BasicInfoSection />;
     }
   };
