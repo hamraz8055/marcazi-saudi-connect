@@ -18,6 +18,7 @@ import { toast } from "@/components/ui/sonner";
 import JobEmploymentStep from "@/components/post/JobEmploymentStep";
 import JobSalaryFields from "@/components/post/JobSalaryFields";
 import SkillsInput from "@/components/post/SkillsInput";
+import DocumentsInput from "@/components/post/DocumentsInput";
 import CompanyLogoUpload from "@/components/post/CompanyLogoUpload";
 import VehicleFields from "@/components/post/VehicleFields";
 import ContactDetailsCard from "@/components/post/ContactDetailsCard";
@@ -57,8 +58,13 @@ const PostAd = () => {
     paidInternship: true,
     salaryNegotiable: false,
     requiredSkills: [] as string[],
+    requiredDocuments: [] as string[],
     companyLogoFile: null as File | null,
     companyLogoPreview: null as string | null,
+    salaryType: "" as string, // "range" | "fixed" | "negotiable"
+    rentalRateTbd: false,
+    rentalDurationType: "" as string, // "short" | "long" | "unspecified"
+    freelanceBudgetTbd: false,
     // Vehicle fields
     year: "",
     kilometers: "",
@@ -176,9 +182,11 @@ const PostAd = () => {
       if (isJobs) {
         if (formData.employmentType === "internship" && formData.paidInternship && formData.price) {
           price = Number(formData.price);
-        } else if (formData.employmentType === "freelance" && formData.price) {
+        } else if (formData.employmentType === "freelance" && !formData.freelanceBudgetTbd && formData.price) {
           price = Number(formData.price);
-        } else if (formData.salaryNegotiable || formData.contactForPrice) {
+        } else if (formData.employmentType === "freelance" && formData.freelanceBudgetTbd) {
+          contactForPrice = true;
+        } else if (formData.salaryType === "negotiable" || formData.contactForPrice) {
           contactForPrice = true;
         }
       } else if (isVehicle && formData.listingType === "rent") {
@@ -213,10 +221,13 @@ const PostAd = () => {
         insertData.salary_min = formData.salaryMin ? Number(formData.salaryMin) : null;
         insertData.salary_max = formData.salaryMax ? Number(formData.salaryMax) : null;
         insertData.hourly_rate = formData.hourlyRate ? Number(formData.hourlyRate) : null;
-        insertData.salary_negotiable = formData.salaryNegotiable || formData.contactForPrice;
+        insertData.salary_negotiable = formData.salaryType === "negotiable" || formData.freelanceBudgetTbd || formData.contactForPrice;
         insertData.contract_duration = formData.contractDuration || null;
         insertData.required_skills = formData.requiredSkills.length > 0 ? formData.requiredSkills : null;
+        insertData.required_documents = formData.requiredDocuments.length > 0 ? formData.requiredDocuments : null;
         insertData.company_logo_url = companyLogoUrl;
+        insertData.rental_rate_tbd = formData.rentalRateTbd || false;
+        insertData.rental_duration_type = formData.rentalDurationType || null;
       }
 
       if (isVehicle) {
@@ -344,6 +355,10 @@ const PostAd = () => {
                     hourlyRate={formData.hourlyRate} contractDuration={formData.contractDuration}
                     paidInternship={formData.paidInternship} contactForPrice={formData.contactForPrice}
                     price={formData.price}
+                    salaryType={formData.salaryType}
+                    rentalRateTbd={formData.rentalRateTbd}
+                    rentalDurationType={formData.rentalDurationType}
+                    freelanceBudgetTbd={formData.freelanceBudgetTbd}
                     onUpdate={(field, value) => {
                       if (field === "salaryMin") updateField("salaryMin", value);
                       else if (field === "salaryMax") updateField("salaryMax", value);
@@ -352,6 +367,10 @@ const PostAd = () => {
                       else if (field === "paidInternship") updateField("paidInternship", value);
                       else if (field === "contactForPrice") updateField("contactForPrice", value);
                       else if (field === "price") updateField("price", value);
+                      else if (field === "salaryType") updateField("salaryType", value);
+                      else if (field === "rentalRateTbd") updateField("rentalRateTbd", value);
+                      else if (field === "rentalDurationType") updateField("rentalDurationType", value);
+                      else if (field === "freelanceBudgetTbd") updateField("freelanceBudgetTbd", value);
                     }}
                   />
                 </div>
@@ -399,7 +418,8 @@ const PostAd = () => {
                     onUpdate={(field, value) => updateField(field as any, value)}
                     helperText={lang === "ar" ? "تم ملؤه تلقائياً من ملفك الشخصي. غيّره إذا لزم الأمر." : "Pre-filled from your profile. Change if needed."}
                   />
-                  <SkillsInput skills={formData.requiredSkills} onChange={(s) => updateField("requiredSkills", s)} subcategory={formData.subcategory} />
+                   <SkillsInput skills={formData.requiredSkills} onChange={(s) => updateField("requiredSkills", s)} subcategory={formData.subcategory} />
+                   <DocumentsInput documents={formData.requiredDocuments} onChange={(d) => updateField("requiredDocuments", d)} />
                   <CompanyLogoUpload
                     logoFile={formData.companyLogoFile} logoPreview={formData.companyLogoPreview}
                     onUpload={(file) => { updateField("companyLogoFile", file); updateField("companyLogoPreview", URL.createObjectURL(file)); }}

@@ -32,6 +32,7 @@ const EasyApplyModal = ({ open, onOpenChange, listing }: Props) => {
     resumeFile: null as File | null,
     useProfileResume: false,
     matchedSkills: [] as string[],
+    confirmedDocuments: [] as string[],
   });
 
   useEffect(() => {
@@ -96,7 +97,8 @@ const EasyApplyModal = ({ open, onOpenChange, listing }: Props) => {
         cover_letter: form.coverLetter || null,
         resume_url: resumeUrl,
         matched_skills: form.matchedSkills,
-      });
+        confirmed_documents: form.confirmedDocuments.length > 0 ? form.confirmedDocuments : null,
+      } as any);
       if (error) throw error;
       setSubmitted(true);
     } catch (err: any) {
@@ -203,6 +205,33 @@ const EasyApplyModal = ({ open, onOpenChange, listing }: Props) => {
                 <p className="text-xs text-muted-foreground">
                   {form.matchedSkills.length}/{requiredSkills.length} {lang === "ar" ? "مهارات مطابقة" : "skills matched"}
                 </p>
+              </div>
+            )}
+
+            {/* Documents Checklist */}
+            {listing?.required_documents?.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="font-semibold text-foreground">{lang === "ar" ? "قائمة المستندات" : "Documents Checklist"}</h3>
+                <p className="text-xs text-muted-foreground">
+                  {lang === "ar" ? "تأكد من جاهزية هذه المستندات قبل أو بعد التقديم. قد يطلبها صاحب العمل." : "Make sure you have these ready before or after applying. The employer may request them."}
+                </p>
+                <div className="space-y-2">
+                  {listing.required_documents.map((doc: string) => (
+                    <label key={doc} className="flex items-center gap-3 cursor-pointer">
+                      <input type="checkbox" checked={form.confirmedDocuments.includes(doc)}
+                        onChange={() => {
+                          setForm(prev => ({
+                            ...prev,
+                            confirmedDocuments: prev.confirmedDocuments.includes(doc)
+                              ? prev.confirmedDocuments.filter(d => d !== doc)
+                              : [...prev.confirmedDocuments, doc],
+                          }));
+                        }}
+                        className="h-4 w-4 rounded border-border text-primary focus:ring-primary" />
+                      <span className="text-sm text-foreground">📄 {doc}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
             )}
 

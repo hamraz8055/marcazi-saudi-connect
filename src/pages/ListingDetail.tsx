@@ -186,16 +186,50 @@ const ListingDetail = () => {
                   </div>
                 </div>
               )}
+              {/* Required Documents */}
+              {listing?.required_documents?.length > 0 && (
+                <div>
+                  <h2 className="font-semibold text-foreground mb-3">{lang === "ar" ? "المستندات المطلوبة" : "Documents Required"}</h2>
+                  <div className="flex flex-wrap gap-2">
+                    {listing.required_documents.map((d: string) => (
+                      <span key={d} className="rounded-lg bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800 px-3 py-1.5 text-sm font-medium">📄 {d}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div>
                 <h2 className="font-semibold text-foreground mb-3">{lang === "ar" ? "تفاصيل الوظيفة" : "Job Details"}</h2>
                 <div className="grid grid-cols-2 gap-3">
                   {empType && <DetailItem label={lang === "ar" ? "نوع التوظيف" : "Employment Type"} value={getEmploymentLabel(empType, lang)} />}
                   <DetailItem label={lang === "ar" ? "الراتب" : "Salary"} value={formatJobSalary(listing, lang)} />
                   {listing.contract_duration && <DetailItem label={lang === "ar" ? "مدة العقد" : "Contract Duration"} value={listing.contract_duration} />}
+                  {/* Duration badge for hourly */}
+                  {empType === "hourly" && listing.rental_duration_type && listing.rental_duration_type !== "unspecified" && (
+                    <DetailItem
+                      label={lang === "ar" ? "مدة التكليف" : "Assignment Duration"}
+                      value={listing.rental_duration_type === "short"
+                        ? (lang === "ar" ? "قصير المدى · 1–6 أشهر" : "Short Term · 1–6 Months")
+                        : (lang === "ar" ? "طويل المدى · 6+ أشهر" : "Long Term · 6+ Months")}
+                    />
+                  )}
                   <DetailItem label={lang === "ar" ? "الموقع" : "Location"} value={cityName} />
                   {cat && <DetailItem label={lang === "ar" ? "المجال" : "Category"} value={t(cat.key)} />}
                   <DetailItem label={lang === "ar" ? "تاريخ النشر" : "Posted"} value={postedLabel} />
                 </div>
+                {/* Duration badge visual */}
+                {empType === "hourly" && listing.rental_duration_type && listing.rental_duration_type !== "unspecified" && (
+                  <div className="mt-3">
+                    <span className={`inline-flex items-center rounded-lg px-3 py-1.5 text-sm font-semibold ${
+                      listing.rental_duration_type === "short"
+                        ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                        : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                    }`}>
+                      {listing.rental_duration_type === "short"
+                        ? (lang === "ar" ? "قصير المدى · 1–6 أشهر" : "Short Term · 1–6 Months")
+                        : (lang === "ar" ? "طويل المدى · 6+ أشهر" : "Long Term · 6+ Months")}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
             <div className="space-y-4">
