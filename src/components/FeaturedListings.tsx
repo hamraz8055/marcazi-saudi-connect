@@ -124,7 +124,6 @@ const FeaturedListings = () => {
                     </span>
                   )}
                 </div>
-                </div>
                 <button onClick={e => handleFav(e, listing.id)}
                   className="absolute top-3 end-3 flex h-8 w-8 items-center justify-center rounded-full bg-card/80 backdrop-blur-sm text-muted-foreground hover:text-destructive transition-colors"
                   aria-label={`Save ${listing.title} to favorites`}>
