@@ -233,7 +233,8 @@ const EasyApplyModal = ({ open, onOpenChange, listing }: Props) => {
                   ))}
                 </div>
               </div>
-            )
+            )}
+
             <Button onClick={handleSubmit} disabled={submitting || !form.name || !form.email} className="w-full gap-2">
               {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
               {lang === "ar" ? "إرسال الطلب" : "Submit Application"}
