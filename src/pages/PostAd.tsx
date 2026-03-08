@@ -18,6 +18,7 @@ import { toast } from "@/components/ui/sonner";
 import JobEmploymentStep from "@/components/post/JobEmploymentStep";
 import JobSalaryFields from "@/components/post/JobSalaryFields";
 import SkillsInput from "@/components/post/SkillsInput";
+import DocumentsInput from "@/components/post/DocumentsInput";
 import CompanyLogoUpload from "@/components/post/CompanyLogoUpload";
 import VehicleFields from "@/components/post/VehicleFields";
 import ContactDetailsCard from "@/components/post/ContactDetailsCard";
