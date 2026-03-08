@@ -66,6 +66,8 @@ export function useListings(filters?: {
   return { listings, loading, total, refetch: fetchListings };
 }
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export function useListing(id: string | undefined) {
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
@@ -73,13 +75,13 @@ export function useListing(id: string | undefined) {
 
   useEffect(() => {
     if (!id) { setLoading(false); return; }
+    // Skip Supabase query for non-UUID IDs (mock data)
+    if (!UUID_REGEX.test(id)) { setLoading(false); return; }
     const fetch = async () => {
       const { data } = await supabase.from("listings").select("*").eq("id", id).single();
       if (data) {
         setListing(data as Listing);
-        // Increment views
         await supabase.from("listings").update({ views: (data.views || 0) + 1 }).eq("id", id);
-        // Get seller profile
         const { data: profile } = await supabase.from("profiles").select("display_name, avatar_url, user_id").eq("user_id", data.user_id).single();
         setSeller(profile);
       }

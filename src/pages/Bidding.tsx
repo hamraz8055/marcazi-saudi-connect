@@ -12,18 +12,16 @@ import BottomTabBar from "@/components/BottomTabBar";
 import ImageFallback from "@/components/ImageFallback";
 import PageMeta from "@/components/PageMeta";
 import AuthDialog from "@/components/AuthDialog";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/sonner";
+import { getAuctions, getQuotations, type MockListing } from "@/lib/mockListings";
 
 const parseEndTime = (endsIn: string): number => {
   let totalSeconds = 0;
-  const dayMatch = endsIn.match(/(\d+)d/);
-  const hourMatch = endsIn.match(/(\d+)h/);
-  const minMatch = endsIn.match(/(\d+)m/);
-  if (dayMatch) totalSeconds += parseInt(dayMatch[1]) * 86400;
-  if (hourMatch) totalSeconds += parseInt(hourMatch[1]) * 3600;
-  if (minMatch) totalSeconds += parseInt(minMatch[1]) * 60;
+  const d = endsIn.match(/(\d+)d/); const h = endsIn.match(/(\d+)h/); const m = endsIn.match(/(\d+)m/);
+  if (d) totalSeconds += parseInt(d[1]) * 86400;
+  if (h) totalSeconds += parseInt(h[1]) * 3600;
+  if (m) totalSeconds += parseInt(m[1]) * 60;
   return totalSeconds;
 };
 
@@ -38,23 +36,28 @@ const formatCountdown = (totalSeconds: number): string => {
   return `${m}m ${s.toString().padStart(2, "0")}s`;
 };
 
-const formatCountdownFromDate = (endsAt: string): number => {
-  const diff = Math.floor((new Date(endsAt).getTime() - Date.now()) / 1000);
-  return Math.max(0, diff);
-};
+interface AuctionItem {
+  id: string;
+  title: string;
+  image: string;
+  currentBid: number;
+  startingPrice: number;
+  totalBids: number;
+  endsIn: string;
+  sellerName: string;
+  verified: boolean;
+  source: "db" | "mock";
+}
 
-const mockAuctions = [
-  { id: "mock-a1", title: { en: "Toyota Land Cruiser 2024 - VIP Plate", ar: "تويوتا لاند كروزر 2024 - لوحة VIP" }, image: "https://images.unsplash.com/photo-1625231334168-30dc1d1329cc?w=400&h=300&fit=crop", currentBid: 450000, startingPrice: 350000, totalBids: 23, endsIn: "2d 14h", seller: { en: "Ahmed Motors", ar: "أحمد للسيارات" }, verified: true },
-  { id: "mock-a2", title: { en: "Luxury Penthouse - Riyadh", ar: "بنتهاوس فاخر - الرياض" }, image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400&h=300&fit=crop", currentBid: 3200000, startingPrice: 2800000, totalBids: 15, endsIn: "5d 8h", seller: { en: "KSA Properties", ar: "عقارات المملكة" }, verified: true },
-  { id: "mock-a3", title: { en: "CAT 336 Excavator - Like New", ar: "حفارة كاتربيلر 336 - شبه جديدة" }, image: "https://images.unsplash.com/photo-1580901368919-7738efb0f228?w=400&h=300&fit=crop", currentBid: 520000, startingPrice: 400000, totalBids: 8, endsIn: "1d 6h", seller: { en: "Heavy Machinery Co", ar: "شركة المعدات الثقيلة" }, verified: false },
-  { id: "mock-a4", title: { en: "VIP Mobile Number 05X XXXX", ar: "رقم جوال مميز 05X XXXX" }, image: "https://images.unsplash.com/photo-1556656793-08538906a9f8?w=400&h=300&fit=crop", currentBid: 85000, startingPrice: 50000, totalBids: 42, endsIn: "0d 12h 30m", seller: { en: "Premium Numbers", ar: "أرقام مميزة" }, verified: true },
-];
-
-const mockQuotations = [
-  { id: "mock-q1", title: { en: "Steel Plates 10mm - 500 Tons", ar: "ألواح حديد 10مم - 500 طن" }, budget: { en: "Budget: 800,000 - 1,200,000 SAR", ar: "الميزانية: 800,000 - 1,200,000 ر.س" }, quotes: 7, deadline: "3d left", buyer: { en: "Al Rajhi Construction", ar: "الراجحي للمقاولات" } },
-  { id: "mock-q2", title: { en: "HVAC System for Commercial Building", ar: "نظام تكييف لمبنى تجاري" }, budget: { en: "Budget: 150,000 - 250,000 SAR", ar: "الميزانية: 150,000 - 250,000 ر.س" }, quotes: 12, deadline: "5d left", buyer: { en: "Saudi Development Co", ar: "شركة التطوير السعودية" } },
-  { id: "mock-q3", title: { en: "Office Furniture - 200 Workstations", ar: "أثاث مكتبي - 200 محطة عمل" }, budget: { en: "Budget: 400,000 - 600,000 SAR", ar: "الميزانية: 400,000 - 600,000 ر.س" }, quotes: 5, deadline: "7d left", buyer: { en: "Vision Corp", ar: "شركة فيجن" } },
-];
+interface QuotationItem {
+  id: string;
+  title: string;
+  budget: string;
+  quotes: number;
+  deadline: string;
+  buyer: string;
+  source: "db" | "mock";
+}
 
 const Bidding = () => {
   const { t, lang } = useI18n();
@@ -64,22 +67,91 @@ const Bidding = () => {
   const [showAuth, setShowAuth] = useState(false);
   const [bidSearch, setBidSearch] = useState("");
 
-  // Bid modal
-  const [bidModal, setBidModal] = useState<{ open: boolean; auction: any | null }>({ open: false, auction: null });
+  const [bidModal, setBidModal] = useState<{ open: boolean; auction: AuctionItem | null }>({ open: false, auction: null });
   const [bidAmount, setBidAmount] = useState("");
   const [bidding, setBidding] = useState(false);
 
-  // Quote modal
-  const [quoteModal, setQuoteModal] = useState<{ open: boolean; quotation: any | null }>({ open: false, quotation: null });
+  const [quoteModal, setQuoteModal] = useState<{ open: boolean; quotation: QuotationItem | null }>({ open: false, quotation: null });
   const [quoteForm, setQuoteForm] = useState({ priceOffer: "", deliveryTime: "", notes: "" });
   const [quoting, setQuoting] = useState(false);
 
+  // Data state
+  const [auctions, setAuctions] = useState<AuctionItem[]>([]);
+  const [quotations, setQuotations] = useState<QuotationItem[]>([]);
+
+  // Fetch from Supabase, fallback to mock
+  useEffect(() => {
+    const fetchAuctions = async () => {
+      const { data } = await supabase.from("auctions").select("*").eq("status", "active").order("created_at", { ascending: false });
+      if (data && data.length > 0) {
+        setAuctions(data.map(a => ({
+          id: a.id,
+          title: a.title,
+          image: a.images?.[0] || "",
+          currentBid: Number(a.current_bid) || Number(a.starting_price),
+          startingPrice: Number(a.starting_price),
+          totalBids: a.total_bids || 0,
+          endsIn: "", // will use ends_at
+          sellerName: "Seller",
+          verified: false,
+          source: "db" as const,
+        })));
+      } else {
+        // Fallback to mock
+        setAuctions(getAuctions().map(a => ({
+          id: a.id,
+          title: a.title,
+          image: a.images[0] || "",
+          currentBid: a.currentBid || 0,
+          startingPrice: a.startingPrice || 0,
+          totalBids: a.totalBids || 0,
+          endsIn: a.endsIn || "1d",
+          sellerName: a.seller.name,
+          verified: a.seller.verified,
+          source: "mock" as const,
+        })));
+      }
+    };
+
+    const fetchQuotations = async () => {
+      const { data } = await supabase.from("quotations").select("*").eq("status", "active").order("created_at", { ascending: false });
+      if (data && data.length > 0) {
+        setQuotations(data.map(q => ({
+          id: q.id,
+          title: q.title,
+          budget: q.budget_min && q.budget_max ? `${Number(q.budget_min).toLocaleString()} – ${Number(q.budget_max).toLocaleString()} SAR` : "Contact",
+          quotes: q.quotes_count || 0,
+          deadline: q.deadline ? `${Math.max(0, Math.ceil((new Date(q.deadline).getTime() - Date.now()) / 86400000))}d left` : "Open",
+          buyer: "Buyer",
+          source: "db" as const,
+        })));
+      } else {
+        setQuotations(getQuotations().map(q => ({
+          id: q.id,
+          title: q.title,
+          budget: q.budget || "",
+          quotes: q.quotes || 0,
+          deadline: q.deadline || "",
+          buyer: q.buyer || q.seller.name,
+          source: "mock" as const,
+        })));
+      }
+    };
+
+    fetchAuctions();
+    fetchQuotations();
+  }, []);
+
   // Countdown
-  const [countdowns, setCountdowns] = useState<Record<string, number>>(() => {
+  const [countdowns, setCountdowns] = useState<Record<string, number>>({});
+
+  useEffect(() => {
     const initial: Record<string, number> = {};
-    mockAuctions.forEach(a => { initial[a.id] = parseEndTime(a.endsIn); });
-    return initial;
-  });
+    auctions.forEach(a => {
+      if (a.endsIn) initial[a.id] = parseEndTime(a.endsIn);
+    });
+    setCountdowns(initial);
+  }, [auctions]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -94,7 +166,7 @@ const Bidding = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handlePlaceBid = (auction: any) => {
+  const handlePlaceBid = (auction: AuctionItem) => {
     if (!user) { setShowAuth(true); return; }
     setBidModal({ open: true, auction });
     setBidAmount("");
@@ -103,19 +175,23 @@ const Bidding = () => {
   const submitBid = async () => {
     if (!bidModal.auction || !user) return;
     const amount = Number(bidAmount);
-    if (!amount || amount <= (bidModal.auction.currentBid || bidModal.auction.startingPrice)) {
+    if (!amount || amount <= bidModal.auction.currentBid) {
       toast.error(lang === "ar" ? "المبلغ يجب أن يكون أعلى من المزايدة الحالية" : "Bid must be higher than current bid");
       return;
     }
     setBidding(true);
-    // For mock data, just show success
-    await new Promise(r => setTimeout(r, 500));
+    if (bidModal.auction.source === "db") {
+      await supabase.from("bids").insert({ auction_id: bidModal.auction.id, user_id: user.id, amount });
+      await supabase.from("auctions").update({ current_bid: amount, total_bids: (bidModal.auction.totalBids || 0) + 1 }).eq("id", bidModal.auction.id);
+    } else {
+      await new Promise(r => setTimeout(r, 500));
+    }
     toast.success(lang === "ar" ? "تم تقديم مزايدتك!" : "Your bid has been placed!");
     setBidModal({ open: false, auction: null });
     setBidding(false);
   };
 
-  const handleSubmitQuote = (quotation: any) => {
+  const handleSubmitQuote = (quotation: QuotationItem) => {
     if (!user) { setShowAuth(true); return; }
     setQuoteModal({ open: true, quotation });
     setQuoteForm({ priceOffer: "", deliveryTime: "", notes: "" });
@@ -128,22 +204,30 @@ const Bidding = () => {
       return;
     }
     setQuoting(true);
-    await new Promise(r => setTimeout(r, 500));
+    if (quoteModal.quotation.source === "db") {
+      await supabase.from("quote_responses").insert({
+        quotation_id: quoteModal.quotation.id,
+        user_id: user.id,
+        price_offer: Number(quoteForm.priceOffer),
+        delivery_time: quoteForm.deliveryTime || null,
+        notes: quoteForm.notes || null,
+      });
+    } else {
+      await new Promise(r => setTimeout(r, 500));
+    }
     toast.success(lang === "ar" ? "تم تقديم عرضك!" : "Your quote has been submitted!");
     setQuoteModal({ open: false, quotation: null });
     setQuoting(false);
   };
 
-  const filteredAuctions = mockAuctions.filter(a => {
+  const filteredAuctions = auctions.filter(a => {
     if (!bidSearch) return true;
-    const q = bidSearch.toLowerCase();
-    return a.title.en.toLowerCase().includes(q) || a.title.ar.includes(q);
+    return a.title.toLowerCase().includes(bidSearch.toLowerCase());
   });
 
-  const filteredQuotations = mockQuotations.filter(q => {
+  const filteredQuotations = quotations.filter(q => {
     if (!bidSearch) return true;
-    const s = bidSearch.toLowerCase();
-    return q.title.en.toLowerCase().includes(s) || q.title.ar.includes(s);
+    return q.title.toLowerCase().includes(bidSearch.toLowerCase());
   });
 
   return (
@@ -160,10 +244,10 @@ const Bidding = () => {
         <div className="container relative z-10 py-10 md:py-16">
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
             className="mb-8 inline-flex items-center rounded-2xl bg-card/90 backdrop-blur-sm p-1.5 shadow-elevated">
-            <button onClick={() => navigate("/")} className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors" aria-label="Go to Marketplace">
+            <button onClick={() => navigate("/")} className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
               <ShoppingBag className="h-4 w-4" />{t("tab.marketplace")}
             </button>
-            <button className="flex items-center gap-2 rounded-xl bidding-gradient border-0 px-5 py-2.5 text-sm font-semibold text-white transition-all" aria-label="Bidding section active">
+            <button className="flex items-center gap-2 rounded-xl bidding-gradient border-0 px-5 py-2.5 text-sm font-semibold text-white transition-all">
               <Gavel className="h-4 w-4" />{t("tab.bidding")}
             </button>
           </motion.div>
@@ -209,8 +293,8 @@ const Bidding = () => {
         <div className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-3 mb-6">
           <Search className="h-5 w-5 text-muted-foreground shrink-0" />
           <input type="text" value={bidSearch} onChange={e => setBidSearch(e.target.value)}
-            placeholder={lang === "ar" ? "ابحث في المزادات..." : "Search auctions..."} className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground" aria-label="Search bidding" />
-          {bidSearch && <button onClick={() => setBidSearch("")} aria-label="Clear search"><X className="h-4 w-4 text-muted-foreground" /></button>}
+            placeholder={lang === "ar" ? "ابحث في المزادات وطلبات الأسعار..." : "Search auctions & quotations..."} className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
+          {bidSearch && <button onClick={() => setBidSearch("")}><X className="h-4 w-4 text-muted-foreground" /></button>}
         </div>
 
         <AnimatePresence mode="wait">
@@ -242,21 +326,21 @@ const Bidding = () => {
                       onClick={() => navigate(`/bidding/auction/${auction.id}`)}>
                       <div className="flex flex-col md:flex-row">
                         <div className="relative w-full md:w-48 aspect-[4/3] md:aspect-auto overflow-hidden shrink-0">
-                          <ImageFallback src={auction.image} alt={auction.title[lang]} className="h-full w-full object-cover" loading="lazy" />
+                          <ImageFallback src={auction.image} alt={auction.title} className="h-full w-full object-cover" loading="lazy" />
                           <div className={`absolute top-3 start-3 flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold ${isUrgent ? "bg-destructive/90 text-destructive-foreground animate-pulse" : "bg-destructive/90 text-destructive-foreground"}`}>
                             <Clock className="h-3 w-3" />{formatCountdown(remaining)}
                           </div>
                         </div>
                         <div className="flex-1 p-5">
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-xs text-muted-foreground">{auction.seller[lang]}</span>
+                            <span className="text-xs text-muted-foreground">{auction.sellerName}</span>
                             {auction.verified && (
                               <span className="inline-flex items-center gap-1 rounded-full bg-gold-light text-gold px-2 py-0.5 text-[10px] font-bold">
                                 <Shield className="h-2.5 w-2.5" />{t("bidding.verified")}
                               </span>
                             )}
                           </div>
-                          <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">{auction.title[lang]}</h3>
+                          <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">{auction.title}</h3>
                           <div className="mt-3 flex items-end gap-4">
                             <div>
                               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{t("bidding.currentBid")}</p>
@@ -275,6 +359,11 @@ const Bidding = () => {
                     </motion.article>
                   );
                 })}
+                {filteredAuctions.length === 0 && (
+                  <div className="col-span-full text-center py-12 text-muted-foreground">
+                    {lang === "ar" ? "لا توجد مزادات مطابقة" : "No matching auctions found"}
+                  </div>
+                )}
               </div>
             </motion.div>
           ) : (
@@ -300,9 +389,9 @@ const Bidding = () => {
                     className="rounded-2xl border border-border bg-card p-5 hover:shadow-elevated transition-all cursor-pointer">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <h3 className="font-semibold text-foreground">{q.title[lang]}</h3>
-                        <p className="text-sm text-muted-foreground mt-1">{q.buyer[lang]}</p>
-                        <p className="text-sm font-medium text-primary mt-2">{q.budget[lang]}</p>
+                        <h3 className="font-semibold text-foreground">{q.title}</h3>
+                        <p className="text-sm text-muted-foreground mt-1">{q.buyer}</p>
+                        <p className="text-sm font-medium text-primary mt-2">{q.budget}</p>
                       </div>
                       <div className="text-end shrink-0 ms-4">
                         <div className="inline-flex items-center gap-1 rounded-full bg-primary-light text-primary px-3 py-1 text-xs font-bold">
@@ -321,6 +410,11 @@ const Bidding = () => {
                     </div>
                   </motion.div>
                 ))}
+                {filteredQuotations.length === 0 && (
+                  <div className="text-center py-12 text-muted-foreground">
+                    {lang === "ar" ? "لا توجد طلبات أسعار مطابقة" : "No matching quotations found"}
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
@@ -330,12 +424,10 @@ const Bidding = () => {
       {/* Bid Modal */}
       <Dialog open={bidModal.open} onOpenChange={open => setBidModal({ open, auction: open ? bidModal.auction : null })}>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{lang === "ar" ? "تقديم مزايدة" : "Place Your Bid"}</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>{lang === "ar" ? "تقديم مزايدة" : "Place Your Bid"}</DialogTitle></DialogHeader>
           {bidModal.auction && (
             <div className="space-y-4">
-              <p className="font-semibold text-foreground">{bidModal.auction.title[lang]}</p>
+              <p className="font-semibold text-foreground">{bidModal.auction.title}</p>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">{t("bidding.currentBid")}</span>
                 <span className="font-bold text-primary">{bidModal.auction.currentBid.toLocaleString()} {t("listing.sar")}</span>
@@ -354,15 +446,13 @@ const Bidding = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Quote Response Modal */}
+      {/* Quote Modal */}
       <Dialog open={quoteModal.open} onOpenChange={open => setQuoteModal({ open, quotation: open ? quoteModal.quotation : null })}>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{lang === "ar" ? "تقديم عرض سعر" : "Submit Quote"}</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>{lang === "ar" ? "تقديم عرض سعر" : "Submit Quote"}</DialogTitle></DialogHeader>
           {quoteModal.quotation && (
             <div className="space-y-4">
-              <p className="font-semibold text-foreground">{quoteModal.quotation.title[lang]}</p>
+              <p className="font-semibold text-foreground">{quoteModal.quotation.title}</p>
               <div>
                 <label className="text-sm font-medium">{lang === "ar" ? "عرض السعر" : "Price Offer"} ({t("listing.sar")})</label>
                 <Input type="number" className="mt-1" value={quoteForm.priceOffer} onChange={e => setQuoteForm(p => ({ ...p, priceOffer: e.target.value }))} />
