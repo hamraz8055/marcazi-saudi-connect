@@ -206,6 +206,24 @@ const translations: Record<string, Record<Lang, string>> = {
   "post.phone": { en: "Phone Number", ar: "رقم الهاتف" },
   "post.phonePlaceholder": { en: "+966 5XX XXX XXXX", ar: "+966 5XX XXX XXXX" },
 
+  // How It Works
+  "howItWorks.title": { en: "How It Works", ar: "كيف يعمل" },
+  "howItWorks.post": { en: "Post Your Ad", ar: "أضف إعلانك" },
+  "howItWorks.postDesc": { en: "Create a listing in minutes with photos and details", ar: "أنشئ إعلانك في دقائق مع الصور والتفاصيل" },
+  "howItWorks.browse": { en: "Browse & Discover", ar: "تصفح واكتشف" },
+  "howItWorks.browseDesc": { en: "Search thousands of listings across all categories", ar: "ابحث في آلاف الإعلانات في جميع الفئات" },
+  "howItWorks.connect": { en: "Connect & Deal", ar: "تواصل وأتمم" },
+  "howItWorks.connectDesc": { en: "Message sellers directly and close the deal", ar: "تواصل مع البائعين مباشرة وأتمم الصفقة" },
+
+  // Verification
+  "verify.title": { en: "Get Verified", ar: "توثيق الحساب" },
+  "verify.desc": { en: "Verified sellers get more trust and visibility", ar: "البائعون الموثقون يحصلون على ثقة ورؤية أكبر" },
+  "verify.step1": { en: "Upload National ID or Iqama", ar: "رفع الهوية الوطنية أو الإقامة" },
+  "verify.step2": { en: "Upload Business Registration (Optional)", ar: "رفع السجل التجاري (اختياري)" },
+  "verify.submit": { en: "Submit for Review", ar: "إرسال للمراجعة" },
+  "verify.pending": { en: "Verification Pending", ar: "بانتظار التوثيق" },
+  "verify.verified": { en: "Verified Seller", ar: "بائع موثق" },
+
   // Regions
   "region.central": { en: "Central Region", ar: "المنطقة الوسطى" },
   "region.western": { en: "Western Region", ar: "المنطقة الغربية" },
