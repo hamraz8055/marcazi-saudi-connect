@@ -779,9 +779,14 @@ export type Database = {
     Views: {
       public_listings: {
         Row: {
+          agency_name: string | null
           application_deadline: string | null
+          area_sqm: number | null
+          bathrooms: number | null
+          bedrooms: number | null
           body_type: string | null
           call_clicks: number | null
+          capacity: number | null
           category: string | null
           chat_starts: number | null
           city: string | null
@@ -791,21 +796,42 @@ export type Database = {
           contract_duration: string | null
           created_at: string | null
           description: string | null
+          developer_name: string | null
+          district: string | null
+          down_payment_pct: number | null
           email_inquiries: number | null
           employment_type: string | null
+          features: string[] | null
+          fitout_status: string | null
+          floor_number: string | null
           fuel_type: string | null
+          furnished: string | null
+          handover_date: string | null
           hourly_rate: number | null
           id: string | null
           images: string[] | null
+          installment_period: string | null
           kilometers: number | null
+          land_type: string | null
+          latitude: number | null
           listing_type: string | null
+          longitude: number | null
           make: string | null
           model: string | null
+          payment_plan: boolean | null
+          payment_terms: string | null
           phone: string | null
           phone_country_code: string | null
           phone_full: string | null
           phone_number: string | null
+          poster_type: string | null
           price: number | null
+          price_negotiable: boolean | null
+          price_per_sqm: number | null
+          price_period: string | null
+          project_name: string | null
+          reference_number: string | null
+          rega_license: string | null
           rental_duration_type: string | null
           rental_period: string | null
           rental_rate: number | null
@@ -819,8 +845,10 @@ export type Database = {
           show_email: boolean | null
           show_phone: boolean | null
           status: string | null
+          street: string | null
           subcategory: string | null
           title: string | null
+          tour_360_url: string | null
           updated_at: string | null
           user_id: string | null
           views: number | null
@@ -828,9 +856,14 @@ export type Database = {
           year: number | null
         }
         Insert: {
+          agency_name?: string | null
           application_deadline?: string | null
+          area_sqm?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
           body_type?: string | null
           call_clicks?: number | null
+          capacity?: number | null
           category?: string | null
           chat_starts?: number | null
           city?: string | null
@@ -840,21 +873,42 @@ export type Database = {
           contract_duration?: string | null
           created_at?: string | null
           description?: string | null
+          developer_name?: string | null
+          district?: string | null
+          down_payment_pct?: number | null
           email_inquiries?: number | null
           employment_type?: string | null
+          features?: string[] | null
+          fitout_status?: string | null
+          floor_number?: string | null
           fuel_type?: string | null
+          furnished?: string | null
+          handover_date?: string | null
           hourly_rate?: number | null
           id?: string | null
           images?: string[] | null
+          installment_period?: string | null
           kilometers?: number | null
+          land_type?: string | null
+          latitude?: number | null
           listing_type?: string | null
+          longitude?: number | null
           make?: string | null
           model?: string | null
-          phone?: never
+          payment_plan?: boolean | null
+          payment_terms?: string | null
+          phone?: string | null
           phone_country_code?: string | null
           phone_full?: never
-          phone_number?: never
+          phone_number?: string | null
+          poster_type?: string | null
           price?: number | null
+          price_negotiable?: boolean | null
+          price_per_sqm?: number | null
+          price_period?: string | null
+          project_name?: string | null
+          reference_number?: string | null
+          rega_license?: string | null
           rental_duration_type?: string | null
           rental_period?: string | null
           rental_rate?: number | null
@@ -868,8 +922,10 @@ export type Database = {
           show_email?: boolean | null
           show_phone?: boolean | null
           status?: string | null
+          street?: string | null
           subcategory?: string | null
           title?: string | null
+          tour_360_url?: string | null
           updated_at?: string | null
           user_id?: string | null
           views?: number | null
@@ -877,9 +933,14 @@ export type Database = {
           year?: number | null
         }
         Update: {
+          agency_name?: string | null
           application_deadline?: string | null
+          area_sqm?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
           body_type?: string | null
           call_clicks?: number | null
+          capacity?: number | null
           category?: string | null
           chat_starts?: number | null
           city?: string | null
@@ -889,21 +950,42 @@ export type Database = {
           contract_duration?: string | null
           created_at?: string | null
           description?: string | null
+          developer_name?: string | null
+          district?: string | null
+          down_payment_pct?: number | null
           email_inquiries?: number | null
           employment_type?: string | null
+          features?: string[] | null
+          fitout_status?: string | null
+          floor_number?: string | null
           fuel_type?: string | null
+          furnished?: string | null
+          handover_date?: string | null
           hourly_rate?: number | null
           id?: string | null
           images?: string[] | null
+          installment_period?: string | null
           kilometers?: number | null
+          land_type?: string | null
+          latitude?: number | null
           listing_type?: string | null
+          longitude?: number | null
           make?: string | null
           model?: string | null
-          phone?: never
+          payment_plan?: boolean | null
+          payment_terms?: string | null
+          phone?: string | null
           phone_country_code?: string | null
           phone_full?: never
-          phone_number?: never
+          phone_number?: string | null
+          poster_type?: string | null
           price?: number | null
+          price_negotiable?: boolean | null
+          price_per_sqm?: number | null
+          price_period?: string | null
+          project_name?: string | null
+          reference_number?: string | null
+          rega_license?: string | null
           rental_duration_type?: string | null
           rental_period?: string | null
           rental_rate?: number | null
@@ -917,8 +999,10 @@ export type Database = {
           show_email?: boolean | null
           show_phone?: boolean | null
           status?: string | null
+          street?: string | null
           subcategory?: string | null
           title?: string | null
+          tour_360_url?: string | null
           updated_at?: string | null
           user_id?: string | null
           views?: number | null
