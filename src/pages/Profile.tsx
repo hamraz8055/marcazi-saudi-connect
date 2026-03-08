@@ -16,6 +16,10 @@ import PhoneNumbersSection from "@/components/profile/PhoneNumbersSection";
 import SecuritySection from "@/components/profile/SecuritySection";
 import DeactivateSection from "@/components/profile/DeactivateSection";
 import VerificationSection from "@/components/profile/VerificationSection";
+import MyApplicationsSection from "@/components/profile/MyApplicationsSection";
+import SecuritySection from "@/components/profile/SecuritySection";
+import DeactivateSection from "@/components/profile/DeactivateSection";
+import VerificationSection from "@/components/profile/VerificationSection";
 import { useSearchParams } from "react-router-dom";
 
 export type ProfileSection = "basic-info" | "job-profile" | "addresses" | "phone-numbers" | "security" | "deactivate" | "verify";
