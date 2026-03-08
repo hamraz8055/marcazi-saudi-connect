@@ -221,10 +221,13 @@ const PostAd = () => {
         insertData.salary_min = formData.salaryMin ? Number(formData.salaryMin) : null;
         insertData.salary_max = formData.salaryMax ? Number(formData.salaryMax) : null;
         insertData.hourly_rate = formData.hourlyRate ? Number(formData.hourlyRate) : null;
-        insertData.salary_negotiable = formData.salaryNegotiable || formData.contactForPrice;
+        insertData.salary_negotiable = formData.salaryType === "negotiable" || formData.freelanceBudgetTbd || formData.contactForPrice;
         insertData.contract_duration = formData.contractDuration || null;
         insertData.required_skills = formData.requiredSkills.length > 0 ? formData.requiredSkills : null;
+        insertData.required_documents = formData.requiredDocuments.length > 0 ? formData.requiredDocuments : null;
         insertData.company_logo_url = companyLogoUrl;
+        insertData.rental_rate_tbd = formData.rentalRateTbd || false;
+        insertData.rental_duration_type = formData.rentalDurationType || null;
       }
 
       if (isVehicle) {
