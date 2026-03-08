@@ -350,6 +350,10 @@ const PostAd = () => {
                     hourlyRate={formData.hourlyRate} contractDuration={formData.contractDuration}
                     paidInternship={formData.paidInternship} contactForPrice={formData.contactForPrice}
                     price={formData.price}
+                    salaryType={formData.salaryType}
+                    rentalRateTbd={formData.rentalRateTbd}
+                    rentalDurationType={formData.rentalDurationType}
+                    freelanceBudgetTbd={formData.freelanceBudgetTbd}
                     onUpdate={(field, value) => {
                       if (field === "salaryMin") updateField("salaryMin", value);
                       else if (field === "salaryMax") updateField("salaryMax", value);
@@ -358,6 +362,10 @@ const PostAd = () => {
                       else if (field === "paidInternship") updateField("paidInternship", value);
                       else if (field === "contactForPrice") updateField("contactForPrice", value);
                       else if (field === "price") updateField("price", value);
+                      else if (field === "salaryType") updateField("salaryType", value);
+                      else if (field === "rentalRateTbd") updateField("rentalRateTbd", value);
+                      else if (field === "rentalDurationType") updateField("rentalDurationType", value);
+                      else if (field === "freelanceBudgetTbd") updateField("freelanceBudgetTbd", value);
                     }}
                   />
                 </div>
