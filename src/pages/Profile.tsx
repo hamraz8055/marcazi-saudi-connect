@@ -82,6 +82,7 @@ const Profile = () => {
       case "security": return <SecuritySection />;
       case "deactivate": return <DeactivateSection />;
       case "verify": return <VerificationSection />;
+      case "my-applications": return <MyApplicationsSection />;
       default: return <BasicInfoSection />;
     }
   };

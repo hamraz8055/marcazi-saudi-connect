@@ -40,6 +40,10 @@ const ProfileSidebar = ({ activeSection, onSectionChange }: Props) => {
             <Briefcase className="h-4 w-4" />
             {lang === "ar" ? "الملف الوظيفي" : "Job Profile"}
           </div>
+          <div className={itemClass("my-applications")} onClick={() => onSectionChange("my-applications")}>
+            <FileText className="h-4 w-4" />
+            {lang === "ar" ? "طلباتي" : "My Applications"}
+          </div>
           <div className={itemClass("addresses")} onClick={() => onSectionChange("addresses")}>
             <MapPin className="h-4 w-4" />
             {lang === "ar" ? "العناوين" : "My Addresses"}

@@ -54,6 +54,7 @@ const App = () => (
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/my-ads" element={<MyAds />} />
+                <Route path="/my-ads/applications/:listingId" element={<ApplicationsDashboard />} />
                 <Route path="/account" element={<Profile />} />
                 <Route path="/favorites" element={<Favorites />} />
                 <Route path="/favourites" element={<Favorites />} />
