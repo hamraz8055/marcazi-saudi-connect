@@ -118,6 +118,12 @@ const FeaturedListings = () => {
                       <Shield className="h-2.5 w-2.5" />{lang === "ar" ? "موثق" : "Verified"}
                     </span>
                   )}
+                  {listing.tour_360_url && (
+                    <span className="inline-flex items-center rounded-lg bg-card/90 backdrop-blur-sm px-2 py-1 text-[10px] font-medium text-foreground" title="360° Tour">
+                      🔄
+                    </span>
+                  )}
+                </div>
                 </div>
                 <button onClick={e => handleFav(e, listing.id)}
                   className="absolute top-3 end-3 flex h-8 w-8 items-center justify-center rounded-full bg-card/80 backdrop-blur-sm text-muted-foreground hover:text-destructive transition-colors"
