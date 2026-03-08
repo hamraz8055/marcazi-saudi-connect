@@ -115,14 +115,14 @@ const MyAds = () => {
                     <span className="flex items-center gap-1"><Eye className="h-3.5 w-3.5" />{(listing.views || 0).toLocaleString()}</span>
                   </div>
 
-                  {/* Analytics row */}
-                  {((listing.call_clicks || 0) > 0 || (listing.whatsapp_clicks || 0) > 0 || (listing.chat_starts || 0) > 0) && (
-                    <div className="mt-2 flex items-center gap-3 text-[10px] text-muted-foreground">
-                      {(listing.call_clicks || 0) > 0 && <span>📞 {listing.call_clicks}</span>}
-                      {(listing.whatsapp_clicks || 0) > 0 && <span>💚 {listing.whatsapp_clicks}</span>}
-                      {(listing.chat_starts || 0) > 0 && <span>💬 {listing.chat_starts}</span>}
-                    </div>
-                  )}
+                  {/* Analytics row — always show */}
+                  <div className="mt-2 flex items-center gap-3 text-[10px] text-muted-foreground flex-wrap" title={lang === "ar" ? "منذ نشر الإعلان" : "Since listing was posted"}>
+                    <span>👁 {(listing.views || 0).toLocaleString()}</span>
+                    <span>📞 {listing.call_clicks || 0}</span>
+                    <span>💚 {listing.whatsapp_clicks || 0}</span>
+                    <span>✉️ {listing.email_inquiries || 0}</span>
+                    <span>💬 {listing.chat_starts || 0}</span>
+                  </div>
 
                   <div className="mt-3 flex gap-2">
                     {listing.category === "jobs" && (
