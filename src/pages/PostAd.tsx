@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { categories } from "@/lib/categories";
 import { saudiCities, regions, getCitiesByRegion } from "@/lib/cities";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Header from "@/components/Header";
 import BottomTabBar from "@/components/BottomTabBar";
 import PageMeta from "@/components/PageMeta";
@@ -47,7 +48,7 @@ const PostAd = () => {
 
   const canProceed = () => {
     switch (step) {
-      case 0: return !!formData.category;
+      case 0: return !!formData.category && !!formData.subcategory;
       case 1: return !!formData.title && !!formData.city;
       case 2: return formData.contactForPrice || !!formData.price;
       case 3: return true;
@@ -84,7 +85,6 @@ const PostAd = () => {
 
     setSubmitting(true);
     try {
-      // Upload images to storage
       const imageUrls: string[] = [];
       for (const file of formData.images) {
         const ext = file.name.split(".").pop();
@@ -99,7 +99,7 @@ const PostAd = () => {
       const { data, error } = await supabase.from("listings").insert({
         user_id: user.id,
         category: formData.category,
-        subcategory: formData.subcategory || null,
+        subcategory: formData.subcategory === "all" ? null : formData.subcategory || null,
         title: formData.title,
         description: formData.description || null,
         listing_type: formData.listingType,
@@ -130,7 +130,6 @@ const PostAd = () => {
   const goNext = () => { setDirection(1); setStep(s => Math.min(s + 1, 3)); };
   const goBack = () => { setDirection(-1); setStep(s => Math.max(s - 1, 0)); };
 
-  // Auth check
   if (!user && step > 0) {
     setStep(0);
   }
@@ -160,32 +159,51 @@ const PostAd = () => {
             <motion.div key={step} custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.25 }}>
               {/* Step 0: Category */}
               {step === 0 && (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <h2 className="text-lg font-semibold text-foreground">{t("post.selectCategory")}</h2>
-                  <div className="grid grid-cols-2 gap-3">
-                    {categories.map(cat => {
-                      const Icon = cat.icon;
-                      return (
-                        <button key={cat.id} onClick={() => { updateField("category", cat.id); updateField("subcategory", ""); }}
-                          className={`flex items-center gap-3 rounded-xl border-2 p-4 transition-all ${formData.category === cat.id ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/30"}`}>
-                          <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${cat.color}`}><Icon className="h-5 w-5" /></div>
-                          <span className="font-medium text-foreground text-sm">{t(cat.key)}</span>
-                          {formData.category === cat.id && <Check className="ms-auto h-5 w-5 text-primary" />}
-                        </button>
-                      );
-                    })}
+                  
+                  {/* Category Select */}
+                  <div>
+                    <label className="text-sm font-medium text-foreground mb-1.5 block">{t("post.selectCategory")}</label>
+                    <Select value={formData.category} onValueChange={(val) => { updateField("category", val); updateField("subcategory", ""); }}>
+                      <SelectTrigger className="rounded-xl border-border bg-card py-3 px-4">
+                        <SelectValue placeholder={t("post.selectCategory")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map(cat => {
+                          const Icon = cat.icon;
+                          return (
+                            <SelectItem key={cat.id} value={cat.id}>
+                              <span className="flex items-center gap-2">
+                                <Icon className="h-4 w-4" />
+                                {t(cat.key)}
+                              </span>
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
                   </div>
-                  {selectedCat && selectedCat.subcategories.length > 0 && (
-                    <div className="mt-4">
-                      <h3 className="text-sm font-medium text-muted-foreground mb-2">{t("post.selectSubcategory")}</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedCat.subcategories.map(sub => (
-                          <button key={sub.id} onClick={() => updateField("subcategory", sub.id)}
-                            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${formData.subcategory === sub.id ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}>
-                            {sub.name[lang]}
-                          </button>
-                        ))}
-                      </div>
+
+                  {/* Subcategory Select */}
+                  {selectedCat && (
+                    <div>
+                      <label className="text-sm font-medium text-foreground mb-1.5 block">{t("post.selectSubcategory")}</label>
+                      <Select value={formData.subcategory} onValueChange={(val) => updateField("subcategory", val)}>
+                        <SelectTrigger className="rounded-xl border-border bg-card py-3 px-4">
+                          <SelectValue placeholder={t("post.selectSubcategory")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">
+                            {lang === "ar" ? `الكل في ${t(selectedCat.key)}` : `All in ${t(selectedCat.key)}`}
+                          </SelectItem>
+                          {selectedCat.subcategories.map(sub => (
+                            <SelectItem key={sub.id} value={sub.id}>
+                              {t(`subcategory.${sub.id}`) !== `subcategory.${sub.id}` ? t(`subcategory.${sub.id}`) : sub.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   )}
                 </div>

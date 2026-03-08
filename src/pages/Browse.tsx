@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, MapPin, X, ChevronDown, Eye, Heart, SlidersHorizontal, ArrowUpDown } from "lucide-react";
+import { Search, MapPin, X, ChevronDown, ChevronRight, Eye, Heart, SlidersHorizontal, ArrowUpDown } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { categories } from "@/lib/categories";
@@ -15,9 +15,20 @@ import PageMeta from "@/components/PageMeta";
 import AuthDialog from "@/components/AuthDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { getRegularListings } from "@/lib/mockListings";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
-// Fallback mock data mapped to Listing-like shape
 const mockListings = getRegularListings().map(l => ({
   id: l.id, user_id: "", title: l.title, category: l.category, price: l.price, city: l.city,
   views: l.views, listing_type: l.listing_type, images: l.images, description: l.description,
@@ -32,11 +43,11 @@ const Browse = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("q") || "");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(searchParams.get("category"));
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(searchParams.get("subcategory"));
   const [listingType, setListingType] = useState<"all" | "sale" | "rent">("all");
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [citySearch, setCitySearch] = useState("");
   const [showCityDropdown, setShowCityDropdown] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [sortBy, setSortBy] = useState("newest");
   const [priceMin, setPriceMin] = useState("");
@@ -56,14 +67,16 @@ const Browse = () => {
     limit: 100,
   });
 
-  // Use DB listings or fallback to mock
   const allListings = dbListings.length > 0 ? dbListings : mockListings;
 
-  // Client-side filter for mock data
   const filteredListings = useMemo(() => {
-    if (dbListings.length > 0) return dbListings; // Already filtered server-side
+    if (dbListings.length > 0) {
+      if (selectedSubcategory) return dbListings.filter(l => l.subcategory === selectedSubcategory);
+      return dbListings;
+    }
     return allListings.filter(l => {
       if (selectedCategory && l.category !== selectedCategory) return false;
+      if (selectedSubcategory && l.subcategory !== selectedSubcategory) return false;
       if (listingType !== "all" && l.listing_type !== listingType) return false;
       if (selectedCity && l.city !== selectedCity) return false;
       if (search) {
@@ -74,24 +87,27 @@ const Browse = () => {
       if (priceMax && (l.price || 0) > Number(priceMax)) return false;
       return true;
     });
-  }, [dbListings, allListings, selectedCategory, listingType, selectedCity, search, priceMin, priceMax]);
+  }, [dbListings, allListings, selectedCategory, selectedSubcategory, listingType, selectedCity, search, priceMin, priceMax]);
 
   const displayedListings = filteredListings.slice(0, displayCount);
 
   useEffect(() => {
     const cat = searchParams.get("category");
+    const sub = searchParams.get("subcategory");
     const q = searchParams.get("q");
     if (cat && categories.some(c => c.id === cat)) setSelectedCategory(cat);
+    if (sub) setSelectedSubcategory(sub);
     if (q) setSearch(q);
   }, [searchParams]);
 
-  const handleCategoryChange = (catId: string | null) => {
+  const updateParams = (catId: string | null, subId: string | null) => {
     setSelectedCategory(catId);
+    setSelectedSubcategory(subId);
     const params: Record<string, string> = {};
     if (catId) params.category = catId;
+    if (subId) params.subcategory = subId;
     if (search) params.q = search;
     setSearchParams(params);
-    setShowFilters(false);
   };
 
   const handleFav = async (e: React.MouseEvent, listingId: string) => {
@@ -120,6 +136,52 @@ const Browse = () => {
     { value: "views", label: lang === "ar" ? "الأكثر مشاهدة" : "Most Viewed" },
   ];
 
+  const selectedCat = selectedCategory ? categories.find(c => c.id === selectedCategory) : null;
+  const selectedSub = selectedCat?.subcategories.find(s => s.id === selectedSubcategory);
+
+  // Sidebar content (shared between desktop and mobile drawer)
+  const SidebarContent = () => (
+    <div className="rounded-xl border border-border bg-card p-3 space-y-1">
+      <button onClick={() => updateParams(null, null)}
+        className={`w-full text-start px-3 py-2.5 text-sm rounded-lg transition-colors mb-1 ${!selectedCategory ? "bg-primary text-primary-foreground font-semibold" : "text-foreground hover:bg-muted"}`}>
+        {t("browse.allCategories")}
+      </button>
+      <Accordion type="single" collapsible value={selectedCategory || undefined} onValueChange={(val) => {
+        if (val) updateParams(val, null);
+      }}>
+        {categories.map(cat => {
+          const Icon = cat.icon;
+          return (
+            <AccordionItem key={cat.id} value={cat.id} className="border-none">
+              <AccordionTrigger className={`px-3 py-2.5 text-sm rounded-lg hover:no-underline hover:bg-muted transition-colors ${selectedCategory === cat.id ? "bg-primary/10 text-primary font-semibold" : "text-foreground"}`}>
+                <span className="flex items-center gap-2.5">
+                  <Icon className="h-4 w-4 shrink-0" />
+                  {t(cat.key)}
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="pb-1 pt-0">
+                <div className="ms-6 space-y-0.5">
+                  <button
+                    onClick={() => updateParams(cat.id, null)}
+                    className={`w-full text-start px-3 py-2 text-sm rounded-lg transition-colors ${selectedCategory === cat.id && !selectedSubcategory ? "bg-primary/10 text-primary font-semibold" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}>
+                    {lang === "ar" ? `الكل في ${t(cat.key)}` : `All in ${t(cat.key)}`}
+                  </button>
+                  {cat.subcategories.map(sub => (
+                    <button key={sub.id}
+                      onClick={() => updateParams(cat.id, sub.id)}
+                      className={`w-full text-start px-3 py-2 text-sm rounded-lg transition-colors ${selectedSubcategory === sub.id ? "bg-primary/10 text-primary font-semibold" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}>
+                      {t(`subcategory.${sub.id}`) !== `subcategory.${sub.id}` ? t(`subcategory.${sub.id}`) : sub.name}
+                    </button>
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          );
+        })}
+      </Accordion>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <PageMeta titleKey="browse.title" descriptionKey="browse.subtitle" />
@@ -129,6 +191,22 @@ const Browse = () => {
           <h1 className="text-2xl md:text-3xl font-bold text-foreground">{t("browse.title")}</h1>
           <p className="mt-1 text-muted-foreground">{t("browse.subtitle")}</p>
         </div>
+
+        {/* Active filter chip */}
+        {(selectedCat || selectedSub) && (
+          <div className="mb-4 flex items-center gap-2 flex-wrap">
+            <Badge variant="secondary" className="flex items-center gap-1.5 px-3 py-1.5 text-sm cursor-pointer hover:bg-destructive/10"
+              onClick={() => updateParams(null, null)}>
+              {selectedCat && <selectedCat.icon className="h-3.5 w-3.5" />}
+              <span>
+                {lang === "ar" ? "تصفح: " : "Browsing: "}
+                {selectedCat && t(selectedCat.key)}
+                {selectedSub && ` › ${t(`subcategory.${selectedSub.id}`) !== `subcategory.${selectedSub.id}` ? t(`subcategory.${selectedSub.id}`) : selectedSub.name}`}
+              </span>
+              <X className="h-3.5 w-3.5" />
+            </Badge>
+          </div>
+        )}
 
         {/* Search + Filter bar */}
         <div className="flex flex-col gap-4 mb-6">
@@ -229,32 +307,36 @@ const Browse = () => {
               </AnimatePresence>
             </div>
 
-            <button onClick={() => setShowFilters(!showFilters)} className="flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-2 text-sm md:hidden" aria-label="Toggle filters">
-              <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
-            </button>
+            {/* Mobile filter drawer trigger */}
+            <Sheet>
+              <SheetTrigger asChild>
+                <button className="flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-2 text-sm md:hidden" aria-label="Toggle filters">
+                  <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
+                </button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-72 p-4 overflow-y-auto">
+                <h3 className="font-semibold text-foreground mb-4">{lang === "ar" ? "الفلاتر" : "Filters"}</h3>
+                <SidebarContent />
+                {/* Price Range */}
+                <div className="mt-4 rounded-xl border border-border bg-card p-3">
+                  <p className="text-sm font-semibold text-foreground mb-2">{lang === "ar" ? "نطاق السعر" : "Price Range"}</p>
+                  <div className="flex items-center gap-2">
+                    <input type="number" placeholder={lang === "ar" ? "من" : "Min"} value={priceMin} onChange={e => setPriceMin(e.target.value)}
+                      className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs outline-none focus:border-primary" />
+                    <span className="text-muted-foreground text-xs">–</span>
+                    <input type="number" placeholder={lang === "ar" ? "إلى" : "Max"} value={priceMax} onChange={e => setPriceMax(e.target.value)}
+                      className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs outline-none focus:border-primary" />
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
 
         <div className="flex gap-6">
-          <aside className={`shrink-0 ${showFilters ? "block" : "hidden"} md:block w-full md:w-56`}>
-            <div className="rounded-xl border border-border bg-card p-3 space-y-1">
-              <button onClick={() => handleCategoryChange(null)}
-                className={`w-full text-start px-3 py-2.5 text-sm rounded-lg transition-colors mb-1 ${!selectedCategory ? "bg-primary text-primary-foreground font-semibold" : "text-foreground hover:bg-muted"}`}>
-                {t("browse.allCategories")}
-              </button>
-              {categories.map(cat => {
-                const Icon = cat.icon;
-                return (
-                  <button key={cat.id} onClick={() => handleCategoryChange(cat.id)}
-                    className={`w-full flex items-center gap-2.5 text-start px-3 py-2.5 text-sm rounded-lg transition-colors ${selectedCategory === cat.id ? "bg-primary text-primary-foreground font-semibold" : "text-foreground hover:bg-muted"}`}>
-                    <Icon className="h-4 w-4 shrink-0" />
-                    {t(cat.key)}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Price Range Filter */}
+          {/* Desktop sidebar */}
+          <aside className="shrink-0 hidden md:block w-56">
+            <SidebarContent />
             <div className="mt-4 rounded-xl border border-border bg-card p-3">
               <p className="text-sm font-semibold text-foreground mb-2">{lang === "ar" ? "نطاق السعر" : "Price Range"}</p>
               <div className="flex items-center gap-2">

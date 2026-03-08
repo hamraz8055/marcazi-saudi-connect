@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { useListing } from "@/hooks/useListings";
@@ -15,10 +15,18 @@ import ImageFallback from "@/components/ImageFallback";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Heart, MapPin, Eye, Phone, MessageCircle, ArrowLeft, Share2, Calendar, Shield } from "lucide-react";
 import { motion } from "framer-motion";
 import { saudiCities } from "@/lib/cities";
-import { categories } from "@/lib/categories";
+import { categories, getSubcategoryName } from "@/lib/categories";
 import { toast } from "@/components/ui/sonner";
 
 const ListingDetail = () => {
@@ -147,6 +155,39 @@ const ListingDetail = () => {
       <PageMeta titleKey="page.listing" />
       <Header />
       <div className="container max-w-4xl py-6 pb-24 md:pb-10">
+        {/* Breadcrumb */}
+        <Breadcrumb className="mb-4">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild><Link to="/">{lang === "ar" ? "الرئيسية" : "Home"}</Link></BreadcrumbLink>
+            </BreadcrumbItem>
+            {cat && (
+              <>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild><Link to={`/browse?category=${cat.id}`}>{t(cat.key)}</Link></BreadcrumbLink>
+                </BreadcrumbItem>
+              </>
+            )}
+            {listing.subcategory && cat && (
+              <>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to={`/browse?category=${cat.id}&subcategory=${listing.subcategory}`}>
+                      {t(`subcategory.${listing.subcategory}`) !== `subcategory.${listing.subcategory}` ? t(`subcategory.${listing.subcategory}`) : getSubcategoryName(cat.id, listing.subcategory)}
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+              </>
+            )}
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage className="line-clamp-1 max-w-[200px]">{listing.title}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
           <ArrowLeft className="h-4 w-4 rtl:rotate-180" />{lang === "ar" ? "رجوع" : "Back"}
         </button>
