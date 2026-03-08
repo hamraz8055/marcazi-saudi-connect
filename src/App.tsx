@@ -58,6 +58,7 @@ const App = () => (
                 <Route path="/favourites" element={<Favorites />} />
                 <Route path="/notifications" element={<Notifications />} />
                 <Route path="/listing/:id" element={<ListingDetail />} />
+                <Route path="/user/:id" element={<PublicProfile />} />
                 <Route path="/auth/callback" element={<AuthCallback />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
