@@ -14,6 +14,62 @@ export type Database = {
   }
   public: {
     Tables: {
+      applications: {
+        Row: {
+          applicant_city: string | null
+          applicant_email: string | null
+          applicant_id: string
+          applicant_name: string | null
+          applicant_phone: string | null
+          applied_at: string | null
+          cover_letter: string | null
+          id: string
+          listing_id: string
+          matched_skills: string[] | null
+          resume_url: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          applicant_city?: string | null
+          applicant_email?: string | null
+          applicant_id: string
+          applicant_name?: string | null
+          applicant_phone?: string | null
+          applied_at?: string | null
+          cover_letter?: string | null
+          id?: string
+          listing_id: string
+          matched_skills?: string[] | null
+          resume_url?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          applicant_city?: string | null
+          applicant_email?: string | null
+          applicant_id?: string
+          applicant_name?: string | null
+          applicant_phone?: string | null
+          applied_at?: string | null
+          cover_letter?: string | null
+          id?: string
+          listing_id?: string
+          matched_skills?: string[] | null
+          resume_url?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       auctions: {
         Row: {
           category: string
@@ -246,14 +302,22 @@ export type Database = {
         Row: {
           category: string
           city: string
+          company_logo_url: string | null
           contact_for_price: boolean | null
+          contract_duration: string | null
           created_at: string
           description: string | null
+          employment_type: string | null
+          hourly_rate: number | null
           id: string
           images: string[] | null
           listing_type: string
           phone: string | null
           price: number | null
+          required_skills: string[] | null
+          salary_max: number | null
+          salary_min: number | null
+          salary_negotiable: boolean | null
           status: string | null
           subcategory: string | null
           title: string
@@ -264,14 +328,22 @@ export type Database = {
         Insert: {
           category: string
           city: string
+          company_logo_url?: string | null
           contact_for_price?: boolean | null
+          contract_duration?: string | null
           created_at?: string
           description?: string | null
+          employment_type?: string | null
+          hourly_rate?: number | null
           id?: string
           images?: string[] | null
           listing_type?: string
           phone?: string | null
           price?: number | null
+          required_skills?: string[] | null
+          salary_max?: number | null
+          salary_min?: number | null
+          salary_negotiable?: boolean | null
           status?: string | null
           subcategory?: string | null
           title: string
@@ -282,14 +354,22 @@ export type Database = {
         Update: {
           category?: string
           city?: string
+          company_logo_url?: string | null
           contact_for_price?: boolean | null
+          contract_duration?: string | null
           created_at?: string
           description?: string | null
+          employment_type?: string | null
+          hourly_rate?: number | null
           id?: string
           images?: string[] | null
           listing_type?: string
           phone?: string | null
           price?: number | null
+          required_skills?: string[] | null
+          salary_max?: number | null
+          salary_min?: number | null
+          salary_negotiable?: boolean | null
           status?: string | null
           subcategory?: string | null
           title?: string
