@@ -1,8 +1,8 @@
-import { Truck, Briefcase, Home, Car, TrendingUp, Wrench, Megaphone, type LucideIcon } from "lucide-react";
+import { Briefcase, Truck, Home, Car, Tag, Users, Factory, Zap, Sofa, Smartphone, type LucideIcon } from "lucide-react";
 
 export interface Subcategory {
   id: string;
-  name: { en: string; ar: string };
+  name: string;
 }
 
 export interface Category {
@@ -15,92 +15,137 @@ export interface Category {
 
 export const categories: Category[] = [
   {
-    id: "equipment",
-    key: "cat.equipment",
-    icon: Truck,
-    color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+    id: "jobs",
+    key: "category.jobs",
+    icon: Briefcase,
+    color: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
     subcategories: [
-      { id: "construction", name: { en: "Construction", ar: "إنشاءات" } },
-      { id: "cranes", name: { en: "Cranes", ar: "رافعات" } },
-      { id: "generators", name: { en: "Generators", ar: "مولدات" } },
-      { id: "pumps", name: { en: "Pumps", ar: "مضخات" } },
-      { id: "mechanical", name: { en: "Mechanical", ar: "ميكانيكية" } },
-      { id: "electrical-eq", name: { en: "Electrical", ar: "كهربائية" } },
-      { id: "plumbing-eq", name: { en: "Plumbing", ar: "سباكة" } },
+      { id: "oil-gas", name: "Oil and Gas" },
+      { id: "construction", name: "Construction" },
+      { id: "engineering", name: "Engineering" },
+      { id: "accounting-finance", name: "Accounting / Finance" },
+      { id: "manufacturing", name: "Manufacturing" },
+      { id: "logistics", name: "Logistics" },
+      { id: "sales-biz-dev", name: "Sales / Business Development" },
     ],
   },
   {
-    id: "jobs",
-    key: "cat.jobs",
-    icon: Briefcase,
-    color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+    id: "heavy-equipment",
+    key: "category.heavyEquipment",
+    icon: Truck,
+    color: "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400",
     subcategories: [
-      { id: "civil", name: { en: "Civil", ar: "مدني" } },
-      { id: "mechanical-job", name: { en: "Mechanical", ar: "ميكانيكي" } },
-      { id: "electrical-job", name: { en: "Electrical", ar: "كهربائي" } },
-      { id: "labor", name: { en: "Labor", ar: "عمالة" } },
-      { id: "engineering", name: { en: "Engineering", ar: "هندسة" } },
-      { id: "admin", name: { en: "Administrative", ar: "إداري" } },
+      { id: "trucks", name: "Trucks" },
+      { id: "buses", name: "Buses" },
+      { id: "trailers", name: "Trailers" },
+      { id: "cranes", name: "Cranes" },
+      { id: "forklifts", name: "Forklifts" },
+      { id: "tankers", name: "Tankers" },
+      { id: "parts-engines", name: "Parts & Engines" },
     ],
   },
   {
     id: "property",
-    key: "cat.property",
+    key: "category.property",
     icon: Home,
-    color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+    color: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400",
     subcategories: [
-      { id: "apartments", name: { en: "Apartments", ar: "شقق" } },
-      { id: "villas", name: { en: "Villas", ar: "فلل" } },
-      { id: "commercial", name: { en: "Commercial", ar: "تجاري" } },
-      { id: "land", name: { en: "Land", ar: "أراضي" } },
+      { id: "rent-residential", name: "For Rent — Residential" },
+      { id: "rent-commercial", name: "For Rent — Commercial" },
+      { id: "rent-room-bedspace", name: "Private Room / Bedspace For Rent" },
+      { id: "sale-residential", name: "For Sale — Residential" },
+      { id: "sale-commercial", name: "For Sale — Commercial" },
+      { id: "sale-new-projects", name: "New Projects" },
+      { id: "sale-off-plan", name: "Off-Plan" },
     ],
   },
   {
-    id: "vehicles",
-    key: "cat.vehicles",
+    id: "motors",
+    key: "category.motors",
     icon: Car,
-    color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+    color: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
     subcategories: [
-      { id: "suv", name: { en: "SUVs", ar: "دفع رباعي" } },
-      { id: "sedan", name: { en: "Sedans", ar: "سيدان" } },
-      { id: "trucks", name: { en: "Trucks", ar: "شاحنات" } },
-      { id: "heavy", name: { en: "Heavy Vehicles", ar: "مركبات ثقيلة" } },
-      { id: "parts", name: { en: "Parts", ar: "قطع غيار" } },
-    ],
-  },
-  {
-    id: "trading",
-    key: "cat.trading",
-    icon: TrendingUp,
-    color: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-    subcategories: [
-      { id: "steel", name: { en: "Steel", ar: "حديد" } },
-      { id: "cement", name: { en: "Cement", ar: "أسمنت" } },
-      { id: "wood", name: { en: "Wood", ar: "أخشاب" } },
-      { id: "electrical-parts", name: { en: "Electrical Parts", ar: "مواد كهربائية" } },
-    ],
-  },
-  {
-    id: "services",
-    key: "cat.services",
-    icon: Wrench,
-    color: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
-    subcategories: [
-      { id: "hvac", name: { en: "HVAC", ar: "تكييف" } },
-      { id: "plumbing", name: { en: "Plumbing", ar: "سباكة" } },
-      { id: "cleaning", name: { en: "Cleaning", ar: "تنظيف" } },
-      { id: "security", name: { en: "Security", ar: "أمن" } },
+      { id: "used-cars", name: "Used Cars" },
+      { id: "rental-cars", name: "Rental Cars" },
+      { id: "new-cars", name: "New Cars" },
     ],
   },
   {
     id: "classifieds",
-    key: "cat.classifieds",
-    icon: Megaphone,
-    color: "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400",
+    key: "category.classifieds",
+    icon: Tag,
+    color: "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400",
     subcategories: [
-      { id: "general", name: { en: "General", ar: "عام" } },
-      { id: "electronics", name: { en: "Electronics", ar: "إلكترونيات" } },
-      { id: "furniture", name: { en: "Furniture", ar: "أثاث" } },
+      { id: "electronics", name: "Electronics" },
+      { id: "computers-networking", name: "Computers & Networking" },
+      { id: "clothing-accessories", name: "Clothing & Accessories" },
+      { id: "jewelry-watches", name: "Jewelry & Watches" },
+    ],
+  },
+  {
+    id: "community",
+    key: "category.community",
+    icon: Users,
+    color: "bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400",
+    subcategories: [
+      { id: "freelancers", name: "Freelancers" },
+      { id: "home-maintenance", name: "Home Maintenance" },
+      { id: "other-services", name: "Other Services" },
+      { id: "tutors-classes", name: "Tutors & Classes" },
+    ],
+  },
+  {
+    id: "business-industrial",
+    key: "category.businessIndustrial",
+    icon: Factory,
+    color: "bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400",
+    subcategories: [
+      { id: "businesses-for-sale", name: "Businesses for Sale" },
+      { id: "industrial-supplies", name: "Industrial Supplies" },
+      { id: "construction-materials", name: "Construction Materials" },
+      { id: "kitchen-equipment", name: "Kitchen Equipment" },
+    ],
+  },
+  {
+    id: "home-appliances",
+    key: "category.homeAppliances",
+    icon: Zap,
+    color: "bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400",
+    subcategories: [
+      { id: "large-appliances", name: "Large Appliances / White Goods" },
+      { id: "kitchen-appliances", name: "Kitchen Appliances" },
+      { id: "outdoor-appliances", name: "Outdoor Appliances" },
+      { id: "bathroom-appliances", name: "Bathroom Appliances" },
+    ],
+  },
+  {
+    id: "furniture-home-garden",
+    key: "category.furnitureHomeGarden",
+    icon: Sofa,
+    color: "bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400",
+    subcategories: [
+      { id: "furniture", name: "Furniture" },
+      { id: "home-accessories", name: "Home Accessories" },
+      { id: "garden-outdoor", name: "Garden & Outdoor" },
+      { id: "lighting-fans", name: "Lighting & Fans" },
+    ],
+  },
+  {
+    id: "mobiles-tablets-laptops",
+    key: "category.mobilesTabletsLaptops",
+    icon: Smartphone,
+    color: "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400",
+    subcategories: [
+      { id: "mobile-phones", name: "Mobile Phones" },
+      { id: "tablets", name: "Tablets" },
+      { id: "mobile-accessories", name: "Mobile Phone & Tablet Accessories" },
+      { id: "desktop-laptop", name: "Desktop and Laptop" },
     ],
   },
 ];
+
+export const getCategoryById = (id: string) => categories.find(c => c.id === id);
+export const getSubcategoryName = (catId: string, subId: string) => {
+  const cat = getCategoryById(catId);
+  return cat?.subcategories.find(s => s.id === subId)?.name || subId;
+};
