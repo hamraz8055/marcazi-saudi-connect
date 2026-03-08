@@ -17,9 +17,12 @@ import RequestQuote from "./pages/RequestQuote";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Profile from "./pages/Profile";
+import MyAds from "./pages/MyAds";
 import Favorites from "./pages/Favorites";
 import Notifications from "./pages/Notifications";
 import ListingDetail from "./pages/ListingDetail";
+import AuctionDetail from "./pages/AuctionDetail";
+import QuotationDetail from "./pages/QuotationDetail";
 import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
 
@@ -43,11 +46,15 @@ const App = () => (
                 <Route path="/bidding" element={<Bidding />} />
                 <Route path="/bidding/create-auction" element={<CreateAuction />} />
                 <Route path="/bidding/request-quote" element={<RequestQuote />} />
+                <Route path="/bidding/auction/:id" element={<AuctionDetail />} />
+                <Route path="/bidding/quotation/:id" element={<QuotationDetail />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/my-ads" element={<MyAds />} />
                 <Route path="/account" element={<Profile />} />
                 <Route path="/favorites" element={<Favorites />} />
+                <Route path="/favourites" element={<Favorites />} />
                 <Route path="/notifications" element={<Notifications />} />
                 <Route path="/listing/:id" element={<ListingDetail />} />
                 <Route path="/auth/callback" element={<AuthCallback />} />

@@ -1,22 +1,15 @@
 import { motion } from "framer-motion";
-import { Eye, MapPin, Heart } from "lucide-react";
+import { Eye, MapPin, Heart, Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useListings } from "@/hooks/useListings";
+import { getFeaturedListings, type MockListing } from "@/lib/mockListings";
+import { saudiCities } from "@/lib/cities";
 import ImageFallback from "@/components/ImageFallback";
 import AuthDialog from "@/components/AuthDialog";
 import { useState } from "react";
-
-const fallbackListings = [
-  { id: "feat-1", title: { en: "CAT 320 Excavator", ar: "حفارة كاتربيلر 320" }, category: "equipment", price: 285000, city: { en: "Riyadh", ar: "الرياض" }, views: 1240, listing_type: "sale", image: "https://images.unsplash.com/photo-1580901368919-7738efb0f228?w=400&h=300&fit=crop" },
-  { id: "feat-2", title: { en: "Modern Villa - Al Nakheel", ar: "فيلا حديثة - النخيل" }, category: "property", price: 2500000, city: { en: "Jeddah", ar: "جدة" }, views: 3420, listing_type: "sale", image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400&h=300&fit=crop" },
-  { id: "feat-3", title: { en: "Toyota Land Cruiser 2024", ar: "تويوتا لاند كروزر 2024" }, category: "vehicles", price: 320000, city: { en: "Dammam", ar: "الدمام" }, views: 5610, listing_type: "sale", image: "https://images.unsplash.com/photo-1625231334168-30dc1d1329cc?w=400&h=300&fit=crop" },
-  { id: "feat-4", title: { en: "HVAC Maintenance Service", ar: "خدمة صيانة التكييف" }, category: "services", price: 0, city: { en: "Riyadh", ar: "الرياض" }, views: 890, listing_type: "rent", image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=300&fit=crop" },
-  { id: "feat-5", title: { en: "Steel Rebar - Bulk Supply", ar: "حديد تسليح - توريد بالجملة" }, category: "trading", price: 4500, city: { en: "Jubail", ar: "الجبيل" }, views: 2100, listing_type: "sale", image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&h=300&fit=crop" },
-  { id: "feat-6", title: { en: "Electrical Engineer Needed", ar: "مطلوب مهندس كهربائي" }, category: "jobs", price: 15000, city: { en: "Khobar", ar: "الخبر" }, views: 1750, listing_type: "rent", image: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=400&h=300&fit=crop" },
-];
 
 const FeaturedListings = () => {
   const { t, lang } = useI18n();
@@ -26,8 +19,8 @@ const FeaturedListings = () => {
   const { listings: dbListings } = useListings({ limit: 6 });
   const [showAuth, setShowAuth] = useState(false);
 
-  const formatPrice = (price: number) =>
-    price === 0 ? t("listing.contactPrice") : `${price.toLocaleString()} ${t("listing.sar")}`;
+  const formatPrice = (price: number, contactForPrice?: boolean) =>
+    contactForPrice || price === 0 ? t("listing.contactPrice") : `${price.toLocaleString()} ${t("listing.sar")}`;
 
   const handleFav = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
@@ -35,20 +28,36 @@ const FeaturedListings = () => {
     await toggleFavorite(id);
   };
 
-  // Use DB listings if available, else fallback
+  // Use DB listings if available, else mock featured
+  const mockFeatured = getFeaturedListings();
   const useDb = dbListings.length > 0;
   const items = useDb
     ? dbListings.map(l => ({
         id: l.id,
-        title: { en: l.title, ar: l.title },
+        title: l.title,
         category: l.category,
         price: l.price || 0,
-        city: { en: l.city, ar: l.city },
+        contactForPrice: l.contact_for_price || false,
+        city: l.city,
         views: l.views || 0,
         listing_type: l.listing_type,
         image: l.images?.[0] || "",
+        verified: false,
       }))
-    : fallbackListings;
+    : mockFeatured.map(l => ({
+        id: l.id,
+        title: l.title,
+        category: l.category,
+        price: l.price,
+        contactForPrice: l.contactForPrice,
+        city: l.city,
+        views: l.views,
+        listing_type: l.listing_type,
+        image: l.images[0] || "",
+        verified: l.seller.verified,
+      }));
+
+  const getCityName = (cityId: string) => saudiCities.find(c => c.id === cityId)?.name[lang] || cityId;
 
   return (
     <section className="py-16 md:py-20">
@@ -71,31 +80,36 @@ const FeaturedListings = () => {
               <div className="relative aspect-[4/3] overflow-hidden bg-muted">
                 <ImageFallback
                   src={listing.image}
-                  alt={listing.title[lang]}
+                  alt={listing.title}
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
                 />
-                <div className="absolute top-3 start-3">
+                <div className="absolute top-3 start-3 flex items-center gap-2">
                   <span className={`inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-semibold ${listing.listing_type === "sale" ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"}`}>
                     {t(`listing.${listing.listing_type}`)}
                   </span>
+                  {listing.verified && (
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-gold/90 text-gold-foreground px-2 py-1 text-[10px] font-bold">
+                      <Shield className="h-2.5 w-2.5" />{lang === "ar" ? "موثق" : "Verified"}
+                    </span>
+                  )}
                 </div>
                 <button onClick={e => handleFav(e, listing.id)}
                   className="absolute top-3 end-3 flex h-8 w-8 items-center justify-center rounded-full bg-card/80 backdrop-blur-sm text-muted-foreground hover:text-destructive transition-colors"
-                  aria-label={`Save ${listing.title[lang]} to favorites`}>
+                  aria-label={`Save ${listing.title} to favorites`}>
                   <Heart className={`h-4 w-4 ${isFavorite(listing.id) ? "fill-destructive text-destructive" : ""}`} />
                 </button>
               </div>
 
               <div className="p-4">
                 <h3 className="font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
-                  {listing.title[lang]}
+                  {listing.title}
                 </h3>
                 <p className="mt-2 text-lg font-bold text-primary">
-                  {formatPrice(listing.price)}
+                  {formatPrice(listing.price, listing.contactForPrice)}
                 </p>
                 <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{listing.city[lang]}</span>
+                  <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{getCityName(listing.city)}</span>
                   <span className="flex items-center gap-1"><Eye className="h-3.5 w-3.5" />{listing.views.toLocaleString()}</span>
                 </div>
               </div>
