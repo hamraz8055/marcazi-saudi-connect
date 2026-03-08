@@ -22,6 +22,7 @@ export type Database = {
           applicant_name: string | null
           applicant_phone: string | null
           applied_at: string | null
+          confirmed_documents: string[] | null
           cover_letter: string | null
           id: string
           listing_id: string
@@ -37,6 +38,7 @@ export type Database = {
           applicant_name?: string | null
           applicant_phone?: string | null
           applied_at?: string | null
+          confirmed_documents?: string[] | null
           cover_letter?: string | null
           id?: string
           listing_id: string
@@ -52,6 +54,7 @@ export type Database = {
           applicant_name?: string | null
           applicant_phone?: string | null
           applied_at?: string | null
+          confirmed_documents?: string[] | null
           cover_letter?: string | null
           id?: string
           listing_id?: string
@@ -367,8 +370,11 @@ export type Database = {
           phone_country_code: string | null
           phone_number: string | null
           price: number | null
+          rental_duration_type: string | null
           rental_period: string | null
           rental_rate: number | null
+          rental_rate_tbd: boolean | null
+          required_documents: string[] | null
           required_skills: string[] | null
           salary_max: number | null
           salary_min: number | null
@@ -412,8 +418,11 @@ export type Database = {
           phone_country_code?: string | null
           phone_number?: string | null
           price?: number | null
+          rental_duration_type?: string | null
           rental_period?: string | null
           rental_rate?: number | null
+          rental_rate_tbd?: boolean | null
+          required_documents?: string[] | null
           required_skills?: string[] | null
           salary_max?: number | null
           salary_min?: number | null
@@ -457,8 +466,11 @@ export type Database = {
           phone_country_code?: string | null
           phone_number?: string | null
           price?: number | null
+          rental_duration_type?: string | null
           rental_period?: string | null
           rental_rate?: number | null
+          rental_rate_tbd?: boolean | null
+          required_documents?: string[] | null
           required_skills?: string[] | null
           salary_max?: number | null
           salary_min?: number | null
@@ -710,8 +722,11 @@ export type Database = {
           phone_full: string | null
           phone_number: string | null
           price: number | null
+          rental_duration_type: string | null
           rental_period: string | null
           rental_rate: number | null
+          rental_rate_tbd: boolean | null
+          required_documents: string[] | null
           required_skills: string[] | null
           salary_max: number | null
           salary_min: number | null
@@ -756,8 +771,11 @@ export type Database = {
           phone_full?: never
           phone_number?: never
           price?: number | null
+          rental_duration_type?: string | null
           rental_period?: string | null
           rental_rate?: number | null
+          rental_rate_tbd?: boolean | null
+          required_documents?: string[] | null
           required_skills?: string[] | null
           salary_max?: number | null
           salary_min?: number | null
@@ -802,8 +820,11 @@ export type Database = {
           phone_full?: never
           phone_number?: never
           price?: number | null
+          rental_duration_type?: string | null
           rental_period?: string | null
           rental_rate?: number | null
+          rental_rate_tbd?: boolean | null
+          required_documents?: string[] | null
           required_skills?: string[] | null
           salary_max?: number | null
           salary_min?: number | null
