@@ -191,6 +191,57 @@ export type Database = {
           },
         ]
       }
+      job_profiles: {
+        Row: {
+          certificates: Json | null
+          created_at: string | null
+          digital_profiles: Json | null
+          experience: Json | null
+          id: string
+          languages: string[] | null
+          portfolio: Json | null
+          qualifications: Json | null
+          references: Json | null
+          resume_url: string | null
+          skills: string[] | null
+          updated_at: string | null
+          user_id: string
+          visa_status: string | null
+        }
+        Insert: {
+          certificates?: Json | null
+          created_at?: string | null
+          digital_profiles?: Json | null
+          experience?: Json | null
+          id?: string
+          languages?: string[] | null
+          portfolio?: Json | null
+          qualifications?: Json | null
+          references?: Json | null
+          resume_url?: string | null
+          skills?: string[] | null
+          updated_at?: string | null
+          user_id: string
+          visa_status?: string | null
+        }
+        Update: {
+          certificates?: Json | null
+          created_at?: string | null
+          digital_profiles?: Json | null
+          experience?: Json | null
+          id?: string
+          languages?: string[] | null
+          portfolio?: Json | null
+          qualifications?: Json | null
+          references?: Json | null
+          resume_url?: string | null
+          skills?: string[] | null
+          updated_at?: string | null
+          user_id?: string
+          visa_status?: string | null
+        }
+        Relationships: []
+      }
       listings: {
         Row: {
           category: string
@@ -282,33 +333,66 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: Json | null
           avatar_url: string | null
           created_at: string
+          date_of_birth: string | null
+          deactivation_reason: string | null
           display_name: string | null
+          first_name: string | null
+          gender: string | null
           id: string
+          joined_at: string | null
+          last_name: string | null
+          nationality: string | null
+          nickname: string | null
           phone: string | null
+          phone_numbers: Json | null
+          status: string | null
           updated_at: string
           user_id: string
           verification_docs: Json | null
           verification_status: string | null
         }
         Insert: {
+          address?: Json | null
           avatar_url?: string | null
           created_at?: string
+          date_of_birth?: string | null
+          deactivation_reason?: string | null
           display_name?: string | null
+          first_name?: string | null
+          gender?: string | null
           id?: string
+          joined_at?: string | null
+          last_name?: string | null
+          nationality?: string | null
+          nickname?: string | null
           phone?: string | null
+          phone_numbers?: Json | null
+          status?: string | null
           updated_at?: string
           user_id: string
           verification_docs?: Json | null
           verification_status?: string | null
         }
         Update: {
+          address?: Json | null
           avatar_url?: string | null
           created_at?: string
+          date_of_birth?: string | null
+          deactivation_reason?: string | null
           display_name?: string | null
+          first_name?: string | null
+          gender?: string | null
           id?: string
+          joined_at?: string | null
+          last_name?: string | null
+          nationality?: string | null
+          nickname?: string | null
           phone?: string | null
+          phone_numbers?: Json | null
+          status?: string | null
           updated_at?: string
           user_id?: string
           verification_docs?: Json | null

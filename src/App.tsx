@@ -24,6 +24,7 @@ import ListingDetail from "./pages/ListingDetail";
 import AuctionDetail from "./pages/AuctionDetail";
 import QuotationDetail from "./pages/QuotationDetail";
 import AuthCallback from "./pages/AuthCallback";
+import PublicProfile from "./pages/PublicProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -57,6 +58,7 @@ const App = () => (
                 <Route path="/favourites" element={<Favorites />} />
                 <Route path="/notifications" element={<Notifications />} />
                 <Route path="/listing/:id" element={<ListingDetail />} />
+                <Route path="/user/:id" element={<PublicProfile />} />
                 <Route path="/auth/callback" element={<AuthCallback />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
