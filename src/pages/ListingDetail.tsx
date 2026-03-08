@@ -4,6 +4,7 @@ import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { useListing } from "@/hooks/useListings";
 import { useFavorites } from "@/hooks/useFavorites";
+import { getListingById } from "@/lib/mockListings";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -14,7 +15,7 @@ import ImageFallback from "@/components/ImageFallback";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Heart, MapPin, Eye, Phone, MessageCircle, ArrowLeft, Share2, Calendar } from "lucide-react";
+import { Heart, MapPin, Eye, Phone, MessageCircle, ArrowLeft, Share2, Calendar, Shield } from "lucide-react";
 import { motion } from "framer-motion";
 import { saudiCities } from "@/lib/cities";
 import { categories } from "@/lib/categories";
@@ -25,11 +26,43 @@ const ListingDetail = () => {
   const navigate = useNavigate();
   const { t, lang } = useI18n();
   const { user } = useAuth();
-  const { listing, loading, seller } = useListing(id);
+  const { listing: dbListing, loading, seller: dbSeller } = useListing(id);
   const { isFavorite, toggleFavorite } = useFavorites();
   const [showAuth, setShowAuth] = useState(false);
   const [selectedImg, setSelectedImg] = useState(0);
   const [messaging, setMessaging] = useState(false);
+  const [showPhone, setShowPhone] = useState(false);
+
+  // Try mock data if DB returns nothing
+  const mockListing = getListingById(id || "");
+  
+  const listing = dbListing || (mockListing ? {
+    id: mockListing.id,
+    user_id: "",
+    category: mockListing.category,
+    subcategory: mockListing.subcategory,
+    title: mockListing.title,
+    description: mockListing.description,
+    listing_type: mockListing.listing_type,
+    city: mockListing.city,
+    price: mockListing.price,
+    contact_for_price: mockListing.contactForPrice,
+    phone: mockListing.phone,
+    images: mockListing.images,
+    views: mockListing.views,
+    status: "active",
+    created_at: mockListing.postedAt,
+    updated_at: mockListing.postedAt,
+  } : null);
+
+  const seller = dbSeller || (mockListing ? {
+    display_name: mockListing.seller.name,
+    avatar_url: null,
+    user_id: "",
+    verification_status: mockListing.seller.verified ? "verified" : "unverified",
+    member_since: mockListing.seller.memberSince,
+    total_listings: mockListing.seller.totalListings,
+  } : null);
 
   const handleFavorite = async () => {
     if (!user) { setShowAuth(true); return; }
@@ -39,33 +72,21 @@ const ListingDetail = () => {
   const handleMessage = async () => {
     if (!user) { setShowAuth(true); return; }
     if (!listing || !seller) return;
+    if (!listing.user_id) { toast.info(lang === "ar" ? "هذا إعلان تجريبي" : "This is a demo listing"); return; }
     setMessaging(true);
     try {
-      // Check if conversation already exists for this listing between these users
       const { data: existingParticipations } = await supabase
-        .from("conversation_participants")
-        .select("conversation_id")
-        .eq("user_id", user.id);
-
+        .from("conversation_participants").select("conversation_id").eq("user_id", user.id);
       if (existingParticipations?.length) {
         for (const p of existingParticipations) {
           const { data: conv } = await supabase.from("conversations").select("*").eq("id", p.conversation_id).eq("listing_id", listing.id).single();
           if (conv) {
             const { data: otherP } = await supabase.from("conversation_participants").select("user_id").eq("conversation_id", conv.id).neq("user_id", user.id).single();
-            if (otherP?.user_id === seller.user_id) {
-              navigate("/messages");
-              return;
-            }
+            if (otherP?.user_id === seller.user_id) { navigate("/messages"); return; }
           }
         }
       }
-
-      // Create new conversation
-      const { data: conv } = await supabase.from("conversations").insert({
-        listing_id: listing.id,
-        listing_title: listing.title,
-      }).select().single();
-
+      const { data: conv } = await supabase.from("conversations").insert({ listing_id: listing.id, listing_title: listing.title }).select().single();
       if (conv) {
         await supabase.from("conversation_participants").insert([
           { conversation_id: conv.id, user_id: user.id },
@@ -73,11 +94,13 @@ const ListingDetail = () => {
         ]);
         navigate("/messages");
       }
-    } catch {
-      toast.error(lang === "ar" ? "حدث خطأ" : "Something went wrong");
-    } finally {
-      setMessaging(false);
-    }
+    } catch { toast.error(lang === "ar" ? "حدث خطأ" : "Something went wrong"); }
+    finally { setMessaging(false); }
+  };
+
+  const handleShowPhone = () => {
+    if (!user) { setShowAuth(true); return; }
+    setShowPhone(true);
   };
 
   if (loading) {
@@ -112,16 +135,20 @@ const ListingDetail = () => {
   const cat = categories.find(c => c.id === listing.category);
   const cityName = saudiCities.find(c => c.id === listing.city)?.name[lang] || listing.city;
   const isFav = isFavorite(listing.id);
+  const isVerified = (seller as any)?.verification_status === "verified";
+  const postedDate = new Date(listing.created_at);
+  const daysAgo = Math.floor((Date.now() - postedDate.getTime()) / 86400000);
+  const postedLabel = daysAgo === 0 ? (lang === "ar" ? "اليوم" : "Today") :
+    daysAgo === 1 ? (lang === "ar" ? "أمس" : "Yesterday") :
+    `${daysAgo} ${lang === "ar" ? "أيام" : "days ago"}`;
 
   return (
     <div className="min-h-screen bg-background">
       <PageMeta titleKey="page.listing" />
       <Header />
       <div className="container max-w-4xl py-6 pb-24 md:pb-10">
-        {/* Back */}
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
-          <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
-          {lang === "ar" ? "رجوع" : "Back"}
+          <ArrowLeft className="h-4 w-4 rtl:rotate-180" />{lang === "ar" ? "رجوع" : "Back"}
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -134,7 +161,7 @@ const ListingDetail = () => {
                 </motion.div>
                 {listing.images.length > 1 && (
                   <div className="flex gap-2 mt-3 overflow-x-auto pb-2">
-                    {listing.images.map((img, i) => (
+                    {listing.images.map((img: string, i: number) => (
                       <button key={i} onClick={() => setSelectedImg(i)}
                         className={`shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors ${i === selectedImg ? "border-primary" : "border-border"}`}>
                         <ImageFallback src={img} alt="" className="h-full w-full object-cover" />
@@ -154,8 +181,7 @@ const ListingDetail = () => {
               <div className="flex items-center gap-2 flex-wrap mb-3">
                 {cat && (
                   <span className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold ${cat.color}`}>
-                    <cat.icon className="h-3.5 w-3.5" />
-                    {t(cat.key)}
+                    <cat.icon className="h-3.5 w-3.5" />{t(cat.key)}
                   </span>
                 )}
                 <span className={`rounded-lg px-2.5 py-1 text-xs font-semibold ${listing.listing_type === "sale" ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"}`}>
@@ -168,7 +194,7 @@ const ListingDetail = () => {
               <div className="mt-4 flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
                 <span className="flex items-center gap-1"><MapPin className="h-4 w-4" /> {cityName}</span>
                 <span className="flex items-center gap-1"><Eye className="h-4 w-4" /> {listing.views?.toLocaleString()} {lang === "ar" ? "مشاهدة" : "views"}</span>
-                <span className="flex items-center gap-1"><Calendar className="h-4 w-4" /> {new Date(listing.created_at).toLocaleDateString(lang === "ar" ? "ar-SA" : "en-US")}</span>
+                <span className="flex items-center gap-1"><Calendar className="h-4 w-4" /> {postedLabel}</span>
               </div>
 
               {listing.description && (
@@ -196,21 +222,34 @@ const ListingDetail = () => {
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-semibold text-sm">{seller.display_name || (lang === "ar" ? "بائع" : "Seller")}</p>
-                    <p className="text-xs text-muted-foreground">{lang === "ar" ? "عضو في مركزي" : "Marcazi member"}</p>
+                    <div className="flex items-center gap-1.5">
+                      <p className="font-semibold text-sm">{seller.display_name || (lang === "ar" ? "بائع" : "Seller")}</p>
+                      {isVerified && <Shield className="h-3.5 w-3.5 text-gold" />}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {(seller as any)?.member_since ? `${lang === "ar" ? "عضو منذ" : "Since"} ${(seller as any).member_since}` : (lang === "ar" ? "عضو في مركزي" : "Marcazi member")}
+                    </p>
+                    {(seller as any)?.total_listings !== undefined && (
+                      <p className="text-xs text-muted-foreground">{(seller as any).total_listings} {lang === "ar" ? "إعلانات" : "listings"}</p>
+                    )}
                   </div>
                 </div>
               )}
 
               <div className="mt-4 space-y-2">
                 <Button className="w-full gap-2" onClick={handleMessage} disabled={messaging || listing.user_id === user?.id}>
-                  <MessageCircle className="h-4 w-4" />
-                  {lang === "ar" ? "إرسال رسالة" : "Send Message"}
+                  <MessageCircle className="h-4 w-4" />{lang === "ar" ? "إرسال رسالة" : "Send Message"}
                 </Button>
                 {listing.phone && (
-                  <Button variant="outline" className="w-full gap-2" asChild>
-                    <a href={`tel:${listing.phone}`}><Phone className="h-4 w-4" />{listing.phone}</a>
-                  </Button>
+                  showPhone ? (
+                    <Button variant="outline" className="w-full gap-2" asChild>
+                      <a href={`tel:${listing.phone}`}><Phone className="h-4 w-4" />{listing.phone}</a>
+                    </Button>
+                  ) : (
+                    <Button variant="outline" className="w-full gap-2" onClick={handleShowPhone}>
+                      <Phone className="h-4 w-4" />{lang === "ar" ? "إظهار رقم الهاتف" : "Show Phone Number"}
+                    </Button>
+                  )
                 )}
                 <div className="flex gap-2">
                   <Button variant="outline" className="flex-1 gap-2" onClick={handleFavorite}>
