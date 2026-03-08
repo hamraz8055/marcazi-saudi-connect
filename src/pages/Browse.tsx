@@ -18,17 +18,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getRegularListings } from "@/lib/mockListings";
+import { fuelTypes, bodyTypes, sellerTypes, carMakes, heavyEquipmentMakes } from "@/lib/vehicleData";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
+  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const mockListings = getRegularListings().map(l => ({
   id: l.id, user_id: "", title: l.title, category: l.category, price: l.price, city: l.city,
@@ -36,6 +30,9 @@ const mockListings = getRegularListings().map(l => ({
   subcategory: l.subcategory, contact_for_price: l.contactForPrice, phone: l.phone,
   status: "active" as const, created_at: l.postedAt, updated_at: l.postedAt,
 }));
+
+const currentYear = new Date().getFullYear();
+const yearOptions = Array.from({ length: currentYear - 1969 }, (_, i) => currentYear - i);
 
 const Browse = () => {
   const { t, lang } = useI18n();
@@ -57,6 +54,20 @@ const Browse = () => {
   const [displayCount, setDisplayCount] = useState(12);
   const { isFavorite, toggleFavorite } = useFavorites();
 
+  // Vehicle/equipment filters
+  const [yearFrom, setYearFrom] = useState("");
+  const [yearTo, setYearTo] = useState("");
+  const [maxKm, setMaxKm] = useState("");
+  const [fuelFilter, setFuelFilter] = useState<string[]>([]);
+  const [sellerFilter, setSellerFilter] = useState<string[]>([]);
+  const [makeFilter, setMakeFilter] = useState("");
+  const [bodyFilter, setBodyFilter] = useState<string[]>([]);
+  // Jobs filters
+  const [empTypeFilter, setEmpTypeFilter] = useState<string[]>([]);
+
+  const isVehicleCategory = selectedCategory === "motors" || selectedCategory === "heavy-equipment";
+  const isJobsCategory = selectedCategory === "jobs";
+
   const { listings: dbListings, loading } = useListings({
     category: selectedCategory,
     city: selectedCity,
@@ -71,24 +82,37 @@ const Browse = () => {
   const allListings = dbListings.length > 0 ? dbListings : mockListings;
 
   const filteredListings = useMemo(() => {
-    if (dbListings.length > 0) {
-      if (selectedSubcategory) return dbListings.filter(l => l.subcategory === selectedSubcategory);
-      return dbListings;
+    let result = dbListings.length > 0 ? [...dbListings] : [...allListings];
+
+    if (dbListings.length === 0) {
+      if (selectedCategory) result = result.filter(l => l.category === selectedCategory);
+      if (listingType !== "all") result = result.filter(l => l.listing_type === listingType);
+      if (selectedCity) result = result.filter(l => l.city === selectedCity);
+      if (search) { const q = search.toLowerCase(); result = result.filter(l => l.title.toLowerCase().includes(q)); }
+      if (priceMin) result = result.filter(l => (l.price || 0) >= Number(priceMin));
+      if (priceMax) result = result.filter(l => (l.price || 0) <= Number(priceMax));
     }
-    return allListings.filter(l => {
-      if (selectedCategory && l.category !== selectedCategory) return false;
-      if (selectedSubcategory && l.subcategory !== selectedSubcategory) return false;
-      if (listingType !== "all" && l.listing_type !== listingType) return false;
-      if (selectedCity && l.city !== selectedCity) return false;
-      if (search) {
-        const q = search.toLowerCase();
-        if (!l.title.toLowerCase().includes(q)) return false;
-      }
-      if (priceMin && (l.price || 0) < Number(priceMin)) return false;
-      if (priceMax && (l.price || 0) > Number(priceMax)) return false;
-      return true;
-    });
-  }, [dbListings, allListings, selectedCategory, selectedSubcategory, listingType, selectedCity, search, priceMin, priceMax]);
+
+    if (selectedSubcategory) result = result.filter(l => l.subcategory === selectedSubcategory);
+
+    // Vehicle filters
+    if (isVehicleCategory) {
+      if (yearFrom) result = result.filter(l => (l.year || 0) >= Number(yearFrom));
+      if (yearTo) result = result.filter(l => (l.year || 9999) <= Number(yearTo));
+      if (maxKm) result = result.filter(l => (l.kilometers || 0) <= Number(maxKm));
+      if (fuelFilter.length > 0) result = result.filter(l => l.fuel_type && fuelFilter.includes(l.fuel_type));
+      if (sellerFilter.length > 0) result = result.filter(l => l.seller_type && sellerFilter.includes(l.seller_type));
+      if (makeFilter) result = result.filter(l => l.make === makeFilter);
+      if (bodyFilter.length > 0 && selectedCategory === "motors") result = result.filter(l => l.body_type && bodyFilter.includes(l.body_type));
+    }
+
+    // Jobs filters
+    if (isJobsCategory && empTypeFilter.length > 0) {
+      result = result.filter(l => l.employment_type && empTypeFilter.includes(l.employment_type));
+    }
+
+    return result;
+  }, [dbListings, allListings, selectedCategory, selectedSubcategory, listingType, selectedCity, search, priceMin, priceMax, yearFrom, yearTo, maxKm, fuelFilter, sellerFilter, makeFilter, bodyFilter, empTypeFilter, isVehicleCategory, isJobsCategory]);
 
   const displayedListings = filteredListings.slice(0, displayCount);
 
@@ -109,6 +133,9 @@ const Browse = () => {
     if (subId) params.subcategory = subId;
     if (search) params.q = search;
     setSearchParams(params);
+    // Reset vehicle filters on category change
+    setYearFrom(""); setYearTo(""); setMaxKm(""); setFuelFilter([]); setSellerFilter([]); setMakeFilter(""); setBodyFilter([]);
+    setEmpTypeFilter([]);
   };
 
   const handleFav = async (e: React.MouseEvent, listingId: string) => {
@@ -140,7 +167,135 @@ const Browse = () => {
   const selectedCat = selectedCategory ? categories.find(c => c.id === selectedCategory) : null;
   const selectedSub = selectedCat?.subcategories.find(s => s.id === selectedSubcategory);
 
-  // Sidebar content (shared between desktop and mobile drawer)
+  const toggleArrayFilter = (arr: string[], setArr: (v: string[]) => void, val: string) => {
+    setArr(arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val]);
+  };
+
+  const inputFilterClass = "w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs outline-none focus:border-primary";
+
+  // Category-specific filter section
+  const CategoryFilters = () => {
+    if (isVehicleCategory) {
+      const makesData = selectedCategory === "motors" ? carMakes : heavyEquipmentMakes;
+      return (
+        <div className="mt-4 rounded-xl border border-border bg-card p-3 space-y-4">
+          <p className="text-sm font-semibold text-foreground">{lang === "ar" ? "فلاتر متقدمة" : "Advanced Filters"}</p>
+
+          {/* Year range */}
+          <div>
+            <p className="text-xs font-medium text-muted-foreground mb-1.5">{lang === "ar" ? "نطاق السنة" : "Year Range"}</p>
+            <div className="flex items-center gap-2">
+              <select value={yearFrom} onChange={e => setYearFrom(e.target.value)} className={inputFilterClass}>
+                <option value="">{lang === "ar" ? "من" : "From"}</option>
+                {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
+              </select>
+              <span className="text-muted-foreground text-xs">–</span>
+              <select value={yearTo} onChange={e => setYearTo(e.target.value)} className={inputFilterClass}>
+                <option value="">{lang === "ar" ? "إلى" : "To"}</option>
+                {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {/* Max KM */}
+          <div>
+            <p className="text-xs font-medium text-muted-foreground mb-1.5">{lang === "ar" ? "أقصى كيلومترات" : "Max Kilometers"}</p>
+            <input type="number" value={maxKm} onChange={e => setMaxKm(e.target.value)} placeholder="500,000" className={inputFilterClass} />
+          </div>
+
+          {/* Fuel Type */}
+          <div>
+            <p className="text-xs font-medium text-muted-foreground mb-1.5">{lang === "ar" ? "نوع الوقود" : "Fuel Type"}</p>
+            <div className="flex flex-wrap gap-1.5">
+              {fuelTypes.map(f => (
+                <button key={f.id} onClick={() => toggleArrayFilter(fuelFilter, setFuelFilter, f.id)}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-medium border transition-colors ${fuelFilter.includes(f.id) ? "border-primary bg-primary/10 text-primary" : "border-border text-foreground hover:bg-muted"}`}>
+                  {f.emoji} {f.label[lang]}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Seller Type */}
+          <div>
+            <p className="text-xs font-medium text-muted-foreground mb-1.5">{lang === "ar" ? "نوع البائع" : "Seller Type"}</p>
+            <div className="flex flex-wrap gap-1.5">
+              {sellerTypes.map(s => (
+                <button key={s.id} onClick={() => toggleArrayFilter(sellerFilter, setSellerFilter, s.id)}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-medium border transition-colors ${sellerFilter.includes(s.id) ? "border-primary bg-primary/10 text-primary" : "border-border text-foreground hover:bg-muted"}`}>
+                  {s.label[lang]}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Make */}
+          <div>
+            <p className="text-xs font-medium text-muted-foreground mb-1.5">{lang === "ar" ? "الشركة" : "Make"}</p>
+            <select value={makeFilter} onChange={e => setMakeFilter(e.target.value)} className={inputFilterClass}>
+              <option value="">{lang === "ar" ? "الكل" : "All"}</option>
+              {Object.keys(makesData).map(m => <option key={m} value={m}>{m}</option>)}
+            </select>
+          </div>
+
+          {/* Body Type (motors only) */}
+          {selectedCategory === "motors" && (
+            <div>
+              <p className="text-xs font-medium text-muted-foreground mb-1.5">{lang === "ar" ? "نوع الهيكل" : "Body Type"}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {bodyTypes.map(b => (
+                  <button key={b.id} onClick={() => toggleArrayFilter(bodyFilter, setBodyFilter, b.id)}
+                    className={`rounded-lg px-2 py-1 text-xs font-medium border transition-colors ${bodyFilter.includes(b.id) ? "border-primary bg-primary/10 text-primary" : "border-border text-foreground hover:bg-muted"}`}>
+                    {b.emoji} {b.label[lang]}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (isJobsCategory) {
+      const empTypes = [
+        { id: "full-time", label: { en: "Full-time", ar: "دوام كامل" } },
+        { id: "part-time", label: { en: "Part-time", ar: "دوام جزئي" } },
+        { id: "hourly", label: { en: "Hourly/Rental", ar: "بالساعة" } },
+        { id: "contract", label: { en: "Contract", ar: "عقد" } },
+        { id: "internship", label: { en: "Internship", ar: "تدريب" } },
+        { id: "freelance", label: { en: "Freelance", ar: "عمل حر" } },
+      ];
+      return (
+        <div className="mt-4 rounded-xl border border-border bg-card p-3 space-y-4">
+          <p className="text-sm font-semibold text-foreground">{lang === "ar" ? "فلاتر الوظائف" : "Job Filters"}</p>
+          <div>
+            <p className="text-xs font-medium text-muted-foreground mb-1.5">{lang === "ar" ? "نوع التوظيف" : "Employment Type"}</p>
+            <div className="flex flex-wrap gap-1.5">
+              {empTypes.map(e => (
+                <button key={e.id} onClick={() => toggleArrayFilter(empTypeFilter, setEmpTypeFilter, e.id)}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-medium border transition-colors ${empTypeFilter.includes(e.id) ? "border-primary bg-primary/10 text-primary" : "border-border text-foreground hover:bg-muted"}`}>
+                  {e.label[lang]}
+                </button>
+              ))}
+            </div>
+          </div>
+          {/* Salary range for jobs */}
+          <div>
+            <p className="text-xs font-medium text-muted-foreground mb-1.5">{lang === "ar" ? "نطاق الراتب (ر.س/شهر)" : "Salary Range (SAR/month)"}</p>
+            <div className="flex items-center gap-2">
+              <input type="number" placeholder={lang === "ar" ? "من" : "Min"} value={priceMin} onChange={e => setPriceMin(e.target.value)} className={inputFilterClass} />
+              <span className="text-muted-foreground text-xs">–</span>
+              <input type="number" placeholder={lang === "ar" ? "إلى" : "Max"} value={priceMax} onChange={e => setPriceMax(e.target.value)} className={inputFilterClass} />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+  // Sidebar content
   const SidebarContent = () => (
     <div className="rounded-xl border border-border bg-card p-3 space-y-1">
       <button onClick={() => updateParams(null, null)}
@@ -193,7 +348,6 @@ const Browse = () => {
           <p className="mt-1 text-muted-foreground">{t("browse.subtitle")}</p>
         </div>
 
-        {/* Active filter chip */}
         {(selectedCat || selectedSub) && (
           <div className="mb-4 flex items-center gap-2 flex-wrap">
             <Badge variant="secondary" className="flex items-center gap-1.5 px-3 py-1.5 text-sm cursor-pointer hover:bg-destructive/10"
@@ -224,17 +378,19 @@ const Browse = () => {
           </div>
 
           <div className="flex items-center gap-3 flex-wrap">
-            {/* Type toggle */}
-            <div className="relative inline-flex items-center rounded-full bg-muted p-1">
-              <motion.div className="absolute h-[calc(100%-8px)] rounded-full bg-primary" layout transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                style={{ width: "33.33%", left: listingType === "all" ? "4px" : listingType === "sale" ? "33.33%" : "66.66%" }} />
-              {(["all", "sale", "rent"] as const).map(type => (
-                <button key={type} onClick={() => setListingType(type)}
-                  className={`relative z-10 px-4 py-1.5 text-xs font-semibold rounded-full transition-colors ${listingType === type ? "text-primary-foreground" : "text-muted-foreground"}`}>
-                  {type === "all" ? t("browse.allCategories").split(" ")[0] : t(`browse.${type}`)}
-                </button>
-              ))}
-            </div>
+            {/* Type toggle (hide for jobs) */}
+            {!isJobsCategory && (
+              <div className="relative inline-flex items-center rounded-full bg-muted p-1">
+                <motion.div className="absolute h-[calc(100%-8px)] rounded-full bg-primary" layout transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  style={{ width: "33.33%", left: listingType === "all" ? "4px" : listingType === "sale" ? "33.33%" : "66.66%" }} />
+                {(["all", "sale", "rent"] as const).map(type => (
+                  <button key={type} onClick={() => setListingType(type)}
+                    className={`relative z-10 px-4 py-1.5 text-xs font-semibold rounded-full transition-colors ${listingType === type ? "text-primary-foreground" : "text-muted-foreground"}`}>
+                    {type === "all" ? t("browse.allCategories").split(" ")[0] : t(`browse.${type}`)}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* City selector */}
             <div className="relative">
@@ -249,7 +405,7 @@ const Browse = () => {
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setShowCityDropdown(false)} />
                     <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
-                      className="absolute top-full mt-2 start-0 z-50 w-72 max-h-80 overflow-auto rounded-xl border border-border bg-card shadow-elevated">
+                      className="absolute top-full mt-2 start-0 z-50 w-72 max-h-80 overflow-auto rounded-xl border border-border bg-card shadow-lg">
                       <div className="sticky top-0 bg-card p-2 border-b border-border">
                         <div className="flex items-center gap-2 rounded-lg bg-muted px-3 py-2">
                           <Search className="h-4 w-4 text-muted-foreground" />
@@ -284,7 +440,7 @@ const Browse = () => {
               </AnimatePresence>
             </div>
 
-            {/* Sort dropdown */}
+            {/* Sort */}
             <div className="relative">
               <button onClick={() => setShowSort(!showSort)} className="flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-2 text-sm" aria-label="Sort listings">
                 <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
@@ -295,7 +451,7 @@ const Browse = () => {
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setShowSort(false)} />
                     <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
-                      className="absolute top-full mt-2 end-0 z-50 w-48 rounded-xl border border-border bg-card shadow-elevated overflow-hidden">
+                      className="absolute top-full mt-2 end-0 z-50 w-48 rounded-xl border border-border bg-card shadow-lg overflow-hidden">
                       {sortOptions.map(opt => (
                         <button key={opt.value} onClick={() => { setSortBy(opt.value); setShowSort(false); }}
                           className={`w-full text-start px-4 py-2.5 text-sm transition-colors ${sortBy === opt.value ? "bg-primary/10 text-primary font-semibold" : "text-foreground hover:bg-muted"}`}>
@@ -308,7 +464,7 @@ const Browse = () => {
               </AnimatePresence>
             </div>
 
-            {/* Mobile filter drawer trigger */}
+            {/* Mobile filter drawer */}
             <Sheet>
               <SheetTrigger asChild>
                 <button className="flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-2 text-sm md:hidden" aria-label="Toggle filters">
@@ -318,17 +474,17 @@ const Browse = () => {
               <SheetContent side="left" className="w-72 p-4 overflow-y-auto">
                 <h3 className="font-semibold text-foreground mb-4">{lang === "ar" ? "الفلاتر" : "Filters"}</h3>
                 <SidebarContent />
-                {/* Price Range */}
-                <div className="mt-4 rounded-xl border border-border bg-card p-3">
-                  <p className="text-sm font-semibold text-foreground mb-2">{lang === "ar" ? "نطاق السعر" : "Price Range"}</p>
-                  <div className="flex items-center gap-2">
-                    <input type="number" placeholder={lang === "ar" ? "من" : "Min"} value={priceMin} onChange={e => setPriceMin(e.target.value)}
-                      className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs outline-none focus:border-primary" />
-                    <span className="text-muted-foreground text-xs">–</span>
-                    <input type="number" placeholder={lang === "ar" ? "إلى" : "Max"} value={priceMax} onChange={e => setPriceMax(e.target.value)}
-                      className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs outline-none focus:border-primary" />
+                {!isVehicleCategory && !isJobsCategory && (
+                  <div className="mt-4 rounded-xl border border-border bg-card p-3">
+                    <p className="text-sm font-semibold text-foreground mb-2">{lang === "ar" ? "نطاق السعر" : "Price Range"}</p>
+                    <div className="flex items-center gap-2">
+                      <input type="number" placeholder={lang === "ar" ? "من" : "Min"} value={priceMin} onChange={e => setPriceMin(e.target.value)} className={inputFilterClass} />
+                      <span className="text-muted-foreground text-xs">–</span>
+                      <input type="number" placeholder={lang === "ar" ? "إلى" : "Max"} value={priceMax} onChange={e => setPriceMax(e.target.value)} className={inputFilterClass} />
+                    </div>
                   </div>
-                </div>
+                )}
+                <CategoryFilters />
               </SheetContent>
             </Sheet>
           </div>
@@ -338,16 +494,17 @@ const Browse = () => {
           {/* Desktop sidebar */}
           <aside className="shrink-0 hidden md:block w-56">
             <SidebarContent />
-            <div className="mt-4 rounded-xl border border-border bg-card p-3">
-              <p className="text-sm font-semibold text-foreground mb-2">{lang === "ar" ? "نطاق السعر" : "Price Range"}</p>
-              <div className="flex items-center gap-2">
-                <input type="number" placeholder={lang === "ar" ? "من" : "Min"} value={priceMin} onChange={e => setPriceMin(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs outline-none focus:border-primary" />
-                <span className="text-muted-foreground text-xs">–</span>
-                <input type="number" placeholder={lang === "ar" ? "إلى" : "Max"} value={priceMax} onChange={e => setPriceMax(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs outline-none focus:border-primary" />
+            {!isVehicleCategory && !isJobsCategory && (
+              <div className="mt-4 rounded-xl border border-border bg-card p-3">
+                <p className="text-sm font-semibold text-foreground mb-2">{lang === "ar" ? "نطاق السعر" : "Price Range"}</p>
+                <div className="flex items-center gap-2">
+                  <input type="number" placeholder={lang === "ar" ? "من" : "Min"} value={priceMin} onChange={e => setPriceMin(e.target.value)} className={inputFilterClass} />
+                  <span className="text-muted-foreground text-xs">–</span>
+                  <input type="number" placeholder={lang === "ar" ? "إلى" : "Max"} value={priceMax} onChange={e => setPriceMax(e.target.value)} className={inputFilterClass} />
+                </div>
               </div>
-            </div>
+            )}
+            <CategoryFilters />
           </aside>
 
           <div className="flex-1 min-w-0">
@@ -371,47 +528,54 @@ const Browse = () => {
                   {displayedListings.map((listing, i) => {
                     if (listing.category === "jobs") {
                       return (
-                        <JobListingCard
-                          key={listing.id}
-                          listing={listing}
-                          index={i}
-                          isFavorite={isFavorite(listing.id)}
-                          onFavorite={(e: React.MouseEvent) => handleFav(e, listing.id)}
-                        />
+                        <JobListingCard key={listing.id} listing={listing} index={i}
+                          isFavorite={isFavorite(listing.id)} onFavorite={(e: React.MouseEvent) => handleFav(e, listing.id)} />
                       );
                     }
                     return (
-                    <motion.article key={listing.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.3 }}
-                      onClick={() => navigate(`/listing/${listing.id}`)}
-                      className="group cursor-pointer rounded-2xl border border-border bg-card overflow-hidden shadow-card hover:shadow-elevated transition-all duration-300">
-                      <div className="relative aspect-[4/3] overflow-hidden">
-                        <ImageFallback src={listing.images?.[0]} alt={listing.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
-                        <div className="absolute top-3 start-3">
-                          <span className={`inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-semibold ${listing.listing_type === "sale" ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"}`}>
-                            {t(`listing.${listing.listing_type}`)}
-                          </span>
+                      <motion.article key={listing.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.3 }}
+                        onClick={() => navigate(`/listing/${listing.id}`)}
+                        className="group cursor-pointer rounded-2xl border border-border bg-card overflow-hidden shadow-card hover:shadow-elevated transition-all duration-300">
+                        <div className="relative aspect-[4/3] overflow-hidden">
+                          <ImageFallback src={listing.images?.[0]} alt={listing.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+                          <div className="absolute top-3 start-3">
+                            <span className={`inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-semibold ${listing.listing_type === "sale" ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"}`}>
+                              {t(`listing.${listing.listing_type}`)}
+                            </span>
+                          </div>
+                          <button onClick={e => handleFav(e, listing.id)}
+                            className="absolute top-3 end-3 flex h-8 w-8 items-center justify-center rounded-full bg-card/80 backdrop-blur-sm text-muted-foreground hover:text-destructive transition-colors"
+                            aria-label={`Save ${listing.title} to favorites`}>
+                            <Heart className={`h-4 w-4 ${isFavorite(listing.id) ? "fill-destructive text-destructive" : ""}`} />
+                          </button>
                         </div>
-                        <button onClick={e => handleFav(e, listing.id)}
-                          className="absolute top-3 end-3 flex h-8 w-8 items-center justify-center rounded-full bg-card/80 backdrop-blur-sm text-muted-foreground hover:text-destructive transition-colors"
-                          aria-label={`Save ${listing.title} to favorites`}>
-                          <Heart className={`h-4 w-4 ${isFavorite(listing.id) ? "fill-destructive text-destructive" : ""}`} />
-                        </button>
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">{listing.title}</h3>
-                        <p className="mt-2 text-lg font-bold text-primary">{formatPrice(listing.price, listing.contact_for_price)}</p>
-                        <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <MapPin className="h-3.5 w-3.5" />
-                            {saudiCities.find(c => c.id === listing.city)?.name[lang] || listing.city}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Eye className="h-3.5 w-3.5" />
-                            {(listing.views || 0).toLocaleString()}
-                          </span>
+                        <div className="p-4">
+                          <h3 className="font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">{listing.title}</h3>
+                          <p className="mt-2 text-lg font-bold text-primary">
+                            {listing.rental_rate && listing.rental_period
+                              ? `${listing.rental_rate.toLocaleString()} ${t("listing.sar")}/${listing.rental_period}`
+                              : formatPrice(listing.price, listing.contact_for_price)}
+                          </p>
+                          <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <MapPin className="h-3.5 w-3.5" />
+                              {saudiCities.find(c => c.id === listing.city)?.name[lang] || listing.city}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Eye className="h-3.5 w-3.5" />
+                              {(listing.views || 0).toLocaleString()}
+                            </span>
+                          </div>
+                          {/* Vehicle badge row */}
+                          {(listing.category === "motors" || listing.category === "heavy-equipment") && (listing.year || listing.make) && (
+                            <div className="mt-2 flex items-center gap-1.5 flex-wrap">
+                              {listing.year && <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">{listing.year}</span>}
+                              {listing.make && <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">{listing.make}</span>}
+                              {listing.fuel_type && <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">{listing.fuel_type}</span>}
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    </motion.article>
+                      </motion.article>
                     );
                   })}
                 </div>
