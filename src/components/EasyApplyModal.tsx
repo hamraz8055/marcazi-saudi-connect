@@ -32,6 +32,7 @@ const EasyApplyModal = ({ open, onOpenChange, listing }: Props) => {
     resumeFile: null as File | null,
     useProfileResume: false,
     matchedSkills: [] as string[],
+    confirmedDocuments: [] as string[],
   });
 
   useEffect(() => {
