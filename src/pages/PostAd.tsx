@@ -71,6 +71,35 @@ const PostAd = () => {
     rentalPeriod: "day",
   });
 
+  // Auto-fill contact info from profile/auth
+  useEffect(() => {
+    if (!user) return;
+    // Pre-fill email from auth
+    if (user.email && !formData.contactEmail) {
+      setFormData(prev => ({ ...prev, contactEmail: user.email || "" }));
+    }
+    // Pre-fill phone from profile
+    supabase.from("profiles").select("phone, display_name").eq("user_id", user.id).single()
+      .then(({ data }) => {
+        if (data?.phone) {
+          // Try to extract country code and number
+          const phone = data.phone;
+          if (phone.startsWith("+")) {
+            // Try known codes
+            const codes = ["+966", "+971", "+973", "+974", "+965", "+968", "+962", "+20", "+92", "+91", "+63"];
+            const matchedCode = codes.find(c => phone.startsWith(c));
+            if (matchedCode) {
+              setFormData(prev => ({
+                ...prev,
+                phoneCountryCode: prev.phoneNumber ? prev.phoneCountryCode : matchedCode,
+                phoneNumber: prev.phoneNumber || phone.slice(matchedCode.length),
+              }));
+            }
+          }
+        }
+      });
+  }, [user]);
+
   const isJobs = formData.category === "jobs";
   const isVehicle = formData.category === "heavy-equipment" || formData.category === "motors";
 
