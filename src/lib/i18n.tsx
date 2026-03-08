@@ -94,7 +94,6 @@ const translations: Record<string, Record<Lang, string>> = {
   "subcategory.sale-residential": { en: "For Sale — Residential", ar: "للبيع — سكني" },
   "subcategory.sale-commercial": { en: "For Sale — Commercial", ar: "للبيع — تجاري" },
   "subcategory.sale-new-projects": { en: "New Projects", ar: "مشاريع جديدة" },
-  "subcategory.sale-off-plan": { en: "Off-Plan", ar: "على الخارطة" },
   "subcategory.used-cars": { en: "Used Cars", ar: "سيارات مستعملة" },
   "subcategory.rental-cars": { en: "Rental Cars", ar: "سيارات للإيجار" },
   "subcategory.new-cars": { en: "New Cars", ar: "سيارات جديدة" },
