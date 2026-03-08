@@ -137,8 +137,17 @@ const FeaturedListings = () => {
                   {listing.title}
                 </h3>
                 <p className="mt-2 text-lg font-bold text-primary">
-                  {formatPrice(listing.price, listing.contactForPrice)}
+                  {formatPrice(listing)}
                 </p>
+                {/* Property stats row */}
+                {listing.category === "property" && (listing.bedrooms != null || listing.area_sqm) && (
+                  <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+                    {listing.bedrooms != null && <span>🛏 {listing.bedrooms === 0 ? "Studio" : listing.bedrooms}</span>}
+                    {listing.bathrooms && <span>🚿 {listing.bathrooms}</span>}
+                    {listing.area_sqm && <span>📐 {listing.area_sqm} sqm</span>}
+                    {listing.furnished && <span className="capitalize">{listing.furnished}</span>}
+                  </div>
+                )}
                 <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
                   <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{getCityName(listing.city)}</span>
                   <span className="flex items-center gap-1"><Eye className="h-3.5 w-3.5" />{listing.views.toLocaleString()}</span>
@@ -146,6 +155,9 @@ const FeaturedListings = () => {
                 {/* Contact indicators */}
                 <div className="mt-2 flex items-center gap-2 text-muted-foreground">
                   <span className="text-xs" title={lang === "ar" ? "محادثة متاحة" : "Chat available"}>💬</span>
+                  {listing.show_phone && <span className="text-xs" title={lang === "ar" ? "اتصال متاح" : "Call available"}>📞</span>}
+                  {listing.show_phone && <span className="text-xs" title={lang === "ar" ? "واتساب متاح" : "WhatsApp available"}>💚</span>}
+                  {listing.show_email && <span className="text-xs" title={lang === "ar" ? "بريد متاح" : "Email available"}>✉️</span>}
                 </div>
               </div>
             </motion.article>
