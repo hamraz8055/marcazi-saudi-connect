@@ -20,6 +20,7 @@ import JobSalaryFields from "@/components/post/JobSalaryFields";
 import SkillsInput from "@/components/post/SkillsInput";
 import CompanyLogoUpload from "@/components/post/CompanyLogoUpload";
 import VehicleFields from "@/components/post/VehicleFields";
+import ContactDetailsCard from "@/components/post/ContactDetailsCard";
 import type { EmploymentType } from "@/lib/jobSkillSuggestions";
 
 const PostAd = () => {
