@@ -572,42 +572,16 @@ const DetailsStep = ({ formData, updateField, lang, t, isVehicle }: any) => (
         ))}
       </select>
     </div>
-    <div>
-      <label className="text-sm font-medium text-foreground">{t("post.phone")}</label>
-      <div className="mt-1.5">
-        <PhoneInput
-          countryCode={formData.phoneCountryCode}
-          phoneNumber={formData.phoneNumber}
-          onCountryCodeChange={(c: string) => updateField("phoneCountryCode", c)}
-          onPhoneNumberChange={(n: string) => updateField("phoneNumber", n)}
-        />
-      </div>
-    </div>
-
-    {/* Phone visibility toggle */}
-    <div className="rounded-xl border border-border bg-card p-4 space-y-3">
-      <p className="text-sm font-medium text-foreground flex items-center gap-2">
-        📞 {lang === "ar" ? "ظهور رقم الهاتف" : "Phone Number Visibility"}
-      </p>
-      <label className="flex items-start gap-3 cursor-pointer">
-        <input type="radio" name="showPhone" checked={formData.showPhone === true}
-          onChange={() => updateField("showPhone", true)}
-          className="mt-1 accent-primary" />
-        <div>
-          <p className="text-sm font-medium text-foreground">{lang === "ar" ? "إظهار رقمي" : "Show my number publicly"}</p>
-          <p className="text-xs text-muted-foreground">{lang === "ar" ? "يمكن للمشترين رؤية رقمك والاتصال/واتساب مباشرة" : "Buyers can see and call/WhatsApp you directly"}</p>
-        </div>
-      </label>
-      <label className="flex items-start gap-3 cursor-pointer">
-        <input type="radio" name="showPhone" checked={formData.showPhone === false}
-          onChange={() => updateField("showPhone", false)}
-          className="mt-1 accent-primary" />
-        <div>
-          <p className="text-sm font-medium text-foreground">{lang === "ar" ? "إخفاء رقمي" : "Hide my number"}</p>
-          <p className="text-xs text-muted-foreground">{lang === "ar" ? "يجب على المشترين التواصل عبر محادثة مركزي" : "Buyers must message you through Marcazi chat"}</p>
-        </div>
-      </label>
-    </div>
+    {/* Contact Details Card */}
+    <ContactDetailsCard
+      phoneCountryCode={formData.phoneCountryCode}
+      phoneNumber={formData.phoneNumber}
+      showPhone={formData.showPhone}
+      contactEmail={formData.contactEmail}
+      showEmail={formData.showEmail}
+      onUpdate={(field, value) => updateField(field as any, value)}
+      helperText={lang === "ar" ? "تم ملؤه تلقائياً من ملفك الشخصي. غيّره إذا لزم الأمر." : "Pre-filled from your profile. Change if needed."}
+    />
   </div>
 );
 
