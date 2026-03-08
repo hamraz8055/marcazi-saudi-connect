@@ -43,6 +43,8 @@ const PostAd = () => {
     phoneCountryCode: "+966",
     phoneNumber: "",
     showPhone: false,
+    contactEmail: "",
+    showEmail: false,
     images: [] as File[],
     imagePreviewUrls: [] as string[],
     // Job-specific fields
