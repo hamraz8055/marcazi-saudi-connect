@@ -1,0 +1,32 @@
+
+ALTER TABLE public.listings
+  ADD COLUMN IF NOT EXISTS price_period text,
+  ADD COLUMN IF NOT EXISTS payment_terms text,
+  ADD COLUMN IF NOT EXISTS price_negotiable boolean DEFAULT false,
+  ADD COLUMN IF NOT EXISTS payment_plan boolean DEFAULT false,
+  ADD COLUMN IF NOT EXISTS down_payment_pct numeric,
+  ADD COLUMN IF NOT EXISTS installment_period text,
+  ADD COLUMN IF NOT EXISTS handover_date date,
+  ADD COLUMN IF NOT EXISTS bedrooms integer,
+  ADD COLUMN IF NOT EXISTS bathrooms integer,
+  ADD COLUMN IF NOT EXISTS area_sqm numeric,
+  ADD COLUMN IF NOT EXISTS floor_number text,
+  ADD COLUMN IF NOT EXISTS furnished text,
+  ADD COLUMN IF NOT EXISTS fitout_status text,
+  ADD COLUMN IF NOT EXISTS features text[] DEFAULT '{}'::text[],
+  ADD COLUMN IF NOT EXISTS land_type text,
+  ADD COLUMN IF NOT EXISTS capacity integer,
+  ADD COLUMN IF NOT EXISTS district text,
+  ADD COLUMN IF NOT EXISTS street text,
+  ADD COLUMN IF NOT EXISTS latitude numeric,
+  ADD COLUMN IF NOT EXISTS longitude numeric,
+  ADD COLUMN IF NOT EXISTS poster_type text,
+  ADD COLUMN IF NOT EXISTS agency_name text,
+  ADD COLUMN IF NOT EXISTS rega_license text,
+  ADD COLUMN IF NOT EXISTS developer_name text,
+  ADD COLUMN IF NOT EXISTS project_name text,
+  ADD COLUMN IF NOT EXISTS reference_number text,
+  ADD COLUMN IF NOT EXISTS tour_360_url text,
+  ADD COLUMN IF NOT EXISTS price_per_sqm numeric;
+
+CREATE SEQUENCE IF NOT EXISTS listing_ref_seq START WITH 1;

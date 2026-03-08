@@ -19,8 +19,14 @@ const FeaturedListings = () => {
   const { listings: dbListings } = useListings({ limit: 6 });
   const [showAuth, setShowAuth] = useState(false);
 
-  const formatPrice = (price: number, contactForPrice?: boolean) =>
-    contactForPrice || price === 0 ? t("listing.contactPrice") : `${price.toLocaleString()} ${t("listing.sar")}`;
+  const formatPrice = (listing: any) => {
+    if (listing.contactForPrice || listing.price === 0) return t("listing.contactPrice");
+    const price = `${listing.price.toLocaleString()} ${t("listing.sar")}`;
+    if (listing.category === "property" && listing.price_period && listing.listing_type === "rent") {
+      return `${price}/${listing.price_period}`;
+    }
+    return price;
+  };
 
   const handleFav = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
@@ -36,6 +42,7 @@ const FeaturedListings = () => {
         id: l.id,
         title: l.title,
         category: l.category,
+        subcategory: l.subcategory,
         price: l.price || 0,
         contactForPrice: l.contact_for_price || false,
         city: l.city,
@@ -43,11 +50,21 @@ const FeaturedListings = () => {
         listing_type: l.listing_type,
         image: l.images?.[0] || "",
         verified: false,
+        show_phone: l.show_phone,
+        show_email: l.show_email,
+        // Property fields
+        bedrooms: l.bedrooms,
+        bathrooms: l.bathrooms,
+        area_sqm: l.area_sqm,
+        furnished: l.furnished,
+        price_period: l.price_period,
+        tour_360_url: l.tour_360_url,
       }))
     : mockFeatured.map(l => ({
         id: l.id,
         title: l.title,
         category: l.category,
+        subcategory: l.subcategory,
         price: l.price,
         contactForPrice: l.contactForPrice,
         city: l.city,
@@ -55,6 +72,14 @@ const FeaturedListings = () => {
         listing_type: l.listing_type,
         image: l.images[0] || "",
         verified: l.seller.verified,
+        show_phone: false,
+        show_email: false,
+        bedrooms: null,
+        bathrooms: null,
+        area_sqm: null,
+        furnished: null,
+        price_period: null,
+        tour_360_url: null,
       }));
 
   const getCityName = (cityId: string) => saudiCities.find(c => c.id === cityId)?.name[lang] || cityId;
@@ -93,6 +118,12 @@ const FeaturedListings = () => {
                       <Shield className="h-2.5 w-2.5" />{lang === "ar" ? "موثق" : "Verified"}
                     </span>
                   )}
+                  {listing.tour_360_url && (
+                    <span className="inline-flex items-center rounded-lg bg-card/90 backdrop-blur-sm px-2 py-1 text-[10px] font-medium text-foreground" title="360° Tour">
+                      🔄
+                    </span>
+                  )}
+                </div>
                 </div>
                 <button onClick={e => handleFav(e, listing.id)}
                   className="absolute top-3 end-3 flex h-8 w-8 items-center justify-center rounded-full bg-card/80 backdrop-blur-sm text-muted-foreground hover:text-destructive transition-colors"
@@ -106,8 +137,17 @@ const FeaturedListings = () => {
                   {listing.title}
                 </h3>
                 <p className="mt-2 text-lg font-bold text-primary">
-                  {formatPrice(listing.price, listing.contactForPrice)}
+                  {formatPrice(listing)}
                 </p>
+                {/* Property stats row */}
+                {listing.category === "property" && (listing.bedrooms != null || listing.area_sqm) && (
+                  <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+                    {listing.bedrooms != null && <span>🛏 {listing.bedrooms === 0 ? "Studio" : listing.bedrooms}</span>}
+                    {listing.bathrooms && <span>🚿 {listing.bathrooms}</span>}
+                    {listing.area_sqm && <span>📐 {listing.area_sqm} sqm</span>}
+                    {listing.furnished && <span className="capitalize">{listing.furnished}</span>}
+                  </div>
+                )}
                 <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
                   <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{getCityName(listing.city)}</span>
                   <span className="flex items-center gap-1"><Eye className="h-3.5 w-3.5" />{listing.views.toLocaleString()}</span>
@@ -115,6 +155,9 @@ const FeaturedListings = () => {
                 {/* Contact indicators */}
                 <div className="mt-2 flex items-center gap-2 text-muted-foreground">
                   <span className="text-xs" title={lang === "ar" ? "محادثة متاحة" : "Chat available"}>💬</span>
+                  {listing.show_phone && <span className="text-xs" title={lang === "ar" ? "اتصال متاح" : "Call available"}>📞</span>}
+                  {listing.show_phone && <span className="text-xs" title={lang === "ar" ? "واتساب متاح" : "WhatsApp available"}>💚</span>}
+                  {listing.show_email && <span className="text-xs" title={lang === "ar" ? "بريد متاح" : "Email available"}>✉️</span>}
                 </div>
               </div>
             </motion.article>
