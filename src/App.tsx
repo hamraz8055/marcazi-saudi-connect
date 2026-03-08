@@ -24,6 +24,7 @@ import ListingDetail from "./pages/ListingDetail";
 import AuctionDetail from "./pages/AuctionDetail";
 import QuotationDetail from "./pages/QuotationDetail";
 import AuthCallback from "./pages/AuthCallback";
+import PublicProfile from "./pages/PublicProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
