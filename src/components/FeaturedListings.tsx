@@ -19,8 +19,14 @@ const FeaturedListings = () => {
   const { listings: dbListings } = useListings({ limit: 6 });
   const [showAuth, setShowAuth] = useState(false);
 
-  const formatPrice = (price: number, contactForPrice?: boolean) =>
-    contactForPrice || price === 0 ? t("listing.contactPrice") : `${price.toLocaleString()} ${t("listing.sar")}`;
+  const formatPrice = (listing: any) => {
+    if (listing.contactForPrice || listing.price === 0) return t("listing.contactPrice");
+    const price = `${listing.price.toLocaleString()} ${t("listing.sar")}`;
+    if (listing.category === "property" && listing.price_period && listing.listing_type === "rent") {
+      return `${price}/${listing.price_period}`;
+    }
+    return price;
+  };
 
   const handleFav = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
