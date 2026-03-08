@@ -22,6 +22,7 @@ import DocumentsInput from "@/components/post/DocumentsInput";
 import CompanyLogoUpload from "@/components/post/CompanyLogoUpload";
 import VehicleFields from "@/components/post/VehicleFields";
 import ContactDetailsCard from "@/components/post/ContactDetailsCard";
+import PropertyDetailsStep from "@/components/post/PropertyDetailsStep";
 import type { EmploymentType } from "@/lib/jobSkillSuggestions";
 
 const PostAd = () => {
@@ -61,9 +62,9 @@ const PostAd = () => {
     requiredDocuments: [] as string[],
     companyLogoFile: null as File | null,
     companyLogoPreview: null as string | null,
-    salaryType: "" as string, // "range" | "fixed" | "negotiable"
+    salaryType: "" as string,
     rentalRateTbd: false,
-    rentalDurationType: "" as string, // "short" | "long" | "unspecified"
+    rentalDurationType: "" as string,
     freelanceBudgetTbd: false,
     // Vehicle fields
     year: "",
@@ -75,23 +76,45 @@ const PostAd = () => {
     bodyType: "",
     rentalRate: "",
     rentalPeriod: "day",
+    // Property fields
+    pricePeriod: "yearly",
+    paymentTerms: "",
+    priceNegotiable: false,
+    paymentPlan: false as boolean | null,
+    downPaymentPct: "",
+    installmentPeriod: "",
+    handoverDate: "",
+    bedrooms: null as number | null,
+    bathrooms: null as number | null,
+    areaSqm: "",
+    floorNumber: "",
+    furnished: "",
+    fitoutStatus: "",
+    features: [] as string[],
+    landType: "",
+    capacity: "",
+    district: "",
+    street: "",
+    posterType: "",
+    agencyName: "",
+    regaLicense: "",
+    developerName: "",
+    projectName: "",
+    tour360Url: "",
+    parkingSpaces: "",
   });
 
   // Auto-fill contact info from profile/auth
   useEffect(() => {
     if (!user) return;
-    // Pre-fill email from auth
     if (user.email && !formData.contactEmail) {
       setFormData(prev => ({ ...prev, contactEmail: user.email || "" }));
     }
-    // Pre-fill phone from profile
     supabase.from("profiles").select("phone, display_name").eq("user_id", user.id).single()
       .then(({ data }) => {
         if (data?.phone) {
-          // Try to extract country code and number
           const phone = data.phone;
           if (phone.startsWith("+")) {
-            // Try known codes
             const codes = ["+966", "+971", "+973", "+974", "+965", "+968", "+962", "+20", "+92", "+91", "+63"];
             const matchedCode = codes.find(c => phone.startsWith(c));
             if (matchedCode) {
@@ -108,9 +131,11 @@ const PostAd = () => {
 
   const isJobs = formData.category === "jobs";
   const isVehicle = formData.category === "heavy-equipment" || formData.category === "motors";
+  const isProperty = formData.category === "property";
 
   const getSteps = () => {
     if (isJobs) return ["post.step1", "post.jobStep2", "post.step2", "post.step4"];
+    if (isProperty) return ["post.step1", "post.step2", "post.step3", "post.step4"];
     return ["post.step1", "post.step2", "post.step3", "post.step4"];
   };
   const STEPS = getSteps();
@@ -126,19 +151,23 @@ const PostAd = () => {
       case 0: return !!formData.category && !!formData.subcategory;
       case 1:
         if (isJobs) return !!formData.employmentType;
+        if (isProperty) return !!formData.title && !!formData.city;
         return !!formData.title && !!formData.city;
       case 2:
         if (isJobs) return !!formData.title && !!formData.city;
+        if (isProperty) return formData.images.length > 0 || formData.contactForPrice || !!formData.price;
         return formData.contactForPrice || !!formData.price || (isVehicle && formData.listingType === "rent" && !!formData.rentalRate);
       case 3: return true;
       default: return false;
     }
   };
 
+  const maxImages = isProperty ? 20 : 10;
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
-    const newFiles = Array.from(files).slice(0, 10 - formData.images.length);
+    const newFiles = Array.from(files).slice(0, maxImages - formData.images.length);
     const newPreviews = newFiles.map(f => URL.createObjectURL(f));
     updateField("images", [...formData.images, ...newFiles]);
     updateField("imagePreviewUrls", [...formData.imagePreviewUrls, ...newPreviews]);
@@ -190,7 +219,7 @@ const PostAd = () => {
           contactForPrice = true;
         }
       } else if (isVehicle && formData.listingType === "rent") {
-        price = null; // rental uses rental_rate instead
+        price = null;
       } else {
         price = contactForPrice ? null : Number(formData.price) || null;
       }
@@ -203,7 +232,7 @@ const PostAd = () => {
         subcategory: formData.subcategory === "all" ? null : formData.subcategory || null,
         title: formData.title,
         description: formData.description || null,
-        listing_type: isJobs ? "sale" : formData.listingType,
+        listing_type: isJobs ? "sale" : isProperty ? (formData.subcategory?.startsWith("rent-") ? "rent" : "sale") : formData.listingType,
         city: formData.city,
         price,
         contact_for_price: contactForPrice,
@@ -241,6 +270,36 @@ const PostAd = () => {
         if (formData.listingType === "rent") {
           insertData.rental_rate = formData.rentalRate ? Number(formData.rentalRate) : null;
           insertData.rental_period = formData.rentalPeriod || null;
+        }
+      }
+
+      if (isProperty) {
+        insertData.price_period = formData.pricePeriod || null;
+        insertData.payment_terms = formData.paymentTerms || null;
+        insertData.price_negotiable = formData.priceNegotiable || false;
+        insertData.payment_plan = formData.paymentPlan || false;
+        insertData.down_payment_pct = formData.downPaymentPct ? Number(formData.downPaymentPct) : null;
+        insertData.installment_period = formData.installmentPeriod || null;
+        insertData.handover_date = formData.handoverDate || null;
+        insertData.bedrooms = formData.bedrooms;
+        insertData.bathrooms = formData.bathrooms;
+        insertData.area_sqm = formData.areaSqm ? Number(formData.areaSqm) : null;
+        insertData.floor_number = formData.floorNumber || null;
+        insertData.furnished = formData.furnished || null;
+        insertData.fitout_status = formData.fitoutStatus || null;
+        insertData.features = formData.features.length > 0 ? formData.features : null;
+        insertData.land_type = formData.landType || null;
+        insertData.capacity = formData.capacity ? Number(formData.capacity) : null;
+        insertData.district = formData.district || null;
+        insertData.street = formData.street || null;
+        insertData.poster_type = formData.posterType || null;
+        insertData.agency_name = formData.agencyName || null;
+        insertData.rega_license = formData.regaLicense || null;
+        insertData.developer_name = formData.developerName || null;
+        insertData.project_name = formData.projectName || null;
+        insertData.tour_360_url = formData.tour360Url || null;
+        if (formData.areaSqm && formData.price) {
+          insertData.price_per_sqm = Math.round(Number(formData.price) / Number(formData.areaSqm));
         }
       }
 
@@ -306,6 +365,7 @@ const PostAd = () => {
                       updateField("bodyType", "");
                       updateField("make", "");
                       updateField("model", "");
+                      updateField("features", []);
                     }}>
                       <SelectTrigger className="rounded-xl border-border bg-card py-3 px-4">
                         <SelectValue placeholder={t("post.selectCategory")} />
@@ -330,9 +390,11 @@ const PostAd = () => {
                           <SelectValue placeholder={t("post.selectSubcategory")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all">
-                            {lang === "ar" ? `الكل في ${t(selectedCat.key)}` : `All in ${t(selectedCat.key)}`}
-                          </SelectItem>
+                          {!isProperty && (
+                            <SelectItem value="all">
+                              {lang === "ar" ? `الكل في ${t(selectedCat.key)}` : `All in ${t(selectedCat.key)}`}
+                            </SelectItem>
+                          )}
                           {selectedCat.subcategories.map(sub => (
                             <SelectItem key={sub.id} value={sub.id}>
                               {t(`subcategory.${sub.id}`) !== `subcategory.${sub.id}` ? t(`subcategory.${sub.id}`) : sub.name}
@@ -345,7 +407,7 @@ const PostAd = () => {
                 </div>
               )}
 
-              {/* Step 1: Employment Type (jobs) or Details (non-jobs) */}
+              {/* Step 1: Employment Type (jobs) / Property Details / Generic Details */}
               {step === 1 && isJobs && (
                 <div className="space-y-6">
                   <JobEmploymentStep employmentType={formData.employmentType} onSelect={(type) => updateField("employmentType", type)} />
@@ -376,11 +438,15 @@ const PostAd = () => {
                 </div>
               )}
 
-              {step === 1 && !isJobs && (
+              {step === 1 && isProperty && (
+                <PropertyDetailsStep formData={formData} updateField={(key: string, value: any) => updateField(key as any, value)} />
+              )}
+
+              {step === 1 && !isJobs && !isProperty && (
                 <DetailsStep formData={formData} updateField={updateField} lang={lang} t={t} isVehicle={isVehicle} />
               )}
 
-              {/* Step 2: Details (jobs) or Photos & Price (non-jobs) */}
+              {/* Step 2: Details (jobs) / Photos (property) / Photos & Price (non-jobs) */}
               {step === 2 && isJobs && (
                 <div className="space-y-5">
                   <div>
@@ -408,7 +474,6 @@ const PostAd = () => {
                       ))}
                     </select>
                   </div>
-                  {/* Contact Details Card */}
                   <ContactDetailsCard
                     phoneCountryCode={formData.phoneCountryCode}
                     phoneNumber={formData.phoneNumber}
@@ -428,7 +493,12 @@ const PostAd = () => {
                 </div>
               )}
 
-              {step === 2 && !isJobs && (
+              {step === 2 && isProperty && (
+                <PropertyPhotosStep formData={formData} updateField={updateField} fileInputRef={fileInputRef}
+                  handleImageUpload={handleImageUpload} removeImage={removeImage} lang={lang} t={t} maxImages={maxImages} />
+              )}
+
+              {step === 2 && !isJobs && !isProperty && (
                 <PhotosPriceStep formData={formData} updateField={updateField} fileInputRef={fileInputRef}
                   handleImageUpload={handleImageUpload} removeImage={removeImage} lang={lang} t={t} isVehicle={isVehicle} />
               )}
@@ -438,7 +508,7 @@ const PostAd = () => {
                 <div className="space-y-5">
                   <h2 className="text-lg font-semibold text-foreground">{t("post.review")}</h2>
                   <div className="rounded-xl border border-border bg-card overflow-hidden">
-                    {!isJobs && formData.imagePreviewUrls.length > 0 && (
+                    {formData.imagePreviewUrls.length > 0 && (
                       <div className="aspect-video overflow-hidden">
                         <img src={formData.imagePreviewUrls[0]} alt="" className="h-full w-full object-cover" />
                       </div>
@@ -453,14 +523,40 @@ const PostAd = () => {
                         {isJobs && formData.employmentType && (
                           <span className="rounded-lg px-2.5 py-1 text-xs font-semibold bg-green-100 text-green-700">{formData.employmentType}</span>
                         )}
-                        {!isJobs && (
+                        {isProperty && formData.subcategory && (
+                          <span className="rounded-lg px-2.5 py-1 text-xs font-semibold bg-green-100 text-green-700">
+                            {t(`subcategory.${formData.subcategory}`) !== `subcategory.${formData.subcategory}` ? t(`subcategory.${formData.subcategory}`) : formData.subcategory}
+                          </span>
+                        )}
+                        {!isJobs && !isProperty && (
                           <span className={`rounded-lg px-2.5 py-1 text-xs font-semibold ${formData.listingType === "sale" ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"}`}>
                             {t(`post.for${formData.listingType === "sale" ? "Sale" : "Rent"}`)}
                           </span>
                         )}
                       </div>
                       <h3 className="text-xl font-bold text-foreground">{formData.title || "—"}</h3>
-                      {isJobs ? (
+
+                      {/* Property review */}
+                      {isProperty && (
+                        <div className="text-sm text-muted-foreground space-y-1">
+                          {formData.price && !formData.contactForPrice && (
+                            <p className="text-2xl font-bold text-primary">
+                              {Number(formData.price).toLocaleString()} {t("listing.sar")}
+                              {formData.pricePeriod && formData.subcategory?.startsWith("rent-") ? `/${formData.pricePeriod}` : ""}
+                            </p>
+                          )}
+                          {formData.contactForPrice && <p className="text-lg font-bold text-primary">{t("listing.contactPrice")}</p>}
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {formData.bedrooms != null && <span className="rounded-md bg-muted px-2 py-0.5 text-xs">🛏 {formData.bedrooms === 0 ? "Studio" : formData.bedrooms}</span>}
+                            {formData.bathrooms && <span className="rounded-md bg-muted px-2 py-0.5 text-xs">🚿 {formData.bathrooms}</span>}
+                            {formData.areaSqm && <span className="rounded-md bg-muted px-2 py-0.5 text-xs">📐 {formData.areaSqm} sqm</span>}
+                            {formData.furnished && <span className="rounded-md bg-muted px-2 py-0.5 text-xs">🪑 {formData.furnished}</span>}
+                            {formData.posterType && <span className="rounded-md bg-muted px-2 py-0.5 text-xs">👤 {formData.posterType}</span>}
+                          </div>
+                        </div>
+                      )}
+
+                      {isJobs && (
                         <div className="text-sm text-muted-foreground space-y-1">
                           {formData.salaryMin && formData.salaryMax && (
                             <p>💰 {Number(formData.salaryMin).toLocaleString()} – {Number(formData.salaryMax).toLocaleString()} {t("listing.sar")}</p>
@@ -473,7 +569,9 @@ const PostAd = () => {
                             </div>
                           )}
                         </div>
-                      ) : isVehicle ? (
+                      )}
+
+                      {!isJobs && !isProperty && isVehicle && (
                         <div className="text-sm text-muted-foreground space-y-1">
                           {formData.listingType === "rent" && formData.rentalRate && (
                             <p>💰 {Number(formData.rentalRate).toLocaleString()} {t("listing.sar")}/{formData.rentalPeriod}</p>
@@ -488,11 +586,14 @@ const PostAd = () => {
                             {formData.make && <span className="rounded-md bg-muted px-2 py-0.5 text-xs">🏢 {formData.make} {formData.model}</span>}
                           </div>
                         </div>
-                      ) : (
+                      )}
+
+                      {!isJobs && !isProperty && !isVehicle && (
                         <p className="text-2xl font-bold text-primary">
                           {formData.contactForPrice ? t("listing.contactPrice") : formData.price ? `${Number(formData.price).toLocaleString()} ${t("listing.sar")}` : "—"}
                         </p>
                       )}
+
                       {formData.description && <p className="text-sm text-muted-foreground">{formData.description}</p>}
                       <div className="flex items-center gap-4 text-sm text-muted-foreground pt-2 border-t border-border">
                         {formData.city && (
@@ -533,7 +634,7 @@ const PostAd = () => {
   );
 };
 
-// Details step for non-jobs
+// Details step for non-jobs, non-property
 const DetailsStep = ({ formData, updateField, lang, t, isVehicle }: any) => (
   <div className="space-y-5">
     <div>
@@ -562,7 +663,6 @@ const DetailsStep = ({ formData, updateField, lang, t, isVehicle }: any) => (
       </div>
     </div>
 
-    {/* Vehicle-specific fields */}
     {isVehicle && (
       <VehicleFields
         category={formData.category}
@@ -592,7 +692,6 @@ const DetailsStep = ({ formData, updateField, lang, t, isVehicle }: any) => (
         ))}
       </select>
     </div>
-    {/* Contact Details Card */}
     <ContactDetailsCard
       phoneCountryCode={formData.phoneCountryCode}
       phoneNumber={formData.phoneNumber}
@@ -605,7 +704,7 @@ const DetailsStep = ({ formData, updateField, lang, t, isVehicle }: any) => (
   </div>
 );
 
-// Photos & Price step for non-jobs
+// Photos & Price step for non-jobs, non-property
 const PhotosPriceStep = ({ formData, updateField, fileInputRef, handleImageUpload, removeImage, lang, t, isVehicle }: any) => (
   <div className="space-y-6">
     <div>
@@ -635,7 +734,6 @@ const PhotosPriceStep = ({ formData, updateField, fileInputRef, handleImageUploa
       <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" />
     </div>
 
-    {/* Price section — skip for vehicle rentals (handled in VehicleFields) */}
     {!(isVehicle && formData.listingType === "rent") && (
       <div>
         <label className="text-sm font-medium text-foreground">{t("post.price")}</label>
@@ -654,6 +752,52 @@ const PhotosPriceStep = ({ formData, updateField, fileInputRef, handleImageUploa
         </label>
       </div>
     )}
+  </div>
+);
+
+// Property photos step
+const PropertyPhotosStep = ({ formData, updateField, fileInputRef, handleImageUpload, removeImage, lang, t, maxImages }: any) => (
+  <div className="space-y-6">
+    <div>
+      <h2 className="text-lg font-semibold text-foreground">{lang === "ar" ? "📸 صور العقار" : "📸 Property Photos"}</h2>
+      <p className="text-sm text-muted-foreground mt-1">
+        {lang === "ar" ? `أضف حتى ${maxImages} صورة. الصورة الأولى ستكون الغلاف.` : `Add up to ${maxImages} photos. First photo is the cover.`}
+      </p>
+      <div className="mt-4 grid grid-cols-3 sm:grid-cols-4 gap-3">
+        {formData.imagePreviewUrls.map((img: string, i: number) => (
+          <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-border">
+            <img src={img} alt="" className="h-full w-full object-cover" />
+            <button onClick={() => removeImage(i)} className="absolute top-1.5 end-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-destructive-foreground" aria-label="Remove image">
+              <X className="h-3.5 w-3.5" />
+            </button>
+            {i === 0 && (
+              <span className="absolute bottom-1.5 start-1.5 rounded-md bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground">{t("post.cover")}</span>
+            )}
+          </div>
+        ))}
+        {formData.images.length < maxImages && (
+          <button onClick={() => fileInputRef.current?.click()}
+            className="aspect-square rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+            aria-label="Upload image">
+            <ImagePlus className="h-6 w-6" />
+            <span className="text-[10px] font-medium">{t("post.dragDrop")}</span>
+          </button>
+        )}
+      </div>
+      <p className="text-xs text-muted-foreground mt-2">{formData.images.length} / {maxImages} {lang === "ar" ? "صور مضافة" : "photos added"}</p>
+      <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" />
+    </div>
+
+    {/* Photo tips */}
+    <details className="text-xs text-muted-foreground">
+      <summary className="cursor-pointer font-medium hover:text-foreground">📷 {lang === "ar" ? "نصائح لصور عقارية رائعة" : "Tips for great property photos"}</summary>
+      <ul className="mt-2 space-y-1 ps-4 list-disc">
+        <li>{lang === "ar" ? "التقط الصور في ضوء النهار" : "Take photos in daylight"}</li>
+        <li>{lang === "ar" ? "صوّر جميع الغرف بما فيها الحمامات" : "Show all rooms including bathrooms"}</li>
+        <li>{lang === "ar" ? "أضف صورة للمبنى من الخارج" : "Include exterior / building view"}</li>
+        <li>{lang === "ar" ? "التقط المنظر من النوافذ والشرفة" : "Capture the view from windows/balcony"}</li>
+      </ul>
+    </details>
   </div>
 );
 
