@@ -8,7 +8,7 @@ import { categories } from "@/lib/categories";
 import { saudiCities, regions, getCitiesByRegion } from "@/lib/cities";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
-import { useListings } from "@/hooks/useListings";
+import { useListings, type Listing } from "@/hooks/useListings";
 import Header from "@/components/Header";
 import BottomTabBar from "@/components/BottomTabBar";
 import ImageFallback from "@/components/ImageFallback";
