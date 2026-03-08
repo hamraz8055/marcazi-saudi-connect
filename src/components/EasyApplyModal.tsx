@@ -208,6 +208,32 @@ const EasyApplyModal = ({ open, onOpenChange, listing }: Props) => {
               </div>
             )}
 
+            {/* Documents Checklist */}
+            {listing?.required_documents?.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="font-semibold text-foreground">{lang === "ar" ? "قائمة المستندات" : "Documents Checklist"}</h3>
+                <p className="text-xs text-muted-foreground">
+                  {lang === "ar" ? "تأكد من جاهزية هذه المستندات قبل أو بعد التقديم. قد يطلبها صاحب العمل." : "Make sure you have these ready before or after applying. The employer may request them."}
+                </p>
+                <div className="space-y-2">
+                  {listing.required_documents.map((doc: string) => (
+                    <label key={doc} className="flex items-center gap-3 cursor-pointer">
+                      <input type="checkbox" checked={form.confirmedDocuments.includes(doc)}
+                        onChange={() => {
+                          setForm(prev => ({
+                            ...prev,
+                            confirmedDocuments: prev.confirmedDocuments.includes(doc)
+                              ? prev.confirmedDocuments.filter(d => d !== doc)
+                              : [...prev.confirmedDocuments, doc],
+                          }));
+                        }}
+                        className="h-4 w-4 rounded border-border text-primary focus:ring-primary" />
+                      <span className="text-sm text-foreground">📄 {doc}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )
             <Button onClick={handleSubmit} disabled={submitting || !form.name || !form.email} className="w-full gap-2">
               {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
               {lang === "ar" ? "إرسال الطلب" : "Submit Application"}
