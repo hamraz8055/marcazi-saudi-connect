@@ -49,10 +49,39 @@ export interface Listing {
   body_type?: string | null;
   rental_rate?: number | null;
   rental_period?: string | null;
-  // New job fields
+  // Job extra fields
   required_documents?: string[] | null;
   rental_rate_tbd?: boolean | null;
   rental_duration_type?: string | null;
+  // Property fields
+  price_period?: string | null;
+  payment_terms?: string | null;
+  price_negotiable?: boolean | null;
+  payment_plan?: boolean | null;
+  down_payment_pct?: number | null;
+  installment_period?: string | null;
+  handover_date?: string | null;
+  bedrooms?: number | null;
+  bathrooms?: number | null;
+  area_sqm?: number | null;
+  floor_number?: string | null;
+  furnished?: string | null;
+  fitout_status?: string | null;
+  features?: string[] | null;
+  land_type?: string | null;
+  capacity?: number | null;
+  district?: string | null;
+  street?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  poster_type?: string | null;
+  agency_name?: string | null;
+  rega_license?: string | null;
+  developer_name?: string | null;
+  project_name?: string | null;
+  reference_number?: string | null;
+  tour_360_url?: string | null;
+  price_per_sqm?: number | null;
 }
 
 export function useListings(filters?: {
