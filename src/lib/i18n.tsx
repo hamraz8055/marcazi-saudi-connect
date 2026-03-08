@@ -313,8 +313,14 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return <I18nContext.Provider value={{ lang, dir, t, toggleLang }}>{children}</I18nContext.Provider>;
 };
 
+const defaultI18n: I18nContextType = {
+  lang: "en",
+  dir: "ltr",
+  t: (key: string) => key,
+  toggleLang: () => {},
+};
+
 export const useI18n = () => {
   const ctx = useContext(I18nContext);
-  if (!ctx) throw new Error("useI18n must be used within I18nProvider");
-  return ctx;
+  return ctx ?? defaultI18n;
 };
