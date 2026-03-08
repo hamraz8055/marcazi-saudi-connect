@@ -36,6 +36,7 @@ const FeaturedListings = () => {
         id: l.id,
         title: l.title,
         category: l.category,
+        subcategory: l.subcategory,
         price: l.price || 0,
         contactForPrice: l.contact_for_price || false,
         city: l.city,
@@ -43,11 +44,21 @@ const FeaturedListings = () => {
         listing_type: l.listing_type,
         image: l.images?.[0] || "",
         verified: false,
+        show_phone: l.show_phone,
+        show_email: l.show_email,
+        // Property fields
+        bedrooms: l.bedrooms,
+        bathrooms: l.bathrooms,
+        area_sqm: l.area_sqm,
+        furnished: l.furnished,
+        price_period: l.price_period,
+        tour_360_url: l.tour_360_url,
       }))
     : mockFeatured.map(l => ({
         id: l.id,
         title: l.title,
         category: l.category,
+        subcategory: l.subcategory,
         price: l.price,
         contactForPrice: l.contactForPrice,
         city: l.city,
@@ -55,6 +66,14 @@ const FeaturedListings = () => {
         listing_type: l.listing_type,
         image: l.images[0] || "",
         verified: l.seller.verified,
+        show_phone: false,
+        show_email: false,
+        bedrooms: null,
+        bathrooms: null,
+        area_sqm: null,
+        furnished: null,
+        price_period: null,
+        tour_360_url: null,
       }));
 
   const getCityName = (cityId: string) => saudiCities.find(c => c.id === cityId)?.name[lang] || cityId;
