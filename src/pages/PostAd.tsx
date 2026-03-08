@@ -173,6 +173,8 @@ const PostAd = () => {
         phone_country_code: formData.phoneCountryCode,
         phone_number: formData.phoneNumber || null,
         show_phone: formData.showPhone,
+        contact_email: formData.contactEmail || null,
+        show_email: formData.showEmail,
         images: imageUrls,
       };
 
