@@ -413,7 +413,8 @@ const PostAd = () => {
                     onUpdate={(field, value) => updateField(field as any, value)}
                     helperText={lang === "ar" ? "تم ملؤه تلقائياً من ملفك الشخصي. غيّره إذا لزم الأمر." : "Pre-filled from your profile. Change if needed."}
                   />
-                  <SkillsInput skills={formData.requiredSkills} onChange={(s) => updateField("requiredSkills", s)} subcategory={formData.subcategory} />
+                   <SkillsInput skills={formData.requiredSkills} onChange={(s) => updateField("requiredSkills", s)} subcategory={formData.subcategory} />
+                   <DocumentsInput documents={formData.requiredDocuments} onChange={(d) => updateField("requiredDocuments", d)} />
                   <CompanyLogoUpload
                     logoFile={formData.companyLogoFile} logoPreview={formData.companyLogoPreview}
                     onUpload={(file) => { updateField("companyLogoFile", file); updateField("companyLogoPreview", URL.createObjectURL(file)); }}
