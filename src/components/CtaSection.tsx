@@ -27,7 +27,7 @@ const CtaSection = () => {
             <p className="mx-auto mt-3 max-w-md text-primary-foreground/80">{t("cta.desc")}</p>
             <Button
               size="lg"
-              className="mt-8 rounded-xl bg-gold text-gold-foreground hover:bg-gold/90 font-semibold"
+              className="mt-8 rounded-xl bg-card text-primary hover:bg-card/90 font-semibold"
               onClick={() => navigate("/post")}
             >
               {t("cta.start")}

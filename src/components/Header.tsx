@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Globe, Camera, ChevronDown, MapPin, Menu, X, Bell, Heart, User } from "lucide-react";
+import { Globe, ChevronDown, MapPin, Menu, X } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/hooks/useAuth";
@@ -29,17 +29,8 @@ const Header = () => {
   const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
 
   const currentCity = majorCities.find(c => c.id === selectedCity) || majorCities[0];
-
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      navigate(`/browse?q=${encodeURIComponent(searchQuery.trim())}`);
-    } else {
-      navigate("/browse");
-    }
-  };
 
   const navLinks = [
     { label: lang === "ar" ? "تصفح" : "Browse", path: "/browse" },
@@ -51,20 +42,20 @@ const Header = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl safe-top">
+      <header className="sticky top-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur-xl safe-top">
         <div className="container flex h-16 items-center justify-between gap-4">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 shrink-0" aria-label="Go to homepage">
-            <img src="/logo.png" alt="Marcazi - Saudi Premier Resource Marketplace" className="h-8 md:h-10 w-auto object-contain shrink-0" />
+            <img src="/logo.png" alt="Marcazi" className="h-11 w-auto object-contain shrink-0" />
             <span className="text-xl font-bold text-foreground tracking-tight">Marcazi</span>
           </Link>
 
           {/* City Selector */}
           <div className="relative hidden md:block">
             <button onClick={() => setShowCityDropdown(!showCityDropdown)}
-              className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg px-2 py-1.5 hover:bg-muted"
+              className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg px-2.5 py-2 hover:bg-muted"
               aria-label="Select city" aria-expanded={showCityDropdown}>
-              <MapPin className="h-3.5 w-3.5" />{currentCity[lang]}<ChevronDown className="h-4 w-4" />
+              <MapPin className="h-4 w-4" />{currentCity[lang]}<ChevronDown className="h-4 w-4" />
             </button>
             <AnimatePresence>
               {showCityDropdown && (
@@ -84,39 +75,19 @@ const Header = () => {
             </AnimatePresence>
           </div>
 
-          {/* Search Bar */}
-          <div className="hidden md:flex flex-1 max-w-xl items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5" role="search" aria-label="Search listings">
-            <Search className="h-4 w-4 text-muted-foreground" />
-            <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter") handleSearch(); }}
-              placeholder={t("nav.search")} className="flex-1 text-sm bg-transparent outline-none placeholder:text-muted-foreground" />
-            <button onClick={handleSearch} aria-label="Submit search"><Camera className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" /></button>
-          </div>
+          <div className="flex-1" />
 
           {/* Actions */}
           <div className="flex items-center gap-2">
             <button onClick={toggleLang}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              className="flex h-9 items-center gap-1.5 rounded-lg px-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
               aria-label={lang === "en" ? "Switch to Arabic" : "Switch to English"}>
-              <Globe className="h-4.5 w-4.5" />
+              <Globe className="h-4 w-4" />
+              <span className="hidden sm:inline">{lang === "en" ? "العربية" : "English"}</span>
             </button>
 
-            {user && (
-              <>
-                <button onClick={() => navigate("/notifications")} className="hidden sm:flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" aria-label="Notifications">
-                  <Bell className="h-4.5 w-4.5" />
-                </button>
-                <button onClick={() => navigate("/favorites")} className="hidden sm:flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" aria-label="Favorites">
-                  <Heart className="h-4.5 w-4.5" />
-                </button>
-                <button onClick={() => navigate("/profile")} className="hidden sm:flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" aria-label="Profile">
-                  <User className="h-4.5 w-4.5" />
-                </button>
-              </>
-            )}
-
             <Button size="sm"
-              className={`hidden sm:flex ${isBidding ? 'bidding-gradient border-0' : 'bg-gold text-gold-foreground hover:bg-gold/90'}`}
+              className={`hidden sm:flex ${isBidding ? 'bidding-gradient border-0' : ''}`}
               onClick={() => navigate(isBidding ? "/bidding/create-auction" : "/post")}>
               {isBidding ? t("bidding.postAuction") : t("nav.postAd")}
             </Button>
@@ -151,12 +122,15 @@ const Header = () => {
                 <button onClick={() => setShowMobileMenu(false)} aria-label="Close menu"><X className="h-5 w-5 text-muted-foreground" /></button>
               </div>
 
-              {/* Mobile search */}
-              <div className="flex items-center gap-2 rounded-xl border border-border bg-muted px-3 py-2.5 mb-6">
-                <Search className="h-4 w-4 text-muted-foreground" />
-                <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                  onKeyDown={e => { if (e.key === "Enter") { handleSearch(); setShowMobileMenu(false); } }}
-                  placeholder={t("nav.search")} className="flex-1 text-sm bg-transparent outline-none placeholder:text-muted-foreground" />
+              {/* Mobile city selector */}
+              <div className="mb-4">
+                <p className="text-xs font-semibold text-muted-foreground mb-2">{lang === "ar" ? "المدينة" : "City"}</p>
+                <select value={selectedCity} onChange={e => setSelectedCity(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm">
+                  {majorCities.map(city => (
+                    <option key={city.id} value={city.id}>{city[lang]}</option>
+                  ))}
+                </select>
               </div>
 
               <nav className="space-y-1">
@@ -178,9 +152,12 @@ const Header = () => {
                 )}
               </nav>
 
-              <div className="mt-6 pt-4 border-t border-border">
+              <div className="mt-6 pt-4 border-t border-border space-y-2">
+                <Button className="w-full" onClick={() => { navigate("/post"); setShowMobileMenu(false); }}>
+                  {t("nav.postAd")}
+                </Button>
                 {!user && (
-                  <Button className="w-full" onClick={() => { setShowAuth(true); setShowMobileMenu(false); }}>
+                  <Button variant="outline" className="w-full" onClick={() => { setShowAuth(true); setShowMobileMenu(false); }}>
                     {lang === "ar" ? "تسجيل الدخول" : "Sign In"}
                   </Button>
                 )}
