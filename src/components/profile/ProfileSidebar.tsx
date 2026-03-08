@@ -1,5 +1,5 @@
 import { useI18n } from "@/lib/i18n";
-import { User, Briefcase, MapPin, Phone, Shield, AlertTriangle, Settings } from "lucide-react";
+import { User, Briefcase, MapPin, Phone, Shield, AlertTriangle, Settings, FileText } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
