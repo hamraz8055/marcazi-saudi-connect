@@ -18,6 +18,7 @@ export interface Listing {
   status: string | null;
   created_at: string;
   updated_at: string;
+  // Job fields
   employment_type?: string | null;
   salary_min?: number | null;
   salary_max?: number | null;
@@ -26,6 +27,26 @@ export interface Listing {
   contract_duration?: string | null;
   required_skills?: string[] | null;
   company_logo_url?: string | null;
+  application_deadline?: string | null;
+  // Phone & contact fields
+  phone_country_code?: string | null;
+  phone_number?: string | null;
+  show_phone?: boolean | null;
+  show_email?: boolean | null;
+  call_clicks?: number | null;
+  whatsapp_clicks?: number | null;
+  email_inquiries?: number | null;
+  chat_starts?: number | null;
+  // Vehicle fields
+  year?: number | null;
+  kilometers?: number | null;
+  fuel_type?: string | null;
+  seller_type?: string | null;
+  make?: string | null;
+  model?: string | null;
+  body_type?: string | null;
+  rental_rate?: number | null;
+  rental_period?: string | null;
 }
 
 export function useListings(filters?: {
@@ -54,7 +75,6 @@ export function useListings(filters?: {
     if (filters?.priceMin) query = query.gte("price", filters.priceMin);
     if (filters?.priceMax) query = query.lte("price", filters.priceMax);
     
-    // Sort
     if (filters?.sortBy === "price_asc") query = query.order("price", { ascending: true, nullsFirst: false });
     else if (filters?.sortBy === "price_desc") query = query.order("price", { ascending: false, nullsFirst: false });
     else if (filters?.sortBy === "views") query = query.order("views", { ascending: false });
@@ -83,7 +103,6 @@ export function useListing(id: string | undefined) {
 
   useEffect(() => {
     if (!id) { setLoading(false); return; }
-    // Skip Supabase query for non-UUID IDs (mock data)
     if (!UUID_REGEX.test(id)) { setLoading(false); return; }
     const fetch = async () => {
       const { data } = await supabase.from("listings").select("*").eq("id", id).single();

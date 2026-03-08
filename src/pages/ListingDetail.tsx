@@ -5,7 +5,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useListing } from "@/hooks/useListings";
 import { useFavorites } from "@/hooks/useFavorites";
 import { getListingById } from "@/lib/mockListings";
-import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BottomTabBar from "@/components/BottomTabBar";
@@ -13,6 +12,7 @@ import PageMeta from "@/components/PageMeta";
 import AuthDialog from "@/components/AuthDialog";
 import ImageFallback from "@/components/ImageFallback";
 import EasyApplyModal from "@/components/EasyApplyModal";
+import ListingContactBar from "@/components/ListingContactBar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -25,6 +25,7 @@ import { saudiCities } from "@/lib/cities";
 import { categories, getSubcategoryName } from "@/lib/categories";
 import { toast } from "@/components/ui/sonner";
 import { getEmploymentBadgeStyle, getEmploymentLabel, formatJobSalary } from "@/lib/jobSkillSuggestions";
+import { fuelTypes, bodyTypes, sellerTypes, rentalPeriods } from "@/lib/vehicleData";
 
 const ListingDetail = () => {
   const { id } = useParams();
@@ -35,8 +36,6 @@ const ListingDetail = () => {
   const { isFavorite, toggleFavorite } = useFavorites();
   const [showAuth, setShowAuth] = useState(false);
   const [selectedImg, setSelectedImg] = useState(0);
-  const [messaging, setMessaging] = useState(false);
-  const [showPhone, setShowPhone] = useState(false);
   const [showApply, setShowApply] = useState(false);
 
   const mockListing = getListingById(id || "");
@@ -55,42 +54,13 @@ const ListingDetail = () => {
   } : null);
 
   const isJob = listing?.category === "jobs";
+  const isVehicle = listing?.category === "heavy-equipment" || listing?.category === "motors";
 
   const handleFavorite = async () => {
     if (!user) { setShowAuth(true); return; }
     if (listing) await toggleFavorite(listing.id);
   };
 
-  const handleMessage = async () => {
-    if (!user) { setShowAuth(true); return; }
-    if (!listing || !seller) return;
-    if (!listing.user_id) { toast.info(lang === "ar" ? "هذا إعلان تجريبي" : "This is a demo listing"); return; }
-    setMessaging(true);
-    try {
-      const { data: existingParticipations } = await supabase
-        .from("conversation_participants").select("conversation_id").eq("user_id", user.id);
-      if (existingParticipations?.length) {
-        for (const p of existingParticipations) {
-          const { data: conv } = await supabase.from("conversations").select("*").eq("id", p.conversation_id).eq("listing_id", listing.id).single();
-          if (conv) {
-            const { data: otherP } = await supabase.from("conversation_participants").select("user_id").eq("conversation_id", conv.id).neq("user_id", user.id).single();
-            if (otherP?.user_id === seller.user_id) { navigate("/messages"); return; }
-          }
-        }
-      }
-      const { data: conv } = await supabase.from("conversations").insert({ listing_id: listing.id, listing_title: listing.title }).select().single();
-      if (conv) {
-        await supabase.from("conversation_participants").insert([
-          { conversation_id: conv.id, user_id: user.id },
-          { conversation_id: conv.id, user_id: seller.user_id },
-        ]);
-        navigate("/messages");
-      }
-    } catch { toast.error(lang === "ar" ? "حدث خطأ" : "Something went wrong"); }
-    finally { setMessaging(false); }
-  };
-
-  const handleShowPhone = () => { if (!user) { setShowAuth(true); return; } setShowPhone(true); };
   const handleEasyApply = () => { if (!user) { setShowAuth(true); return; } setShowApply(true); };
 
   if (loading) {
@@ -118,34 +88,63 @@ const ListingDetail = () => {
   const postedDate = new Date(listing.created_at);
   const daysAgo = Math.floor((Date.now() - postedDate.getTime()) / 86400000);
   const postedLabel = daysAgo === 0 ? (lang === "ar" ? "اليوم" : "Today") : daysAgo === 1 ? (lang === "ar" ? "أمس" : "Yesterday") : `${daysAgo} ${lang === "ar" ? "أيام" : "days ago"}`;
-  const displayName = seller?.display_name || (lang === "ar" ? "صاحب العمل" : "Employer");
-  const requiredSkills: string[] = (listing as any)?.required_skills || [];
-  const empType = (listing as any)?.employment_type;
+  const displayName = seller?.display_name || (lang === "ar" ? "البائع" : "Seller");
+  const requiredSkills: string[] = listing?.required_skills || [];
+  const empType = listing?.employment_type;
 
+  const BreadcrumbNav = () => (
+    <Breadcrumb className="mb-4">
+      <BreadcrumbList>
+        <BreadcrumbItem><BreadcrumbLink asChild><Link to="/">{lang === "ar" ? "الرئيسية" : "Home"}</Link></BreadcrumbLink></BreadcrumbItem>
+        {cat && (<><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbLink asChild><Link to={`/browse?category=${cat.id}`}>{t(cat.key)}</Link></BreadcrumbLink></BreadcrumbItem></>)}
+        {listing.subcategory && cat && (<><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbLink asChild><Link to={`/browse?category=${cat.id}&subcategory=${listing.subcategory}`}>{t(`subcategory.${listing.subcategory}`) !== `subcategory.${listing.subcategory}` ? t(`subcategory.${listing.subcategory}`) : getSubcategoryName(cat.id, listing.subcategory)}</Link></BreadcrumbLink></BreadcrumbItem></>)}
+        <BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbPage className="line-clamp-1 max-w-[200px]">{listing.title}</BreadcrumbPage></BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
+  );
+
+  const BackButton = () => (
+    <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
+      <ArrowLeft className="h-4 w-4 rtl:rotate-180" />{lang === "ar" ? "رجوع" : "Back"}
+    </button>
+  );
+
+  // Vehicle details grid
+  const VehicleDetailsGrid = () => {
+    if (!isVehicle) return null;
+    const fuelLabel = fuelTypes.find(f => f.id === listing.fuel_type)?.label[lang];
+    const bodyLabel = bodyTypes.find(b => b.id === listing.body_type)?.label[lang];
+    const sellerLabel = sellerTypes.find(s => s.id === listing.seller_type)?.label[lang];
+    const periodLabel = rentalPeriods.find(p => p.id === listing.rental_period)?.label[lang];
+
+    return (
+      <div>
+        <h2 className="font-semibold text-foreground mb-3">{lang === "ar" ? "تفاصيل الإعلان" : "Ad Details"}</h2>
+        <div className="grid grid-cols-2 gap-3">
+          {listing.year && <DetailItem label={lang === "ar" ? "📅 السنة" : "📅 Year"} value={String(listing.year)} />}
+          {listing.kilometers != null && <DetailItem label={listing.category === "motors" ? (lang === "ar" ? "🛣️ المسافة" : "🛣️ Mileage") : (lang === "ar" ? "⚙️ الكيلومترات/الساعات" : "⚙️ KM/Hours")} value={`${listing.kilometers.toLocaleString()} ${listing.category === "motors" ? "km" : ""}`} />}
+          {fuelLabel && <DetailItem label={lang === "ar" ? "⛽ نوع الوقود" : "⛽ Fuel Type"} value={fuelLabel} />}
+          {bodyLabel && <DetailItem label={lang === "ar" ? "🚗 نوع الهيكل" : "🚗 Body Type"} value={bodyLabel} />}
+          {sellerLabel && <DetailItem label={lang === "ar" ? "👤 نوع البائع" : "👤 Seller Type"} value={sellerLabel} />}
+          {listing.make && <DetailItem label={lang === "ar" ? "🏢 الشركة / الموديل" : "🏢 Make / Model"} value={`${listing.make}${listing.model ? ` ${listing.model}` : ""}`} />}
+          {listing.rental_rate && periodLabel && <DetailItem label={lang === "ar" ? "💰 سعر الإيجار" : "💰 Rental Rate"} value={`${listing.rental_rate.toLocaleString()} ${t("listing.sar")}/${periodLabel}`} />}
+        </div>
+      </div>
+    );
+  };
+
+  // JOB DETAIL LAYOUT
   if (isJob) {
     return (
       <div className="min-h-screen bg-background">
         <PageMeta titleKey="page.listing" /><Header />
         <div className="container max-w-4xl py-6 pb-24 md:pb-10">
-          <Breadcrumb className="mb-4">
-            <BreadcrumbList>
-              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/">{lang === "ar" ? "الرئيسية" : "Home"}</Link></BreadcrumbLink></BreadcrumbItem>
-              {cat && (<><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbLink asChild><Link to={`/browse?category=${cat.id}`}>{t(cat.key)}</Link></BreadcrumbLink></BreadcrumbItem></>)}
-              {listing.subcategory && cat && (<><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbLink asChild><Link to={`/browse?category=${cat.id}&subcategory=${listing.subcategory}`}>{t(`subcategory.${listing.subcategory}`) !== `subcategory.${listing.subcategory}` ? t(`subcategory.${listing.subcategory}`) : getSubcategoryName(cat.id, listing.subcategory)}</Link></BreadcrumbLink></BreadcrumbItem></>)}
-              <BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbPage className="line-clamp-1 max-w-[200px]">{listing.title}</BreadcrumbPage></BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-
-          <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
-            <ArrowLeft className="h-4 w-4 rtl:rotate-180" />{lang === "ar" ? "رجوع" : "Back"}
-          </button>
-
+          <BreadcrumbNav /><BackButton />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-              {/* Company Header */}
               <div className="flex items-center gap-4">
-                {(listing as any).company_logo_url ? (
-                  <img src={(listing as any).company_logo_url} alt="" className="h-20 w-20 rounded-2xl object-cover border border-border" />
+                {listing.company_logo_url ? (
+                  <img src={listing.company_logo_url} alt="" className="h-20 w-20 rounded-2xl object-cover border border-border" />
                 ) : (
                   <div className="h-20 w-20 rounded-2xl bg-primary/10 flex items-center justify-center">
                     <span className="text-2xl font-bold text-primary">{displayName[0]?.toUpperCase()}</span>
@@ -161,11 +160,7 @@ const ListingDetail = () => {
                   </p>
                 </div>
               </div>
-
-              {/* Job Title */}
               <h1 className="text-2xl md:text-3xl font-bold text-foreground">{listing.title}</h1>
-
-              {/* Employment + Salary */}
               <div className="flex items-center gap-3 flex-wrap">
                 {empType && (
                   <span className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${getEmploymentBadgeStyle(empType)}`}>
@@ -174,18 +169,13 @@ const ListingDetail = () => {
                 )}
                 <span className="text-lg font-bold text-primary">💰 {formatJobSalary(listing, lang)}</span>
               </div>
-
               <hr className="border-border" />
-
-              {/* Description */}
               {listing.description && (
                 <div>
                   <h2 className="font-semibold text-foreground mb-2">{lang === "ar" ? "عن الوظيفة" : "About the Role"}</h2>
                   <p className="text-muted-foreground whitespace-pre-wrap">{listing.description}</p>
                 </div>
               )}
-
-              {/* Skills */}
               {requiredSkills.length > 0 && (
                 <div>
                   <h2 className="font-semibold text-foreground mb-3">{lang === "ar" ? "المهارات المطلوبة" : "Required Skills"}</h2>
@@ -196,27 +186,23 @@ const ListingDetail = () => {
                   </div>
                 </div>
               )}
-
-              {/* Job Details Grid */}
               <div>
                 <h2 className="font-semibold text-foreground mb-3">{lang === "ar" ? "تفاصيل الوظيفة" : "Job Details"}</h2>
                 <div className="grid grid-cols-2 gap-3">
                   {empType && <DetailItem label={lang === "ar" ? "نوع التوظيف" : "Employment Type"} value={getEmploymentLabel(empType, lang)} />}
                   <DetailItem label={lang === "ar" ? "الراتب" : "Salary"} value={formatJobSalary(listing, lang)} />
-                  {(listing as any).contract_duration && <DetailItem label={lang === "ar" ? "مدة العقد" : "Contract Duration"} value={(listing as any).contract_duration} />}
+                  {listing.contract_duration && <DetailItem label={lang === "ar" ? "مدة العقد" : "Contract Duration"} value={listing.contract_duration} />}
                   <DetailItem label={lang === "ar" ? "الموقع" : "Location"} value={cityName} />
                   {cat && <DetailItem label={lang === "ar" ? "المجال" : "Category"} value={t(cat.key)} />}
                   <DetailItem label={lang === "ar" ? "تاريخ النشر" : "Posted"} value={postedLabel} />
                 </div>
               </div>
             </div>
-
-            {/* Sidebar */}
             <div className="space-y-4">
               <div className="rounded-2xl border border-border bg-card p-5 sticky top-20 space-y-4">
                 <div className="flex items-center gap-3">
-                  {(listing as any).company_logo_url ? (
-                    <img src={(listing as any).company_logo_url} alt="" className="h-10 w-10 rounded-lg object-cover border border-border" />
+                  {listing.company_logo_url ? (
+                    <img src={listing.company_logo_url} alt="" className="h-10 w-10 rounded-lg object-cover border border-border" />
                   ) : (
                     <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
                       <span className="text-sm font-bold text-primary">{displayName[0]?.toUpperCase()}</span>
@@ -227,17 +213,13 @@ const ListingDetail = () => {
                     <p className="text-xs text-muted-foreground truncate">{listing.title}</p>
                   </div>
                 </div>
-
                 <Button className="w-full gap-2 bg-green-600 hover:bg-green-700 text-white" onClick={handleEasyApply}>
                   <Briefcase className="h-4 w-4" />{lang === "ar" ? "تقديم سريع" : "Easy Apply"}
                 </Button>
-                <p className="text-xs text-muted-foreground text-center">
-                  {lang === "ar" ? "قدم بملفك الشخصي في مركزي" : "Apply with your Marcazi profile"}
-                </p>
+                <p className="text-xs text-muted-foreground text-center">{lang === "ar" ? "قدم بملفك الشخصي في مركزي" : "Apply with your Marcazi profile"}</p>
                 <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
                   <Eye className="h-3.5 w-3.5" />{listing.views?.toLocaleString()} {lang === "ar" ? "شاهدوا هذه الوظيفة" : "people viewed this job"}
                 </p>
-
                 <div className="flex gap-2 pt-2 border-t border-border">
                   <Button variant="outline" className="flex-1 gap-2" onClick={handleFavorite}>
                     <Heart className={`h-4 w-4 ${isFav ? "fill-destructive text-destructive" : ""}`} />
@@ -247,14 +229,6 @@ const ListingDetail = () => {
                     <Share2 className="h-4 w-4" />
                   </Button>
                 </div>
-
-                {listing.phone && (
-                  showPhone ? (
-                    <Button variant="outline" className="w-full gap-2" asChild><a href={`tel:${listing.phone}`}><Phone className="h-4 w-4" />{listing.phone}</a></Button>
-                  ) : (
-                    <Button variant="outline" className="w-full gap-2" onClick={handleShowPhone}><Phone className="h-4 w-4" />{lang === "ar" ? "إظهار رقم الهاتف" : "Show Phone Number"}</Button>
-                  )
-                )}
               </div>
             </div>
           </div>
@@ -266,24 +240,12 @@ const ListingDetail = () => {
     );
   }
 
-  // Non-job listing (original layout)
+  // NON-JOB LISTING (original + enhanced layout)
   return (
     <div className="min-h-screen bg-background">
       <PageMeta titleKey="page.listing" /><Header />
       <div className="container max-w-4xl py-6 pb-24 md:pb-10">
-        <Breadcrumb className="mb-4">
-          <BreadcrumbList>
-            <BreadcrumbItem><BreadcrumbLink asChild><Link to="/">{lang === "ar" ? "الرئيسية" : "Home"}</Link></BreadcrumbLink></BreadcrumbItem>
-            {cat && (<><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbLink asChild><Link to={`/browse?category=${cat.id}`}>{t(cat.key)}</Link></BreadcrumbLink></BreadcrumbItem></>)}
-            {listing.subcategory && cat && (<><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbLink asChild><Link to={`/browse?category=${cat.id}&subcategory=${listing.subcategory}`}>{t(`subcategory.${listing.subcategory}`) !== `subcategory.${listing.subcategory}` ? t(`subcategory.${listing.subcategory}`) : getSubcategoryName(cat.id, listing.subcategory)}</Link></BreadcrumbLink></BreadcrumbItem></>)}
-            <BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbPage className="line-clamp-1 max-w-[200px]">{listing.title}</BreadcrumbPage></BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
-          <ArrowLeft className="h-4 w-4 rtl:rotate-180" />{lang === "ar" ? "رجوع" : "Back"}
-        </button>
-
+        <BreadcrumbNav /><BackButton />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             {listing.images?.length > 0 ? (
@@ -324,15 +286,26 @@ const ListingDetail = () => {
                   <p className="text-muted-foreground whitespace-pre-wrap">{listing.description}</p>
                 </div>
               )}
+              {/* Vehicle details grid */}
+              {isVehicle && <div className="mt-6"><VehicleDetailsGrid /></div>}
             </div>
           </div>
           <div className="space-y-4">
-            <div className="rounded-2xl border border-border bg-card p-5 sticky top-20">
-              <p className="text-3xl font-bold text-primary">
-                {listing.contact_for_price ? t("listing.contactPrice") : `${Number(listing.price).toLocaleString()} ${t("listing.sar")}`}
-              </p>
+            <div className="rounded-2xl border border-border bg-card p-5 sticky top-20 space-y-4">
+              {/* Price */}
+              {listing.rental_rate && listing.rental_period ? (
+                <p className="text-2xl font-bold text-primary">
+                  {listing.rental_rate.toLocaleString()} {t("listing.sar")}/{rentalPeriods.find(p => p.id === listing.rental_period)?.label[lang] || listing.rental_period}
+                </p>
+              ) : (
+                <p className="text-3xl font-bold text-primary">
+                  {listing.contact_for_price ? t("listing.contactPrice") : `${Number(listing.price).toLocaleString()} ${t("listing.sar")}`}
+                </p>
+              )}
+
+              {/* Seller info */}
               {seller && (
-                <div className="flex items-center gap-3 mt-5 pt-4 border-t border-border">
+                <div className="flex items-center gap-3 pt-4 border-t border-border">
                   <Avatar className="h-10 w-10"><AvatarFallback className="bg-primary/10 text-primary font-semibold">{seller.display_name?.[0]?.toUpperCase() || "?"}</AvatarFallback></Avatar>
                   <div>
                     <div className="flex items-center gap-1.5">
@@ -345,24 +318,18 @@ const ListingDetail = () => {
                   </div>
                 </div>
               )}
-              <div className="mt-4 space-y-2">
-                <Button className="w-full gap-2" onClick={handleMessage} disabled={messaging || listing.user_id === user?.id}>
-                  <MessageCircle className="h-4 w-4" />{lang === "ar" ? "إرسال رسالة" : "Send Message"}
+
+              {/* Contact bar */}
+              <div className="pt-4 border-t border-border">
+                <ListingContactBar listing={listing} seller={seller as any} onAuthRequired={() => setShowAuth(true)} />
+              </div>
+
+              {/* Favorite */}
+              <div className="flex gap-2 pt-2 border-t border-border">
+                <Button variant="outline" className="flex-1 gap-2" onClick={handleFavorite}>
+                  <Heart className={`h-4 w-4 ${isFav ? "fill-destructive text-destructive" : ""}`} />
+                  {isFav ? (lang === "ar" ? "تم الحفظ" : "Saved") : (lang === "ar" ? "حفظ" : "Save")}
                 </Button>
-                {listing.phone && (showPhone ? (
-                  <Button variant="outline" className="w-full gap-2" asChild><a href={`tel:${listing.phone}`}><Phone className="h-4 w-4" />{listing.phone}</a></Button>
-                ) : (
-                  <Button variant="outline" className="w-full gap-2" onClick={handleShowPhone}><Phone className="h-4 w-4" />{lang === "ar" ? "إظهار رقم الهاتف" : "Show Phone Number"}</Button>
-                ))}
-                <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1 gap-2" onClick={handleFavorite}>
-                    <Heart className={`h-4 w-4 ${isFav ? "fill-destructive text-destructive" : ""}`} />
-                    {isFav ? (lang === "ar" ? "تم الحفظ" : "Saved") : (lang === "ar" ? "حفظ" : "Save")}
-                  </Button>
-                  <Button variant="outline" className="gap-2" onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success(lang === "ar" ? "تم نسخ الرابط" : "Link copied!"); }}>
-                    <Share2 className="h-4 w-4" />
-                  </Button>
-                </div>
               </div>
             </div>
           </div>

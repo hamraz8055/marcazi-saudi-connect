@@ -13,7 +13,7 @@ import JobListingCard from "@/components/JobListingCard";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Edit, Trash2, Plus, LogIn, MapPin, Users } from "lucide-react";
+import { Eye, Edit, Trash2, Plus, LogIn, MapPin, Users, Phone, MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { saudiCities } from "@/lib/cities";
 import { toast } from "@/components/ui/sonner";
@@ -35,7 +35,6 @@ const MyAds = () => {
       const myListings = (data as Listing[]) || [];
       setListings(myListings);
 
-      // Fetch application counts for job listings
       const jobIds = myListings.filter(l => l.category === "jobs").map(l => l.id);
       if (jobIds.length > 0) {
         const { data: apps } = await supabase.from("applications").select("listing_id").in("listing_id", jobIds);
@@ -107,12 +106,24 @@ const MyAds = () => {
                 <div className="p-4">
                   <h3 className="font-semibold text-foreground line-clamp-1">{listing.title}</h3>
                   <p className="mt-1 text-lg font-bold text-primary">
-                    {listing.contact_for_price ? t("listing.contactPrice") : `${Number(listing.price).toLocaleString()} ${t("listing.sar")}`}
+                    {listing.rental_rate && listing.rental_period
+                      ? `${listing.rental_rate.toLocaleString()} ${t("listing.sar")}/${listing.rental_period}`
+                      : listing.contact_for_price ? t("listing.contactPrice") : `${Number(listing.price).toLocaleString()} ${t("listing.sar")}`}
                   </p>
                   <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
                     <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{saudiCities.find(c => c.id === listing.city)?.name[lang] || listing.city}</span>
                     <span className="flex items-center gap-1"><Eye className="h-3.5 w-3.5" />{(listing.views || 0).toLocaleString()}</span>
                   </div>
+
+                  {/* Analytics row */}
+                  {((listing.call_clicks || 0) > 0 || (listing.whatsapp_clicks || 0) > 0 || (listing.chat_starts || 0) > 0) && (
+                    <div className="mt-2 flex items-center gap-3 text-[10px] text-muted-foreground">
+                      {(listing.call_clicks || 0) > 0 && <span>📞 {listing.call_clicks}</span>}
+                      {(listing.whatsapp_clicks || 0) > 0 && <span>💚 {listing.whatsapp_clicks}</span>}
+                      {(listing.chat_starts || 0) > 0 && <span>💬 {listing.chat_starts}</span>}
+                    </div>
+                  )}
+
                   <div className="mt-3 flex gap-2">
                     {listing.category === "jobs" && (
                       <Button size="sm" variant="outline" className="flex-1 gap-1 text-xs"

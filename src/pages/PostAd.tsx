@@ -13,11 +13,13 @@ import Header from "@/components/Header";
 import BottomTabBar from "@/components/BottomTabBar";
 import PageMeta from "@/components/PageMeta";
 import AuthDialog from "@/components/AuthDialog";
+import PhoneInput from "@/components/PhoneInput";
 import { toast } from "@/components/ui/sonner";
 import JobEmploymentStep from "@/components/post/JobEmploymentStep";
 import JobSalaryFields from "@/components/post/JobSalaryFields";
 import SkillsInput from "@/components/post/SkillsInput";
 import CompanyLogoUpload from "@/components/post/CompanyLogoUpload";
+import VehicleFields from "@/components/post/VehicleFields";
 import type { EmploymentType } from "@/lib/jobSkillSuggestions";
 
 const PostAd = () => {
@@ -38,7 +40,9 @@ const PostAd = () => {
     city: "",
     price: "",
     contactForPrice: false,
-    phone: "",
+    phoneCountryCode: "+966",
+    phoneNumber: "",
+    showPhone: false,
     images: [] as File[],
     imagePreviewUrls: [] as string[],
     // Job-specific fields
@@ -52,11 +56,21 @@ const PostAd = () => {
     requiredSkills: [] as string[],
     companyLogoFile: null as File | null,
     companyLogoPreview: null as string | null,
+    // Vehicle fields
+    year: "",
+    kilometers: "",
+    fuelType: "",
+    sellerType: "",
+    make: "",
+    model: "",
+    bodyType: "",
+    rentalRate: "",
+    rentalPeriod: "day",
   });
 
   const isJobs = formData.category === "jobs";
+  const isVehicle = formData.category === "heavy-equipment" || formData.category === "motors";
 
-  // Dynamic steps based on category
   const getSteps = () => {
     if (isJobs) return ["post.step1", "post.jobStep2", "post.step2", "post.step4"];
     return ["post.step1", "post.step2", "post.step3", "post.step4"];
@@ -77,15 +91,10 @@ const PostAd = () => {
         return !!formData.title && !!formData.city;
       case 2:
         if (isJobs) return !!formData.title && !!formData.city;
-        return formData.contactForPrice || !!formData.price;
+        return formData.contactForPrice || !!formData.price || (isVehicle && formData.listingType === "rent" && !!formData.rentalRate);
       case 3: return true;
       default: return false;
     }
-  };
-
-  const validatePhone = (phone: string) => {
-    if (!phone) return true;
-    return /^05\d{8}$/.test(phone.replace(/\s/g, ""));
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -105,10 +114,6 @@ const PostAd = () => {
 
   const handleSubmit = async () => {
     if (!user) { setShowAuth(true); return; }
-    if (formData.phone && !validatePhone(formData.phone)) {
-      toast.error(lang === "ar" ? "رقم الهاتف غير صحيح (05XXXXXXXX)" : "Invalid phone number (05XXXXXXXX)");
-      return;
-    }
 
     setSubmitting(true);
     try {
@@ -123,7 +128,6 @@ const PostAd = () => {
         }
       }
 
-      // Upload company logo if jobs
       let companyLogoUrl: string | null = null;
       if (isJobs && formData.companyLogoFile) {
         const ext = formData.companyLogoFile.name.split(".").pop();
@@ -135,7 +139,6 @@ const PostAd = () => {
         }
       }
 
-      // Determine price for jobs
       let price: number | null = null;
       let contactForPrice = formData.contactForPrice;
       if (isJobs) {
@@ -146,9 +149,13 @@ const PostAd = () => {
         } else if (formData.salaryNegotiable || formData.contactForPrice) {
           contactForPrice = true;
         }
+      } else if (isVehicle && formData.listingType === "rent") {
+        price = null; // rental uses rental_rate instead
       } else {
         price = contactForPrice ? null : Number(formData.price) || null;
       }
+
+      const fullPhone = formData.phoneNumber ? `${formData.phoneCountryCode}${formData.phoneNumber}` : null;
 
       const insertData: any = {
         user_id: user.id,
@@ -160,7 +167,10 @@ const PostAd = () => {
         city: formData.city,
         price,
         contact_for_price: contactForPrice,
-        phone: formData.phone || null,
+        phone: fullPhone,
+        phone_country_code: formData.phoneCountryCode,
+        phone_number: formData.phoneNumber || null,
+        show_phone: formData.showPhone,
         images: imageUrls,
       };
 
@@ -173,6 +183,20 @@ const PostAd = () => {
         insertData.contract_duration = formData.contractDuration || null;
         insertData.required_skills = formData.requiredSkills.length > 0 ? formData.requiredSkills : null;
         insertData.company_logo_url = companyLogoUrl;
+      }
+
+      if (isVehicle) {
+        insertData.year = formData.year ? Number(formData.year) : null;
+        insertData.kilometers = formData.kilometers ? Number(formData.kilometers) : null;
+        insertData.fuel_type = formData.fuelType || null;
+        insertData.seller_type = formData.sellerType || null;
+        insertData.make = formData.make || null;
+        insertData.model = formData.model || null;
+        if (formData.category === "motors") insertData.body_type = formData.bodyType || null;
+        if (formData.listingType === "rent") {
+          insertData.rental_rate = formData.rentalRate ? Number(formData.rentalRate) : null;
+          insertData.rental_period = formData.rentalPeriod || null;
+        }
       }
 
       const { data, error } = await supabase.from("listings").insert(insertData).select().single();
@@ -210,7 +234,6 @@ const PostAd = () => {
           <p className="mt-1 text-sm text-muted-foreground">{t("post.subtitle")}</p>
         </div>
 
-        {/* Progress steps */}
         <div className="flex items-center gap-1 mb-8">
           {STEPS.map((s, i) => (
             <div key={s} className="flex-1 flex flex-col items-center gap-1.5">
@@ -234,6 +257,10 @@ const PostAd = () => {
                       updateField("subcategory", "");
                       updateField("employmentType", "");
                       updateField("requiredSkills", []);
+                      updateField("fuelType", "");
+                      updateField("bodyType", "");
+                      updateField("make", "");
+                      updateField("model", "");
                     }}>
                       <SelectTrigger className="rounded-xl border-border bg-card py-3 px-4">
                         <SelectValue placeholder={t("post.selectCategory")} />
@@ -243,9 +270,7 @@ const PostAd = () => {
                           const Icon = cat.icon;
                           return (
                             <SelectItem key={cat.id} value={cat.id}>
-                              <span className="flex items-center gap-2">
-                                <Icon className="h-4 w-4" />{t(cat.key)}
-                              </span>
+                              <span className="flex items-center gap-2"><Icon className="h-4 w-4" />{t(cat.key)}</span>
                             </SelectItem>
                           );
                         })}
@@ -278,18 +303,12 @@ const PostAd = () => {
               {/* Step 1: Employment Type (jobs) or Details (non-jobs) */}
               {step === 1 && isJobs && (
                 <div className="space-y-6">
-                  <JobEmploymentStep
-                    employmentType={formData.employmentType}
-                    onSelect={(type) => updateField("employmentType", type)}
-                  />
+                  <JobEmploymentStep employmentType={formData.employmentType} onSelect={(type) => updateField("employmentType", type)} />
                   <JobSalaryFields
                     employmentType={formData.employmentType}
-                    salaryMin={formData.salaryMin}
-                    salaryMax={formData.salaryMax}
-                    hourlyRate={formData.hourlyRate}
-                    contractDuration={formData.contractDuration}
-                    paidInternship={formData.paidInternship}
-                    contactForPrice={formData.contactForPrice}
+                    salaryMin={formData.salaryMin} salaryMax={formData.salaryMax}
+                    hourlyRate={formData.hourlyRate} contractDuration={formData.contractDuration}
+                    paidInternship={formData.paidInternship} contactForPrice={formData.contactForPrice}
                     price={formData.price}
                     onUpdate={(field, value) => {
                       if (field === "salaryMin") updateField("salaryMin", value);
@@ -305,16 +324,14 @@ const PostAd = () => {
               )}
 
               {step === 1 && !isJobs && (
-                <DetailsStep formData={formData} updateField={updateField} lang={lang} t={t} validatePhone={validatePhone} />
+                <DetailsStep formData={formData} updateField={updateField} lang={lang} t={t} isVehicle={isVehicle} />
               )}
 
               {/* Step 2: Details (jobs) or Photos & Price (non-jobs) */}
               {step === 2 && isJobs && (
                 <div className="space-y-5">
                   <div>
-                    <label className="text-sm font-medium text-foreground">
-                      {lang === "ar" ? "عنوان الوظيفة" : "Job Title"}
-                    </label>
+                    <label className="text-sm font-medium text-foreground">{lang === "ar" ? "عنوان الوظيفة" : "Job Title"}</label>
                     <input type="text" value={formData.title} onChange={e => updateField("title", e.target.value)}
                       placeholder={lang === "ar" ? "مثال: مهندس ميكانيكي أول" : "e.g. Senior Mechanical Engineer"}
                       className="mt-1.5 w-full rounded-xl border border-border bg-card px-4 py-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors placeholder:text-muted-foreground" />
@@ -340,37 +357,27 @@ const PostAd = () => {
                   </div>
                   <div>
                     <label className="text-sm font-medium text-foreground">{t("post.phone")}</label>
-                    <div className="mt-1.5 flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-3">
-                      <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
-                      <input type="tel" value={formData.phone} onChange={e => updateField("phone", e.target.value)}
-                        placeholder={t("post.phonePlaceholder")}
-                        className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
+                    <div className="mt-1.5">
+                      <PhoneInput
+                        countryCode={formData.phoneCountryCode}
+                        phoneNumber={formData.phoneNumber}
+                        onCountryCodeChange={(c) => updateField("phoneCountryCode", c)}
+                        onPhoneNumberChange={(n) => updateField("phoneNumber", n)}
+                      />
                     </div>
                   </div>
-
-                  {/* Skills */}
                   <SkillsInput skills={formData.requiredSkills} onChange={(s) => updateField("requiredSkills", s)} subcategory={formData.subcategory} />
-
-                  {/* Company Logo */}
                   <CompanyLogoUpload
-                    logoFile={formData.companyLogoFile}
-                    logoPreview={formData.companyLogoPreview}
-                    onUpload={(file) => {
-                      updateField("companyLogoFile", file);
-                      updateField("companyLogoPreview", URL.createObjectURL(file));
-                    }}
-                    onRemove={() => {
-                      if (formData.companyLogoPreview) URL.revokeObjectURL(formData.companyLogoPreview);
-                      updateField("companyLogoFile", null);
-                      updateField("companyLogoPreview", null);
-                    }}
+                    logoFile={formData.companyLogoFile} logoPreview={formData.companyLogoPreview}
+                    onUpload={(file) => { updateField("companyLogoFile", file); updateField("companyLogoPreview", URL.createObjectURL(file)); }}
+                    onRemove={() => { if (formData.companyLogoPreview) URL.revokeObjectURL(formData.companyLogoPreview); updateField("companyLogoFile", null); updateField("companyLogoPreview", null); }}
                   />
                 </div>
               )}
 
               {step === 2 && !isJobs && (
                 <PhotosPriceStep formData={formData} updateField={updateField} fileInputRef={fileInputRef}
-                  handleImageUpload={handleImageUpload} removeImage={removeImage} lang={lang} t={t} />
+                  handleImageUpload={handleImageUpload} removeImage={removeImage} lang={lang} t={t} isVehicle={isVehicle} />
               )}
 
               {/* Step 3: Review */}
@@ -391,9 +398,7 @@ const PostAd = () => {
                           </span>
                         )}
                         {isJobs && formData.employmentType && (
-                          <span className="rounded-lg px-2.5 py-1 text-xs font-semibold bg-green-100 text-green-700">
-                            {formData.employmentType}
-                          </span>
+                          <span className="rounded-lg px-2.5 py-1 text-xs font-semibold bg-green-100 text-green-700">{formData.employmentType}</span>
                         )}
                         {!isJobs && (
                           <span className={`rounded-lg px-2.5 py-1 text-xs font-semibold ${formData.listingType === "sale" ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"}`}>
@@ -411,11 +416,24 @@ const PostAd = () => {
                           {formData.contactForPrice && <p>💰 {lang === "ar" ? "قابل للتفاوض" : "Negotiable"}</p>}
                           {formData.requiredSkills.length > 0 && (
                             <div className="flex flex-wrap gap-1.5 mt-2">
-                              {formData.requiredSkills.map(s => (
-                                <span key={s} className="rounded-md bg-muted px-2 py-0.5 text-xs">{s}</span>
-                              ))}
+                              {formData.requiredSkills.map(s => (<span key={s} className="rounded-md bg-muted px-2 py-0.5 text-xs">{s}</span>))}
                             </div>
                           )}
+                        </div>
+                      ) : isVehicle ? (
+                        <div className="text-sm text-muted-foreground space-y-1">
+                          {formData.listingType === "rent" && formData.rentalRate && (
+                            <p>💰 {Number(formData.rentalRate).toLocaleString()} {t("listing.sar")}/{formData.rentalPeriod}</p>
+                          )}
+                          {formData.listingType === "sale" && formData.price && (
+                            <p className="text-2xl font-bold text-primary">{Number(formData.price).toLocaleString()} {t("listing.sar")}</p>
+                          )}
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {formData.year && <span className="rounded-md bg-muted px-2 py-0.5 text-xs">📅 {formData.year}</span>}
+                            {formData.kilometers && <span className="rounded-md bg-muted px-2 py-0.5 text-xs">🛣️ {Number(formData.kilometers).toLocaleString()} km</span>}
+                            {formData.fuelType && <span className="rounded-md bg-muted px-2 py-0.5 text-xs">⛽ {formData.fuelType}</span>}
+                            {formData.make && <span className="rounded-md bg-muted px-2 py-0.5 text-xs">🏢 {formData.make} {formData.model}</span>}
+                          </div>
                         </div>
                       ) : (
                         <p className="text-2xl font-bold text-primary">
@@ -427,8 +445,8 @@ const PostAd = () => {
                         {formData.city && (
                           <span className="flex items-center gap-1"><MapPin className="h-4 w-4" />{saudiCities.find(c => c.id === formData.city)?.name[lang]}</span>
                         )}
-                        {formData.phone && (
-                          <span className="flex items-center gap-1"><Phone className="h-4 w-4" />{formData.phone}</span>
+                        {formData.phoneNumber && (
+                          <span className="flex items-center gap-1"><Phone className="h-4 w-4" />{formData.phoneCountryCode}{formData.phoneNumber}</span>
                         )}
                       </div>
                     </div>
@@ -439,19 +457,14 @@ const PostAd = () => {
           </AnimatePresence>
         </div>
 
-        {/* Navigation buttons */}
         <div className="flex items-center justify-between mt-8 pt-4 border-t border-border">
           <Button variant="outline" onClick={step === 0 ? () => navigate("/") : goBack} className="rounded-xl">
             <ArrowLeft className="h-4 w-4 me-2" />
             {step === 0 ? t("bottom.home") : t("post.back")}
           </Button>
           {step < 3 ? (
-            <Button onClick={() => {
-              if (!user) { setShowAuth(true); return; }
-              goNext();
-            }} disabled={!canProceed()} className="rounded-xl">
-              {t("post.next")}
-              <ArrowRight className="h-4 w-4 ms-2" />
+            <Button onClick={() => { if (!user) { setShowAuth(true); return; } goNext(); }} disabled={!canProceed()} className="rounded-xl">
+              {t("post.next")}<ArrowRight className="h-4 w-4 ms-2" />
             </Button>
           ) : (
             <Button onClick={handleSubmit} className="rounded-xl" disabled={submitting}>
@@ -467,8 +480,8 @@ const PostAd = () => {
   );
 };
 
-// Extracted: Details step for non-jobs
-const DetailsStep = ({ formData, updateField, lang, t, validatePhone }: any) => (
+// Details step for non-jobs
+const DetailsStep = ({ formData, updateField, lang, t, isVehicle }: any) => (
   <div className="space-y-5">
     <div>
       <label className="text-sm font-medium text-foreground">{t("post.adTitle")}</label>
@@ -495,6 +508,25 @@ const DetailsStep = ({ formData, updateField, lang, t, validatePhone }: any) => 
         </button>
       </div>
     </div>
+
+    {/* Vehicle-specific fields */}
+    {isVehicle && (
+      <VehicleFields
+        category={formData.category}
+        listingType={formData.listingType}
+        year={formData.year}
+        kilometers={formData.kilometers}
+        fuelType={formData.fuelType}
+        sellerType={formData.sellerType}
+        make={formData.make}
+        model={formData.model}
+        bodyType={formData.bodyType}
+        rentalRate={formData.rentalRate}
+        rentalPeriod={formData.rentalPeriod}
+        onUpdate={(field, value) => updateField(field as any, value)}
+      />
+    )}
+
     <div>
       <label className="text-sm font-medium text-foreground">{t("post.city")}</label>
       <select value={formData.city} onChange={(e: any) => updateField("city", e.target.value)}
@@ -509,20 +541,45 @@ const DetailsStep = ({ formData, updateField, lang, t, validatePhone }: any) => 
     </div>
     <div>
       <label className="text-sm font-medium text-foreground">{t("post.phone")}</label>
-      <div className="mt-1.5 flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-3">
-        <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
-        <input type="tel" value={formData.phone} onChange={(e: any) => updateField("phone", e.target.value)} placeholder={t("post.phonePlaceholder")}
-          className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
+      <div className="mt-1.5">
+        <PhoneInput
+          countryCode={formData.phoneCountryCode}
+          phoneNumber={formData.phoneNumber}
+          onCountryCodeChange={(c: string) => updateField("phoneCountryCode", c)}
+          onPhoneNumberChange={(n: string) => updateField("phoneNumber", n)}
+        />
       </div>
-      {formData.phone && !validatePhone(formData.phone) && (
-        <p className="mt-1 text-xs text-destructive">{lang === "ar" ? "صيغة غير صحيحة: 05XXXXXXXX" : "Invalid format: 05XXXXXXXX"}</p>
-      )}
+    </div>
+
+    {/* Phone visibility toggle */}
+    <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+      <p className="text-sm font-medium text-foreground flex items-center gap-2">
+        📞 {lang === "ar" ? "ظهور رقم الهاتف" : "Phone Number Visibility"}
+      </p>
+      <label className="flex items-start gap-3 cursor-pointer">
+        <input type="radio" name="showPhone" checked={formData.showPhone === true}
+          onChange={() => updateField("showPhone", true)}
+          className="mt-1 accent-primary" />
+        <div>
+          <p className="text-sm font-medium text-foreground">{lang === "ar" ? "إظهار رقمي" : "Show my number publicly"}</p>
+          <p className="text-xs text-muted-foreground">{lang === "ar" ? "يمكن للمشترين رؤية رقمك والاتصال/واتساب مباشرة" : "Buyers can see and call/WhatsApp you directly"}</p>
+        </div>
+      </label>
+      <label className="flex items-start gap-3 cursor-pointer">
+        <input type="radio" name="showPhone" checked={formData.showPhone === false}
+          onChange={() => updateField("showPhone", false)}
+          className="mt-1 accent-primary" />
+        <div>
+          <p className="text-sm font-medium text-foreground">{lang === "ar" ? "إخفاء رقمي" : "Hide my number"}</p>
+          <p className="text-xs text-muted-foreground">{lang === "ar" ? "يجب على المشترين التواصل عبر محادثة مركزي" : "Buyers must message you through Marcazi chat"}</p>
+        </div>
+      </label>
     </div>
   </div>
 );
 
-// Extracted: Photos & Price step for non-jobs
-const PhotosPriceStep = ({ formData, updateField, fileInputRef, handleImageUpload, removeImage, lang, t }: any) => (
+// Photos & Price step for non-jobs
+const PhotosPriceStep = ({ formData, updateField, fileInputRef, handleImageUpload, removeImage, lang, t, isVehicle }: any) => (
   <div className="space-y-6">
     <div>
       <h2 className="text-lg font-semibold text-foreground">{t("post.uploadPhotos")}</h2>
@@ -535,9 +592,7 @@ const PhotosPriceStep = ({ formData, updateField, fileInputRef, handleImageUploa
               <X className="h-3.5 w-3.5" />
             </button>
             {i === 0 && (
-              <span className="absolute bottom-1.5 start-1.5 rounded-md bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground">
-                {t("post.cover")}
-              </span>
+              <span className="absolute bottom-1.5 start-1.5 rounded-md bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground">{t("post.cover")}</span>
             )}
           </div>
         ))}
@@ -552,22 +607,26 @@ const PhotosPriceStep = ({ formData, updateField, fileInputRef, handleImageUploa
       </div>
       <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" />
     </div>
-    <div>
-      <label className="text-sm font-medium text-foreground">{t("post.price")}</label>
-      <div className="mt-1.5">
-        <input type="number" value={formData.price} onChange={(e: any) => updateField("price", e.target.value)} placeholder={t("post.pricePlaceholder")} disabled={formData.contactForPrice}
-          className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors placeholder:text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed" />
-      </div>
-      <label className="mt-3 flex items-center gap-3 cursor-pointer">
-        <div onClick={() => updateField("contactForPrice", !formData.contactForPrice)}
-          className={`relative w-11 h-6 rounded-full transition-colors ${formData.contactForPrice ? "bg-primary" : "bg-muted"}`}>
-          <motion.div className="absolute top-1 h-4 w-4 rounded-full bg-primary-foreground shadow-sm"
-            animate={{ left: formData.contactForPrice ? "calc(100% - 20px)" : "4px" }}
-            transition={{ type: "spring", stiffness: 500, damping: 30 }} />
+
+    {/* Price section — skip for vehicle rentals (handled in VehicleFields) */}
+    {!(isVehicle && formData.listingType === "rent") && (
+      <div>
+        <label className="text-sm font-medium text-foreground">{t("post.price")}</label>
+        <div className="mt-1.5">
+          <input type="number" value={formData.price} onChange={(e: any) => updateField("price", e.target.value)} placeholder={t("post.pricePlaceholder")} disabled={formData.contactForPrice}
+            className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors placeholder:text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed" />
         </div>
-        <span className="text-sm text-foreground">{t("post.contactForPrice")}</span>
-      </label>
-    </div>
+        <label className="mt-3 flex items-center gap-3 cursor-pointer">
+          <div onClick={() => updateField("contactForPrice", !formData.contactForPrice)}
+            className={`relative w-11 h-6 rounded-full transition-colors ${formData.contactForPrice ? "bg-primary" : "bg-muted"}`}>
+            <motion.div className="absolute top-1 h-4 w-4 rounded-full bg-primary-foreground shadow-sm"
+              animate={{ left: formData.contactForPrice ? "calc(100% - 20px)" : "4px" }}
+              transition={{ type: "spring", stiffness: 500, damping: 30 }} />
+          </div>
+          <span className="text-sm text-foreground">{t("post.contactForPrice")}</span>
+        </label>
+      </div>
+    )}
   </div>
 );
 
