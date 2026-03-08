@@ -24,11 +24,11 @@ import {
 } from "@/components/ui/accordion";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
-const mockListings = getRegularListings().map(l => ({
+const mockListings: Listing[] = getRegularListings().map(l => ({
   id: l.id, user_id: "", title: l.title, category: l.category, price: l.price, city: l.city,
   views: l.views, listing_type: l.listing_type, images: l.images, description: l.description,
   subcategory: l.subcategory, contact_for_price: l.contactForPrice, phone: l.phone,
-  status: "active" as const, created_at: l.postedAt, updated_at: l.postedAt,
+  status: "active", created_at: l.postedAt, updated_at: l.postedAt,
 }));
 
 const currentYear = new Date().getFullYear();
