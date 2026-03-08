@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { useListing } from "@/hooks/useListings";
@@ -15,10 +15,18 @@ import ImageFallback from "@/components/ImageFallback";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Heart, MapPin, Eye, Phone, MessageCircle, ArrowLeft, Share2, Calendar, Shield } from "lucide-react";
 import { motion } from "framer-motion";
 import { saudiCities } from "@/lib/cities";
-import { categories } from "@/lib/categories";
+import { categories, getSubcategoryName } from "@/lib/categories";
 import { toast } from "@/components/ui/sonner";
 
 const ListingDetail = () => {
