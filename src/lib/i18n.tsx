@@ -268,6 +268,7 @@ const translations: Record<string, Record<Lang, string>> = {
   "post.review": { en: "Review Your Ad", ar: "راجع إعلانك" },
   "post.phone": { en: "Phone Number", ar: "رقم الهاتف" },
   "post.phonePlaceholder": { en: "+966 5XX XXX XXXX", ar: "+966 5XX XXX XXXX" },
+  "post.jobStep2": { en: "Employment", ar: "التوظيف" },
 
   // How It Works
   "howItWorks.title": { en: "How It Works", ar: "كيف يعمل" },

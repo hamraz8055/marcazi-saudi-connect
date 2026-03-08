@@ -12,22 +12,19 @@ import BottomTabBar from "@/components/BottomTabBar";
 import PageMeta from "@/components/PageMeta";
 import AuthDialog from "@/components/AuthDialog";
 import ImageFallback from "@/components/ImageFallback";
+import EasyApplyModal from "@/components/EasyApplyModal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
+  Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Heart, MapPin, Eye, Phone, MessageCircle, ArrowLeft, Share2, Calendar, Shield } from "lucide-react";
+import { Heart, MapPin, Eye, Phone, MessageCircle, ArrowLeft, Share2, Calendar, Shield, Briefcase } from "lucide-react";
 import { motion } from "framer-motion";
 import { saudiCities } from "@/lib/cities";
 import { categories, getSubcategoryName } from "@/lib/categories";
 import { toast } from "@/components/ui/sonner";
+import { getEmploymentBadgeStyle, getEmploymentLabel, formatJobSalary } from "@/lib/jobSkillSuggestions";
 
 const ListingDetail = () => {
   const { id } = useParams();
@@ -40,37 +37,24 @@ const ListingDetail = () => {
   const [selectedImg, setSelectedImg] = useState(0);
   const [messaging, setMessaging] = useState(false);
   const [showPhone, setShowPhone] = useState(false);
+  const [showApply, setShowApply] = useState(false);
 
-  // Try mock data if DB returns nothing
   const mockListing = getListingById(id || "");
-  
   const listing = dbListing || (mockListing ? {
-    id: mockListing.id,
-    user_id: "",
-    category: mockListing.category,
-    subcategory: mockListing.subcategory,
-    title: mockListing.title,
-    description: mockListing.description,
-    listing_type: mockListing.listing_type,
-    city: mockListing.city,
-    price: mockListing.price,
-    contact_for_price: mockListing.contactForPrice,
-    phone: mockListing.phone,
-    images: mockListing.images,
-    views: mockListing.views,
-    status: "active",
-    created_at: mockListing.postedAt,
-    updated_at: mockListing.postedAt,
+    id: mockListing.id, user_id: "", category: mockListing.category, subcategory: mockListing.subcategory,
+    title: mockListing.title, description: mockListing.description, listing_type: mockListing.listing_type,
+    city: mockListing.city, price: mockListing.price, contact_for_price: mockListing.contactForPrice,
+    phone: mockListing.phone, images: mockListing.images, views: mockListing.views, status: "active",
+    created_at: mockListing.postedAt, updated_at: mockListing.postedAt,
   } : null);
 
   const seller = dbSeller || (mockListing ? {
-    display_name: mockListing.seller.name,
-    avatar_url: null,
-    user_id: "",
+    display_name: mockListing.seller.name, avatar_url: null, user_id: "",
     verification_status: mockListing.seller.verified ? "verified" : "unverified",
-    member_since: mockListing.seller.memberSince,
-    total_listings: mockListing.seller.totalListings,
+    member_since: mockListing.seller.memberSince, total_listings: mockListing.seller.totalListings,
   } : null);
+
+  const isJob = listing?.category === "jobs";
 
   const handleFavorite = async () => {
     if (!user) { setShowAuth(true); return; }
@@ -106,37 +90,24 @@ const ListingDetail = () => {
     finally { setMessaging(false); }
   };
 
-  const handleShowPhone = () => {
-    if (!user) { setShowAuth(true); return; }
-    setShowPhone(true);
-  };
+  const handleShowPhone = () => { if (!user) { setShowAuth(true); return; } setShowPhone(true); };
+  const handleEasyApply = () => { if (!user) { setShowAuth(true); return; } setShowApply(true); };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container max-w-4xl py-6 pb-24">
-          <Skeleton className="h-8 w-48 mb-4" />
-          <Skeleton className="aspect-[16/9] w-full rounded-2xl mb-4" />
-          <Skeleton className="h-6 w-64 mb-2" />
-          <Skeleton className="h-4 w-full" />
-        </div>
-        <BottomTabBar />
-      </div>
+      <div className="min-h-screen bg-background"><Header />
+        <div className="container max-w-4xl py-6 pb-24"><Skeleton className="h-8 w-48 mb-4" /><Skeleton className="aspect-[16/9] w-full rounded-2xl mb-4" /><Skeleton className="h-6 w-64 mb-2" /><Skeleton className="h-4 w-full" /></div>
+        <BottomTabBar /></div>
     );
   }
 
   if (!listing) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
+      <div className="min-h-screen bg-background"><Header />
         <div className="flex flex-col items-center justify-center py-32 text-center">
           <p className="text-xl font-bold">{lang === "ar" ? "الإعلان غير موجود" : "Listing not found"}</p>
           <Button variant="outline" onClick={() => navigate("/browse")} className="mt-4">{lang === "ar" ? "تصفح الإعلانات" : "Browse Listings"}</Button>
-        </div>
-        <Footer />
-        <BottomTabBar />
-      </div>
+        </div><Footer /><BottomTabBar /></div>
     );
   }
 
@@ -146,45 +117,166 @@ const ListingDetail = () => {
   const isVerified = (seller as any)?.verification_status === "verified";
   const postedDate = new Date(listing.created_at);
   const daysAgo = Math.floor((Date.now() - postedDate.getTime()) / 86400000);
-  const postedLabel = daysAgo === 0 ? (lang === "ar" ? "اليوم" : "Today") :
-    daysAgo === 1 ? (lang === "ar" ? "أمس" : "Yesterday") :
-    `${daysAgo} ${lang === "ar" ? "أيام" : "days ago"}`;
+  const postedLabel = daysAgo === 0 ? (lang === "ar" ? "اليوم" : "Today") : daysAgo === 1 ? (lang === "ar" ? "أمس" : "Yesterday") : `${daysAgo} ${lang === "ar" ? "أيام" : "days ago"}`;
+  const displayName = seller?.display_name || (lang === "ar" ? "صاحب العمل" : "Employer");
+  const requiredSkills: string[] = (listing as any)?.required_skills || [];
+  const empType = (listing as any)?.employment_type;
 
+  if (isJob) {
+    return (
+      <div className="min-h-screen bg-background">
+        <PageMeta titleKey="page.listing" /><Header />
+        <div className="container max-w-4xl py-6 pb-24 md:pb-10">
+          <Breadcrumb className="mb-4">
+            <BreadcrumbList>
+              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/">{lang === "ar" ? "الرئيسية" : "Home"}</Link></BreadcrumbLink></BreadcrumbItem>
+              {cat && (<><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbLink asChild><Link to={`/browse?category=${cat.id}`}>{t(cat.key)}</Link></BreadcrumbLink></BreadcrumbItem></>)}
+              {listing.subcategory && cat && (<><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbLink asChild><Link to={`/browse?category=${cat.id}&subcategory=${listing.subcategory}`}>{t(`subcategory.${listing.subcategory}`) !== `subcategory.${listing.subcategory}` ? t(`subcategory.${listing.subcategory}`) : getSubcategoryName(cat.id, listing.subcategory)}</Link></BreadcrumbLink></BreadcrumbItem></>)}
+              <BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbPage className="line-clamp-1 max-w-[200px]">{listing.title}</BreadcrumbPage></BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+
+          <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
+            <ArrowLeft className="h-4 w-4 rtl:rotate-180" />{lang === "ar" ? "رجوع" : "Back"}
+          </button>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              {/* Company Header */}
+              <div className="flex items-center gap-4">
+                {(listing as any).company_logo_url ? (
+                  <img src={(listing as any).company_logo_url} alt="" className="h-20 w-20 rounded-2xl object-cover border border-border" />
+                ) : (
+                  <div className="h-20 w-20 rounded-2xl bg-primary/10 flex items-center justify-center">
+                    <span className="text-2xl font-bold text-primary">{displayName[0]?.toUpperCase()}</span>
+                  </div>
+                )}
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-bold text-foreground">{displayName}</h2>
+                    {isVerified && <Shield className="h-4 w-4 text-primary" />}
+                  </div>
+                  <p className="text-sm text-muted-foreground flex items-center gap-2">
+                    <Calendar className="h-3.5 w-3.5" />{postedLabel} · <MapPin className="h-3.5 w-3.5" />{cityName}
+                  </p>
+                </div>
+              </div>
+
+              {/* Job Title */}
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">{listing.title}</h1>
+
+              {/* Employment + Salary */}
+              <div className="flex items-center gap-3 flex-wrap">
+                {empType && (
+                  <span className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${getEmploymentBadgeStyle(empType)}`}>
+                    {getEmploymentLabel(empType, lang)}
+                  </span>
+                )}
+                <span className="text-lg font-bold text-primary">💰 {formatJobSalary(listing, lang)}</span>
+              </div>
+
+              <hr className="border-border" />
+
+              {/* Description */}
+              {listing.description && (
+                <div>
+                  <h2 className="font-semibold text-foreground mb-2">{lang === "ar" ? "عن الوظيفة" : "About the Role"}</h2>
+                  <p className="text-muted-foreground whitespace-pre-wrap">{listing.description}</p>
+                </div>
+              )}
+
+              {/* Skills */}
+              {requiredSkills.length > 0 && (
+                <div>
+                  <h2 className="font-semibold text-foreground mb-3">{lang === "ar" ? "المهارات المطلوبة" : "Required Skills"}</h2>
+                  <div className="flex flex-wrap gap-2">
+                    {requiredSkills.map((s: string) => (
+                      <span key={s} className="rounded-lg bg-primary/10 text-primary px-3 py-1.5 text-sm font-medium">{s}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Job Details Grid */}
+              <div>
+                <h2 className="font-semibold text-foreground mb-3">{lang === "ar" ? "تفاصيل الوظيفة" : "Job Details"}</h2>
+                <div className="grid grid-cols-2 gap-3">
+                  {empType && <DetailItem label={lang === "ar" ? "نوع التوظيف" : "Employment Type"} value={getEmploymentLabel(empType, lang)} />}
+                  <DetailItem label={lang === "ar" ? "الراتب" : "Salary"} value={formatJobSalary(listing, lang)} />
+                  {(listing as any).contract_duration && <DetailItem label={lang === "ar" ? "مدة العقد" : "Contract Duration"} value={(listing as any).contract_duration} />}
+                  <DetailItem label={lang === "ar" ? "الموقع" : "Location"} value={cityName} />
+                  {cat && <DetailItem label={lang === "ar" ? "المجال" : "Category"} value={t(cat.key)} />}
+                  <DetailItem label={lang === "ar" ? "تاريخ النشر" : "Posted"} value={postedLabel} />
+                </div>
+              </div>
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-4">
+              <div className="rounded-2xl border border-border bg-card p-5 sticky top-20 space-y-4">
+                <div className="flex items-center gap-3">
+                  {(listing as any).company_logo_url ? (
+                    <img src={(listing as any).company_logo_url} alt="" className="h-10 w-10 rounded-lg object-cover border border-border" />
+                  ) : (
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <span className="text-sm font-bold text-primary">{displayName[0]?.toUpperCase()}</span>
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="font-semibold text-sm text-foreground truncate">{displayName}</p>
+                    <p className="text-xs text-muted-foreground truncate">{listing.title}</p>
+                  </div>
+                </div>
+
+                <Button className="w-full gap-2 bg-green-600 hover:bg-green-700 text-white" onClick={handleEasyApply}>
+                  <Briefcase className="h-4 w-4" />{lang === "ar" ? "تقديم سريع" : "Easy Apply"}
+                </Button>
+                <p className="text-xs text-muted-foreground text-center">
+                  {lang === "ar" ? "قدم بملفك الشخصي في مركزي" : "Apply with your Marcazi profile"}
+                </p>
+                <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
+                  <Eye className="h-3.5 w-3.5" />{listing.views?.toLocaleString()} {lang === "ar" ? "شاهدوا هذه الوظيفة" : "people viewed this job"}
+                </p>
+
+                <div className="flex gap-2 pt-2 border-t border-border">
+                  <Button variant="outline" className="flex-1 gap-2" onClick={handleFavorite}>
+                    <Heart className={`h-4 w-4 ${isFav ? "fill-destructive text-destructive" : ""}`} />
+                    {isFav ? (lang === "ar" ? "تم الحفظ" : "Saved") : (lang === "ar" ? "حفظ" : "Save")}
+                  </Button>
+                  <Button variant="outline" className="gap-2" onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success(lang === "ar" ? "تم نسخ الرابط" : "Link copied!"); }}>
+                    <Share2 className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {listing.phone && (
+                  showPhone ? (
+                    <Button variant="outline" className="w-full gap-2" asChild><a href={`tel:${listing.phone}`}><Phone className="h-4 w-4" />{listing.phone}</a></Button>
+                  ) : (
+                    <Button variant="outline" className="w-full gap-2" onClick={handleShowPhone}><Phone className="h-4 w-4" />{lang === "ar" ? "إظهار رقم الهاتف" : "Show Phone Number"}</Button>
+                  )
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+        <EasyApplyModal open={showApply} onOpenChange={setShowApply} listing={listing} />
+        <AuthDialog open={showAuth} onOpenChange={setShowAuth} />
+        <Footer /><BottomTabBar />
+      </div>
+    );
+  }
+
+  // Non-job listing (original layout)
   return (
     <div className="min-h-screen bg-background">
-      <PageMeta titleKey="page.listing" />
-      <Header />
+      <PageMeta titleKey="page.listing" /><Header />
       <div className="container max-w-4xl py-6 pb-24 md:pb-10">
-        {/* Breadcrumb */}
         <Breadcrumb className="mb-4">
           <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild><Link to="/">{lang === "ar" ? "الرئيسية" : "Home"}</Link></BreadcrumbLink>
-            </BreadcrumbItem>
-            {cat && (
-              <>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbLink asChild><Link to={`/browse?category=${cat.id}`}>{t(cat.key)}</Link></BreadcrumbLink>
-                </BreadcrumbItem>
-              </>
-            )}
-            {listing.subcategory && cat && (
-              <>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbLink asChild>
-                    <Link to={`/browse?category=${cat.id}&subcategory=${listing.subcategory}`}>
-                      {t(`subcategory.${listing.subcategory}`) !== `subcategory.${listing.subcategory}` ? t(`subcategory.${listing.subcategory}`) : getSubcategoryName(cat.id, listing.subcategory)}
-                    </Link>
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-              </>
-            )}
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage className="line-clamp-1 max-w-[200px]">{listing.title}</BreadcrumbPage>
-            </BreadcrumbItem>
+            <BreadcrumbItem><BreadcrumbLink asChild><Link to="/">{lang === "ar" ? "الرئيسية" : "Home"}</Link></BreadcrumbLink></BreadcrumbItem>
+            {cat && (<><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbLink asChild><Link to={`/browse?category=${cat.id}`}>{t(cat.key)}</Link></BreadcrumbLink></BreadcrumbItem></>)}
+            {listing.subcategory && cat && (<><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbLink asChild><Link to={`/browse?category=${cat.id}&subcategory=${listing.subcategory}`}>{t(`subcategory.${listing.subcategory}`) !== `subcategory.${listing.subcategory}` ? t(`subcategory.${listing.subcategory}`) : getSubcategoryName(cat.id, listing.subcategory)}</Link></BreadcrumbLink></BreadcrumbItem></>)}
+            <BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbPage className="line-clamp-1 max-w-[200px]">{listing.title}</BreadcrumbPage></BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
 
@@ -194,7 +286,6 @@ const ListingDetail = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            {/* Images */}
             {listing.images?.length > 0 ? (
               <div>
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-border">
@@ -216,28 +307,17 @@ const ListingDetail = () => {
                 <ImageFallback src="" alt={listing.title} className="h-full w-full" />
               </div>
             )}
-
-            {/* Details */}
             <div className="mt-6">
               <div className="flex items-center gap-2 flex-wrap mb-3">
-                {cat && (
-                  <span className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold ${cat.color}`}>
-                    <cat.icon className="h-3.5 w-3.5" />{t(cat.key)}
-                  </span>
-                )}
-                <span className={`rounded-lg px-2.5 py-1 text-xs font-semibold ${listing.listing_type === "sale" ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"}`}>
-                  {t(`listing.${listing.listing_type}`)}
-                </span>
+                {cat && (<span className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold ${cat.color}`}><cat.icon className="h-3.5 w-3.5" />{t(cat.key)}</span>)}
+                <span className={`rounded-lg px-2.5 py-1 text-xs font-semibold ${listing.listing_type === "sale" ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"}`}>{t(`listing.${listing.listing_type}`)}</span>
               </div>
-
               <h1 className="text-2xl md:text-3xl font-bold text-foreground">{listing.title}</h1>
-
               <div className="mt-4 flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
                 <span className="flex items-center gap-1"><MapPin className="h-4 w-4" /> {cityName}</span>
                 <span className="flex items-center gap-1"><Eye className="h-4 w-4" /> {listing.views?.toLocaleString()} {lang === "ar" ? "مشاهدة" : "views"}</span>
                 <span className="flex items-center gap-1"><Calendar className="h-4 w-4" /> {postedLabel}</span>
               </div>
-
               {listing.description && (
                 <div className="mt-6">
                   <h2 className="font-semibold text-foreground mb-2">{lang === "ar" ? "الوصف" : "Description"}</h2>
@@ -246,52 +326,34 @@ const ListingDetail = () => {
               )}
             </div>
           </div>
-
-          {/* Sidebar */}
           <div className="space-y-4">
             <div className="rounded-2xl border border-border bg-card p-5 sticky top-20">
               <p className="text-3xl font-bold text-primary">
                 {listing.contact_for_price ? t("listing.contactPrice") : `${Number(listing.price).toLocaleString()} ${t("listing.sar")}`}
               </p>
-
-              {/* Seller */}
               {seller && (
                 <div className="flex items-center gap-3 mt-5 pt-4 border-t border-border">
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                      {seller.display_name?.[0]?.toUpperCase() || "?"}
-                    </AvatarFallback>
-                  </Avatar>
+                  <Avatar className="h-10 w-10"><AvatarFallback className="bg-primary/10 text-primary font-semibold">{seller.display_name?.[0]?.toUpperCase() || "?"}</AvatarFallback></Avatar>
                   <div>
                     <div className="flex items-center gap-1.5">
                       <p className="font-semibold text-sm">{seller.display_name || (lang === "ar" ? "بائع" : "Seller")}</p>
-                      {isVerified && <Shield className="h-3.5 w-3.5 text-gold" />}
+                      {isVerified && <Shield className="h-3.5 w-3.5 text-primary" />}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {(seller as any)?.member_since ? `${lang === "ar" ? "عضو منذ" : "Since"} ${(seller as any).member_since}` : (lang === "ar" ? "عضو في مركزي" : "Marcazi member")}
                     </p>
-                    {(seller as any)?.total_listings !== undefined && (
-                      <p className="text-xs text-muted-foreground">{(seller as any).total_listings} {lang === "ar" ? "إعلانات" : "listings"}</p>
-                    )}
                   </div>
                 </div>
               )}
-
               <div className="mt-4 space-y-2">
                 <Button className="w-full gap-2" onClick={handleMessage} disabled={messaging || listing.user_id === user?.id}>
                   <MessageCircle className="h-4 w-4" />{lang === "ar" ? "إرسال رسالة" : "Send Message"}
                 </Button>
-                {listing.phone && (
-                  showPhone ? (
-                    <Button variant="outline" className="w-full gap-2" asChild>
-                      <a href={`tel:${listing.phone}`}><Phone className="h-4 w-4" />{listing.phone}</a>
-                    </Button>
-                  ) : (
-                    <Button variant="outline" className="w-full gap-2" onClick={handleShowPhone}>
-                      <Phone className="h-4 w-4" />{lang === "ar" ? "إظهار رقم الهاتف" : "Show Phone Number"}
-                    </Button>
-                  )
-                )}
+                {listing.phone && (showPhone ? (
+                  <Button variant="outline" className="w-full gap-2" asChild><a href={`tel:${listing.phone}`}><Phone className="h-4 w-4" />{listing.phone}</a></Button>
+                ) : (
+                  <Button variant="outline" className="w-full gap-2" onClick={handleShowPhone}><Phone className="h-4 w-4" />{lang === "ar" ? "إظهار رقم الهاتف" : "Show Phone Number"}</Button>
+                ))}
                 <div className="flex gap-2">
                   <Button variant="outline" className="flex-1 gap-2" onClick={handleFavorite}>
                     <Heart className={`h-4 w-4 ${isFav ? "fill-destructive text-destructive" : ""}`} />
@@ -307,10 +369,16 @@ const ListingDetail = () => {
         </div>
       </div>
       <AuthDialog open={showAuth} onOpenChange={setShowAuth} />
-      <Footer />
-      <BottomTabBar />
+      <Footer /><BottomTabBar />
     </div>
   );
 };
+
+const DetailItem = ({ label, value }: { label: string; value: string }) => (
+  <div className="rounded-lg bg-muted/50 p-3">
+    <p className="text-xs text-muted-foreground">{label}</p>
+    <p className="text-sm font-medium text-foreground mt-0.5">{value}</p>
+  </div>
+);
 
 export default ListingDetail;
