@@ -33,6 +33,8 @@ export interface Listing {
   phone_number?: string | null;
   show_phone?: boolean | null;
   show_email?: boolean | null;
+  contact_email?: string | null;
+  phone_full?: string | null;
   call_clicks?: number | null;
   whatsapp_clicks?: number | null;
   email_inquiries?: number | null;

@@ -68,6 +68,13 @@ export type Database = {
             referencedRelation: "listings"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "applications_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "public_listings"
+            referencedColumns: ["id"]
+          },
         ]
       }
       auctions: {
@@ -245,6 +252,13 @@ export type Database = {
             referencedRelation: "listings"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "favorites_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "public_listings"
+            referencedColumns: ["id"]
+          },
         ]
       }
       job_profiles: {
@@ -334,6 +348,7 @@ export type Database = {
           chat_starts: number | null
           city: string
           company_logo_url: string | null
+          contact_email: string | null
           contact_for_price: boolean | null
           contract_duration: string | null
           created_at: string
@@ -378,6 +393,7 @@ export type Database = {
           chat_starts?: number | null
           city: string
           company_logo_url?: string | null
+          contact_email?: string | null
           contact_for_price?: boolean | null
           contract_duration?: string | null
           created_at?: string
@@ -422,6 +438,7 @@ export type Database = {
           chat_starts?: number | null
           city?: string
           company_logo_url?: string | null
+          contact_email?: string | null
           contact_for_price?: boolean | null
           contract_duration?: string | null
           created_at?: string
@@ -664,7 +681,147 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_listings: {
+        Row: {
+          application_deadline: string | null
+          body_type: string | null
+          call_clicks: number | null
+          category: string | null
+          chat_starts: number | null
+          city: string | null
+          company_logo_url: string | null
+          contact_email: string | null
+          contact_for_price: boolean | null
+          contract_duration: string | null
+          created_at: string | null
+          description: string | null
+          email_inquiries: number | null
+          employment_type: string | null
+          fuel_type: string | null
+          hourly_rate: number | null
+          id: string | null
+          images: string[] | null
+          kilometers: number | null
+          listing_type: string | null
+          make: string | null
+          model: string | null
+          phone: string | null
+          phone_country_code: string | null
+          phone_full: string | null
+          phone_number: string | null
+          price: number | null
+          rental_period: string | null
+          rental_rate: number | null
+          required_skills: string[] | null
+          salary_max: number | null
+          salary_min: number | null
+          salary_negotiable: boolean | null
+          seller_type: string | null
+          show_email: boolean | null
+          show_phone: boolean | null
+          status: string | null
+          subcategory: string | null
+          title: string | null
+          updated_at: string | null
+          user_id: string | null
+          views: number | null
+          whatsapp_clicks: number | null
+          year: number | null
+        }
+        Insert: {
+          application_deadline?: string | null
+          body_type?: string | null
+          call_clicks?: number | null
+          category?: string | null
+          chat_starts?: number | null
+          city?: string | null
+          company_logo_url?: string | null
+          contact_email?: never
+          contact_for_price?: boolean | null
+          contract_duration?: string | null
+          created_at?: string | null
+          description?: string | null
+          email_inquiries?: number | null
+          employment_type?: string | null
+          fuel_type?: string | null
+          hourly_rate?: number | null
+          id?: string | null
+          images?: string[] | null
+          kilometers?: number | null
+          listing_type?: string | null
+          make?: string | null
+          model?: string | null
+          phone?: never
+          phone_country_code?: string | null
+          phone_full?: never
+          phone_number?: never
+          price?: number | null
+          rental_period?: string | null
+          rental_rate?: number | null
+          required_skills?: string[] | null
+          salary_max?: number | null
+          salary_min?: number | null
+          salary_negotiable?: boolean | null
+          seller_type?: string | null
+          show_email?: boolean | null
+          show_phone?: boolean | null
+          status?: string | null
+          subcategory?: string | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          views?: number | null
+          whatsapp_clicks?: number | null
+          year?: number | null
+        }
+        Update: {
+          application_deadline?: string | null
+          body_type?: string | null
+          call_clicks?: number | null
+          category?: string | null
+          chat_starts?: number | null
+          city?: string | null
+          company_logo_url?: string | null
+          contact_email?: never
+          contact_for_price?: boolean | null
+          contract_duration?: string | null
+          created_at?: string | null
+          description?: string | null
+          email_inquiries?: number | null
+          employment_type?: string | null
+          fuel_type?: string | null
+          hourly_rate?: number | null
+          id?: string | null
+          images?: string[] | null
+          kilometers?: number | null
+          listing_type?: string | null
+          make?: string | null
+          model?: string | null
+          phone?: never
+          phone_country_code?: string | null
+          phone_full?: never
+          phone_number?: never
+          price?: number | null
+          rental_period?: string | null
+          rental_rate?: number | null
+          required_skills?: string[] | null
+          salary_max?: number | null
+          salary_min?: number | null
+          salary_negotiable?: boolean | null
+          seller_type?: string | null
+          show_email?: boolean | null
+          show_phone?: boolean | null
+          status?: string | null
+          subcategory?: string | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          views?: number | null
+          whatsapp_clicks?: number | null
+          year?: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never

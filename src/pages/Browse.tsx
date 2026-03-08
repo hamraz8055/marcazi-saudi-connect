@@ -574,6 +574,13 @@ const Browse = () => {
                               {listing.fuel_type && <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">{listing.fuel_type}</span>}
                             </div>
                           )}
+                          {/* Contact indicators */}
+                          <div className="mt-2 flex items-center gap-2 text-muted-foreground">
+                            <span className="text-xs" title={lang === "ar" ? "محادثة متاحة" : "Chat available"}>💬</span>
+                            {listing.show_phone && <span className="text-xs" title={lang === "ar" ? "اتصال متاح" : "Call available"}>📞</span>}
+                            {listing.show_phone && <span className="text-xs" title={lang === "ar" ? "واتساب متاح" : "WhatsApp available"}>💚</span>}
+                            {listing.show_email && <span className="text-xs" title={lang === "ar" ? "بريد متاح" : "Email available"}>✉️</span>}
+                          </div>
                         </div>
                       </motion.article>
                     );

@@ -112,6 +112,10 @@ const FeaturedListings = () => {
                   <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{getCityName(listing.city)}</span>
                   <span className="flex items-center gap-1"><Eye className="h-3.5 w-3.5" />{listing.views.toLocaleString()}</span>
                 </div>
+                {/* Contact indicators */}
+                <div className="mt-2 flex items-center gap-2 text-muted-foreground">
+                  <span className="text-xs" title={lang === "ar" ? "محادثة متاحة" : "Chat available"}>💬</span>
+                </div>
               </div>
             </motion.article>
           ))}

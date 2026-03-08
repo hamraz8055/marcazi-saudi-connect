@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight, Upload, X, ImagePlus, Check, MapPin, Phone, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +20,7 @@ import JobSalaryFields from "@/components/post/JobSalaryFields";
 import SkillsInput from "@/components/post/SkillsInput";
 import CompanyLogoUpload from "@/components/post/CompanyLogoUpload";
 import VehicleFields from "@/components/post/VehicleFields";
+import ContactDetailsCard from "@/components/post/ContactDetailsCard";
 import type { EmploymentType } from "@/lib/jobSkillSuggestions";
 
 const PostAd = () => {
@@ -43,6 +44,8 @@ const PostAd = () => {
     phoneCountryCode: "+966",
     phoneNumber: "",
     showPhone: false,
+    contactEmail: "",
+    showEmail: false,
     images: [] as File[],
     imagePreviewUrls: [] as string[],
     // Job-specific fields
@@ -67,6 +70,35 @@ const PostAd = () => {
     rentalRate: "",
     rentalPeriod: "day",
   });
+
+  // Auto-fill contact info from profile/auth
+  useEffect(() => {
+    if (!user) return;
+    // Pre-fill email from auth
+    if (user.email && !formData.contactEmail) {
+      setFormData(prev => ({ ...prev, contactEmail: user.email || "" }));
+    }
+    // Pre-fill phone from profile
+    supabase.from("profiles").select("phone, display_name").eq("user_id", user.id).single()
+      .then(({ data }) => {
+        if (data?.phone) {
+          // Try to extract country code and number
+          const phone = data.phone;
+          if (phone.startsWith("+")) {
+            // Try known codes
+            const codes = ["+966", "+971", "+973", "+974", "+965", "+968", "+962", "+20", "+92", "+91", "+63"];
+            const matchedCode = codes.find(c => phone.startsWith(c));
+            if (matchedCode) {
+              setFormData(prev => ({
+                ...prev,
+                phoneCountryCode: prev.phoneNumber ? prev.phoneCountryCode : matchedCode,
+                phoneNumber: prev.phoneNumber || phone.slice(matchedCode.length),
+              }));
+            }
+          }
+        }
+      });
+  }, [user]);
 
   const isJobs = formData.category === "jobs";
   const isVehicle = formData.category === "heavy-equipment" || formData.category === "motors";
@@ -171,6 +203,8 @@ const PostAd = () => {
         phone_country_code: formData.phoneCountryCode,
         phone_number: formData.phoneNumber || null,
         show_phone: formData.showPhone,
+        contact_email: formData.contactEmail || null,
+        show_email: formData.showEmail,
         images: imageUrls,
       };
 
@@ -355,17 +389,16 @@ const PostAd = () => {
                       ))}
                     </select>
                   </div>
-                  <div>
-                    <label className="text-sm font-medium text-foreground">{t("post.phone")}</label>
-                    <div className="mt-1.5">
-                      <PhoneInput
-                        countryCode={formData.phoneCountryCode}
-                        phoneNumber={formData.phoneNumber}
-                        onCountryCodeChange={(c) => updateField("phoneCountryCode", c)}
-                        onPhoneNumberChange={(n) => updateField("phoneNumber", n)}
-                      />
-                    </div>
-                  </div>
+                  {/* Contact Details Card */}
+                  <ContactDetailsCard
+                    phoneCountryCode={formData.phoneCountryCode}
+                    phoneNumber={formData.phoneNumber}
+                    showPhone={formData.showPhone}
+                    contactEmail={formData.contactEmail}
+                    showEmail={formData.showEmail}
+                    onUpdate={(field, value) => updateField(field as any, value)}
+                    helperText={lang === "ar" ? "تم ملؤه تلقائياً من ملفك الشخصي. غيّره إذا لزم الأمر." : "Pre-filled from your profile. Change if needed."}
+                  />
                   <SkillsInput skills={formData.requiredSkills} onChange={(s) => updateField("requiredSkills", s)} subcategory={formData.subcategory} />
                   <CompanyLogoUpload
                     logoFile={formData.companyLogoFile} logoPreview={formData.companyLogoPreview}
@@ -539,42 +572,16 @@ const DetailsStep = ({ formData, updateField, lang, t, isVehicle }: any) => (
         ))}
       </select>
     </div>
-    <div>
-      <label className="text-sm font-medium text-foreground">{t("post.phone")}</label>
-      <div className="mt-1.5">
-        <PhoneInput
-          countryCode={formData.phoneCountryCode}
-          phoneNumber={formData.phoneNumber}
-          onCountryCodeChange={(c: string) => updateField("phoneCountryCode", c)}
-          onPhoneNumberChange={(n: string) => updateField("phoneNumber", n)}
-        />
-      </div>
-    </div>
-
-    {/* Phone visibility toggle */}
-    <div className="rounded-xl border border-border bg-card p-4 space-y-3">
-      <p className="text-sm font-medium text-foreground flex items-center gap-2">
-        📞 {lang === "ar" ? "ظهور رقم الهاتف" : "Phone Number Visibility"}
-      </p>
-      <label className="flex items-start gap-3 cursor-pointer">
-        <input type="radio" name="showPhone" checked={formData.showPhone === true}
-          onChange={() => updateField("showPhone", true)}
-          className="mt-1 accent-primary" />
-        <div>
-          <p className="text-sm font-medium text-foreground">{lang === "ar" ? "إظهار رقمي" : "Show my number publicly"}</p>
-          <p className="text-xs text-muted-foreground">{lang === "ar" ? "يمكن للمشترين رؤية رقمك والاتصال/واتساب مباشرة" : "Buyers can see and call/WhatsApp you directly"}</p>
-        </div>
-      </label>
-      <label className="flex items-start gap-3 cursor-pointer">
-        <input type="radio" name="showPhone" checked={formData.showPhone === false}
-          onChange={() => updateField("showPhone", false)}
-          className="mt-1 accent-primary" />
-        <div>
-          <p className="text-sm font-medium text-foreground">{lang === "ar" ? "إخفاء رقمي" : "Hide my number"}</p>
-          <p className="text-xs text-muted-foreground">{lang === "ar" ? "يجب على المشترين التواصل عبر محادثة مركزي" : "Buyers must message you through Marcazi chat"}</p>
-        </div>
-      </label>
-    </div>
+    {/* Contact Details Card */}
+    <ContactDetailsCard
+      phoneCountryCode={formData.phoneCountryCode}
+      phoneNumber={formData.phoneNumber}
+      showPhone={formData.showPhone}
+      contactEmail={formData.contactEmail}
+      showEmail={formData.showEmail}
+      onUpdate={(field, value) => updateField(field as any, value)}
+      helperText={lang === "ar" ? "تم ملؤه تلقائياً من ملفك الشخصي. غيّره إذا لزم الأمر." : "Pre-filled from your profile. Change if needed."}
+    />
   </div>
 );
 
