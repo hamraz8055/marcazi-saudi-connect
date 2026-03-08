@@ -97,7 +97,8 @@ const EasyApplyModal = ({ open, onOpenChange, listing }: Props) => {
         cover_letter: form.coverLetter || null,
         resume_url: resumeUrl,
         matched_skills: form.matchedSkills,
-      });
+        confirmed_documents: form.confirmedDocuments.length > 0 ? form.confirmedDocuments : null,
+      } as any);
       if (error) throw error;
       setSubmitted(true);
     } catch (err: any) {

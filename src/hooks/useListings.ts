@@ -49,6 +49,10 @@ export interface Listing {
   body_type?: string | null;
   rental_rate?: number | null;
   rental_period?: string | null;
+  // New job fields
+  required_documents?: string[] | null;
+  rental_rate_tbd?: boolean | null;
+  rental_duration_type?: string | null;
 }
 
 export function useListings(filters?: {
