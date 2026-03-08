@@ -15,22 +15,15 @@ import PageMeta from "@/components/PageMeta";
 import AuthDialog from "@/components/AuthDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { getRegularListings } from "@/lib/mockListings";
 
-// Fallback mock data if no DB listings
-const mockListings = [
-  { id: "mock-1", user_id: "", title: "CAT 320 Excavator", category: "equipment", price: 285000, city: "riyadh", views: 1240, listing_type: "sale", images: ["https://images.unsplash.com/photo-1580901368919-7738efb0f228?w=400&h=300&fit=crop"], description: null, subcategory: null, contact_for_price: false, phone: null, status: "active", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: "mock-2", user_id: "", title: "Modern Villa - Al Nakheel", category: "property", price: 2500000, city: "jeddah", views: 3420, listing_type: "sale", images: ["https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400&h=300&fit=crop"], description: null, subcategory: null, contact_for_price: false, phone: null, status: "active", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: "mock-3", user_id: "", title: "Toyota Land Cruiser 2024", category: "vehicles", price: 320000, city: "dammam", views: 5610, listing_type: "sale", images: ["https://images.unsplash.com/photo-1625231334168-30dc1d1329cc?w=400&h=300&fit=crop"], description: null, subcategory: null, contact_for_price: false, phone: null, status: "active", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: "mock-4", user_id: "", title: "HVAC Maintenance Service", category: "services", price: 0, city: "riyadh", views: 890, listing_type: "rent", images: ["https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=300&fit=crop"], description: null, subcategory: null, contact_for_price: true, phone: null, status: "active", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: "mock-5", user_id: "", title: "Steel Rebar - Bulk Supply", category: "trading", price: 4500, city: "jubail", views: 2100, listing_type: "sale", images: ["https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&h=300&fit=crop"], description: null, subcategory: null, contact_for_price: false, phone: null, status: "active", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: "mock-6", user_id: "", title: "Electrical Engineer Needed", category: "jobs", price: 15000, city: "khobar", views: 1750, listing_type: "rent", images: ["https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=400&h=300&fit=crop"], description: null, subcategory: null, contact_for_price: false, phone: null, status: "active", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: "mock-7", user_id: "", title: "Luxury Apartment - Olaya", category: "property", price: 850000, city: "riyadh", views: 4200, listing_type: "sale", images: ["https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400&h=300&fit=crop"], description: null, subcategory: null, contact_for_price: false, phone: null, status: "active", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: "mock-8", user_id: "", title: "Generator 500KVA", category: "equipment", price: 75000, city: "jeddah", views: 980, listing_type: "rent", images: ["https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=400&h=300&fit=crop"], description: null, subcategory: null, contact_for_price: false, phone: null, status: "active", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: "mock-9", user_id: "", title: "Cement Bulk - 1000 Bags", category: "trading", price: 32000, city: "dammam", views: 1560, listing_type: "sale", images: ["https://images.unsplash.com/photo-1518709766631-a6a7f45921c3?w=400&h=300&fit=crop"], description: null, subcategory: null, contact_for_price: false, phone: null, status: "active", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: "mock-10", user_id: "", title: "Nissan Patrol 2023", category: "vehicles", price: 245000, city: "tabuk", views: 3890, listing_type: "sale", images: ["https://images.unsplash.com/photo-1606611013016-969c19ba92e8?w=400&h=300&fit=crop"], description: null, subcategory: null, contact_for_price: false, phone: null, status: "active", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: "mock-11", user_id: "", title: "Office Space for Rent", category: "property", price: 5000, city: "riyadh", views: 2310, listing_type: "rent", images: ["https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=300&fit=crop"], description: null, subcategory: null, contact_for_price: false, phone: null, status: "active", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: "mock-12", user_id: "", title: "Plumber Available", category: "services", price: 0, city: "makkah", views: 670, listing_type: "rent", images: ["https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=400&h=300&fit=crop"], description: null, subcategory: null, contact_for_price: true, phone: null, status: "active", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-];
+// Fallback mock data mapped to Listing-like shape
+const mockListings = getRegularListings().map(l => ({
+  id: l.id, user_id: "", title: l.title, category: l.category, price: l.price, city: l.city,
+  views: l.views, listing_type: l.listing_type, images: l.images, description: l.description,
+  subcategory: l.subcategory, contact_for_price: l.contactForPrice, phone: l.phone,
+  status: "active" as const, created_at: l.postedAt, updated_at: l.postedAt,
+}));
 
 const Browse = () => {
   const { t, lang } = useI18n();
