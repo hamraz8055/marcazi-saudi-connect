@@ -58,8 +58,13 @@ const PostAd = () => {
     paidInternship: true,
     salaryNegotiable: false,
     requiredSkills: [] as string[],
+    requiredDocuments: [] as string[],
     companyLogoFile: null as File | null,
     companyLogoPreview: null as string | null,
+    salaryType: "" as string, // "range" | "fixed" | "negotiable"
+    rentalRateTbd: false,
+    rentalDurationType: "" as string, // "short" | "long" | "unspecified"
+    freelanceBudgetTbd: false,
     // Vehicle fields
     year: "",
     kilometers: "",
