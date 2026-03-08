@@ -298,84 +298,165 @@ export type Database = {
         }
         Relationships: []
       }
+      listing_inquiries: {
+        Row: {
+          id: string
+          listing_id: string
+          message: string | null
+          sender_email: string | null
+          sender_name: string | null
+          sent_at: string | null
+        }
+        Insert: {
+          id?: string
+          listing_id: string
+          message?: string | null
+          sender_email?: string | null
+          sender_name?: string | null
+          sent_at?: string | null
+        }
+        Update: {
+          id?: string
+          listing_id?: string
+          message?: string | null
+          sender_email?: string | null
+          sender_name?: string | null
+          sent_at?: string | null
+        }
+        Relationships: []
+      }
       listings: {
         Row: {
+          application_deadline: string | null
+          body_type: string | null
+          call_clicks: number | null
           category: string
+          chat_starts: number | null
           city: string
           company_logo_url: string | null
           contact_for_price: boolean | null
           contract_duration: string | null
           created_at: string
           description: string | null
+          email_inquiries: number | null
           employment_type: string | null
+          fuel_type: string | null
           hourly_rate: number | null
           id: string
           images: string[] | null
+          kilometers: number | null
           listing_type: string
+          make: string | null
+          model: string | null
           phone: string | null
+          phone_country_code: string | null
+          phone_number: string | null
           price: number | null
+          rental_period: string | null
+          rental_rate: number | null
           required_skills: string[] | null
           salary_max: number | null
           salary_min: number | null
           salary_negotiable: boolean | null
+          seller_type: string | null
+          show_email: boolean | null
+          show_phone: boolean | null
           status: string | null
           subcategory: string | null
           title: string
           updated_at: string
           user_id: string
           views: number | null
+          whatsapp_clicks: number | null
+          year: number | null
         }
         Insert: {
+          application_deadline?: string | null
+          body_type?: string | null
+          call_clicks?: number | null
           category: string
+          chat_starts?: number | null
           city: string
           company_logo_url?: string | null
           contact_for_price?: boolean | null
           contract_duration?: string | null
           created_at?: string
           description?: string | null
+          email_inquiries?: number | null
           employment_type?: string | null
+          fuel_type?: string | null
           hourly_rate?: number | null
           id?: string
           images?: string[] | null
+          kilometers?: number | null
           listing_type?: string
+          make?: string | null
+          model?: string | null
           phone?: string | null
+          phone_country_code?: string | null
+          phone_number?: string | null
           price?: number | null
+          rental_period?: string | null
+          rental_rate?: number | null
           required_skills?: string[] | null
           salary_max?: number | null
           salary_min?: number | null
           salary_negotiable?: boolean | null
+          seller_type?: string | null
+          show_email?: boolean | null
+          show_phone?: boolean | null
           status?: string | null
           subcategory?: string | null
           title: string
           updated_at?: string
           user_id: string
           views?: number | null
+          whatsapp_clicks?: number | null
+          year?: number | null
         }
         Update: {
+          application_deadline?: string | null
+          body_type?: string | null
+          call_clicks?: number | null
           category?: string
+          chat_starts?: number | null
           city?: string
           company_logo_url?: string | null
           contact_for_price?: boolean | null
           contract_duration?: string | null
           created_at?: string
           description?: string | null
+          email_inquiries?: number | null
           employment_type?: string | null
+          fuel_type?: string | null
           hourly_rate?: number | null
           id?: string
           images?: string[] | null
+          kilometers?: number | null
           listing_type?: string
+          make?: string | null
+          model?: string | null
           phone?: string | null
+          phone_country_code?: string | null
+          phone_number?: string | null
           price?: number | null
+          rental_period?: string | null
+          rental_rate?: number | null
           required_skills?: string[] | null
           salary_max?: number | null
           salary_min?: number | null
           salary_negotiable?: boolean | null
+          seller_type?: string | null
+          show_email?: boolean | null
+          show_phone?: boolean | null
           status?: string | null
           subcategory?: string | null
           title?: string
           updated_at?: string
           user_id?: string
           views?: number | null
+          whatsapp_clicks?: number | null
+          year?: number | null
         }
         Relationships: []
       }
