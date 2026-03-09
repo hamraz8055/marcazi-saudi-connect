@@ -519,7 +519,15 @@ const PostAd = () => {
               )}
 
               {step === 1 && !isJobs && !isProperty && (
-                <DetailsStep formData={formData} updateField={updateField} lang={lang} t={t} isVehicle={isVehicle} />
+                <div className="space-y-5">
+                  <DetailsStep formData={formData} updateField={updateField} lang={lang} t={t} isVehicle={isVehicle} />
+                  {isClassifieds && <ClassifiedsFields formData={formData} updateField={(key: string, value: any) => updateField(key as any, value)} />}
+                  {isCommunity && <CommunityFields formData={formData} updateField={(key: string, value: any) => updateField(key as any, value)} />}
+                  {isBusinessIndustrial && <BusinessIndustrialFields formData={formData} updateField={(key: string, value: any) => updateField(key as any, value)} />}
+                  {isHomeAppliances && <HomeAppliancesFields formData={formData} updateField={(key: string, value: any) => updateField(key as any, value)} />}
+                  {isFurniture && <FurnitureFields formData={formData} updateField={(key: string, value: any) => updateField(key as any, value)} />}
+                  {isMobiles && <MobilesFields formData={formData} updateField={(key: string, value: any) => updateField(key as any, value)} />}
+                </div>
               )}
 
               {/* Step 2: Details (jobs) / Photos (property) / Photos & Price (non-jobs) */}
