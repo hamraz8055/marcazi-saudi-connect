@@ -822,6 +822,7 @@ const DetailsStep = ({ formData, updateField, lang, t, isVehicle }: any) => (
       <textarea value={formData.description} onChange={(e: any) => updateField("description", e.target.value)} placeholder={t("post.descriptionPlaceholder")} rows={4}
         className="mt-1.5 w-full rounded-xl border border-border bg-card px-4 py-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors placeholder:text-muted-foreground resize-none" />
     </div>
+    {isVehicle && (
     <div>
       <label className="text-sm font-medium text-foreground">{t("post.listingType")}</label>
       <div className="mt-1.5 relative inline-flex items-center rounded-full bg-muted p-1">
@@ -837,6 +838,7 @@ const DetailsStep = ({ formData, updateField, lang, t, isVehicle }: any) => (
         </button>
       </div>
     </div>
+    )}
 
     {isVehicle && (
       <VehicleFields
