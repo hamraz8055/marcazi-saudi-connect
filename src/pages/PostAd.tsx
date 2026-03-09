@@ -379,7 +379,90 @@ const PostAd = () => {
         }
       }
 
-      const { data, error } = await supabase.from("listings").insert(insertData).select().single();
+      // New category fields
+      if (hasSpecificFields) {
+        insertData.condition = formData.condition || null;
+        insertData.listing_type_item = formData.listingTypeItem || null;
+        insertData.swap_for = formData.swapFor || null;
+        insertData.quantity = formData.quantity ? Number(formData.quantity) : 1;
+        insertData.has_warranty = formData.hasWarranty || false;
+        insertData.warranty_expiry = formData.warrantyExpiry || null;
+        insertData.warranty_type = formData.warrantyType || null;
+        insertData.reason_selling = formData.reasonSelling || null;
+        insertData.brand = formData.brand || null;
+        insertData.item_model = formData.itemModel || null;
+        insertData.item_color = formData.itemColor || null;
+        insertData.item_size = formData.itemSize || null;
+        insertData.item_material = formData.itemMaterial || null;
+        insertData.item_type = formData.itemType || null;
+        insertData.price_negotiable = formData.priceNegotiable || false;
+        
+        // Handle listing type for items with sale/swap/free
+        if (formData.listingTypeItem === "free") {
+          insertData.price = 0;
+          insertData.contact_for_price = false;
+        }
+      }
+
+      if (isClassifieds || isMobiles) {
+        insertData.processor = formData.processor || null;
+        insertData.ram = formData.ram || null;
+        insertData.storage_capacity = formData.storageCapacity || null;
+        insertData.storage_type = formData.storageType || null;
+        insertData.gpu = formData.gpu || null;
+        insertData.screen_size = formData.screenSize || null;
+        insertData.operating_system = formData.operatingSystem || null;
+        insertData.battery_health = formData.batteryHealth || null;
+        insertData.network_type = formData.networkType?.length > 0 ? formData.networkType : null;
+        insertData.sim_type = formData.simType || null;
+        insertData.unlocked = formData.unlocked;
+        insertData.accessories_included = formData.accessoriesIncluded?.length > 0 ? formData.accessoriesIncluded : null;
+      }
+
+      if (isCommunity) {
+        insertData.service_direction = formData.serviceDirection || null;
+        insertData.pricing_type = formData.pricingType || null;
+        insertData.availability = formData.serviceAvailability?.length > 0 ? formData.serviceAvailability : null;
+        insertData.service_location = formData.serviceLocationArr?.length > 0 ? formData.serviceLocationArr : null;
+        insertData.experience_level = formData.experienceLevel || null;
+        insertData.service_languages = formData.serviceLanguages?.length > 0 ? formData.serviceLanguages : null;
+        insertData.portfolio_url = formData.portfolioUrl || null;
+        insertData.features = formData.features?.length > 0 ? formData.features : null;
+      }
+
+      if (isBusinessIndustrial) {
+        insertData.business_type = formData.businessType || null;
+        insertData.annual_revenue = formData.annualRevenue ? Number(formData.annualRevenue) : null;
+        insertData.monthly_rent = formData.monthlyRent ? Number(formData.monthlyRent) : null;
+        insertData.lease_remaining = formData.leaseRemaining || null;
+        insertData.employee_count = formData.employeeCount || null;
+        insertData.years_in_operation = formData.yearsInOperation || null;
+        insertData.business_includes = formData.businessIncludesArr?.length > 0 ? formData.businessIncludesArr : null;
+        insertData.unit_of_measurement = formData.unitOfMeasurement || null;
+        insertData.min_order_quantity = formData.minOrderQuantity ? Number(formData.minOrderQuantity) : null;
+        insertData.delivery_available = formData.deliveryAvailable || null;
+        insertData.stock_status = formData.stockStatus || null;
+      }
+
+      if (isFurniture) {
+        insertData.dimensions_w = formData.dimensionsW ? Number(formData.dimensionsW) : null;
+        insertData.dimensions_h = formData.dimensionsH ? Number(formData.dimensionsH) : null;
+        insertData.dimensions_d = formData.dimensionsD ? Number(formData.dimensionsD) : null;
+        insertData.assembly_required = formData.assemblyRequired || null;
+        insertData.item_set = formData.itemSet || false;
+        insertData.set_pieces = formData.setPieces || null;
+      }
+
+      if (isHomeAppliances) {
+        insertData.energy_rating = formData.energyRating || null;
+        insertData.year = formData.year ? Number(formData.year) : null;
+      }
+
+      if (isMobiles) {
+        insertData.year = formData.year ? Number(formData.year) : null;
+      }
+
+      const { data, error } = await (supabase.from("listings") as any).insert(insertData).select().single();
       if (error) throw error;
       toast.success(lang === "ar" ? "تم نشر إعلانك بنجاح!" : "Your ad has been posted successfully!");
       navigate(`/listing/${data.id}`);
