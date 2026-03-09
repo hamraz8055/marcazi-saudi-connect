@@ -44,7 +44,7 @@ export const VirtualTourSection: React.FC<VirtualTourSectionProps> = ({
             onChange={(e) => handleUrlChange(e.target.value)}
           />
           {validationState === "valid" && (
-            <div className="flex items-center gap-1 text-sm text-green-600">
+            <div className="flex items-center gap-1 text-sm text-emerald-600 dark:text-emerald-400">
               <Check className="h-4 w-4" />
               Valid tour link
             </div>
