@@ -23,6 +23,12 @@ import CompanyLogoUpload from "@/components/post/CompanyLogoUpload";
 import VehicleFields from "@/components/post/VehicleFields";
 import ContactDetailsCard from "@/components/post/ContactDetailsCard";
 import PropertyDetailsStep from "@/components/post/PropertyDetailsStep";
+import ClassifiedsFields from "@/components/post/ClassifiedsFields";
+import CommunityFields from "@/components/post/CommunityFields";
+import BusinessIndustrialFields from "@/components/post/BusinessIndustrialFields";
+import HomeAppliancesFields from "@/components/post/HomeAppliancesFields";
+import FurnitureFields from "@/components/post/FurnitureFields";
+import MobilesFields from "@/components/post/MobilesFields";
 import type { EmploymentType } from "@/lib/jobSkillSuggestions";
 
 const PostAd = () => {
