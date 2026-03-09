@@ -162,7 +162,6 @@ const PostAd = () => {
     energyRating: "",
     smartDevice: false,
     hasCertificate: "",
-    priceNegotiable: false,
   });
 
   // Auto-fill contact info from profile/auth
