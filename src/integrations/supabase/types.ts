@@ -1013,7 +1013,7 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      generate_reference_number: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never
