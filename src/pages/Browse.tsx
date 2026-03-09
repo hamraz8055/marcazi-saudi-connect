@@ -65,6 +65,13 @@ const Browse = () => {
   const [bodyFilter, setBodyFilter] = useState<string[]>([]);
   // Jobs filters
   const [empTypeFilter, setEmpTypeFilter] = useState<string[]>([]);
+  // Property filters
+  const [propBedroomsFilter, setPropBedroomsFilter] = useState<string | null>(null);
+  const [propBathroomsFilter, setPropBathroomsFilter] = useState<string | null>(null);
+  const [propAreaMin, setPropAreaMin] = useState("");
+  const [propAreaMax, setPropAreaMax] = useState("");
+  const [propFurnishedFilter, setPropFurnishedFilter] = useState<string[]>([]);
+  const [propHas360, setPropHas360] = useState(false);
 
   const isVehicleCategory = selectedCategory === "motors" || selectedCategory === "heavy-equipment";
   const isJobsCategory = selectedCategory === "jobs";
