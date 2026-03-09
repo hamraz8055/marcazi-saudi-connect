@@ -50,7 +50,7 @@ export const VirtualTourSection: React.FC<VirtualTourSectionProps> = ({
             </div>
           )}
           {validationState === "warning" && (
-            <div className="flex items-center gap-1 text-sm text-amber-600">
+            <div className="flex items-center gap-1 text-sm text-amber-600 dark:text-amber-400">
               <AlertTriangle className="h-4 w-4" />
               This provider may not be supported. Tour preview may not display correctly.
             </div>
