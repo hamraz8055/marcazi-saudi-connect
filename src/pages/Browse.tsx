@@ -145,7 +145,7 @@ const Browse = () => {
     }
 
     return result;
-  }, [dbListings, allListings, selectedCategory, selectedSubcategory, listingType, selectedCity, search, priceMin, priceMax, yearFrom, yearTo, maxKm, fuelFilter, sellerFilter, makeFilter, bodyFilter, empTypeFilter, isVehicleCategory, isJobsCategory]);
+  }, [dbListings, allListings, selectedCategory, selectedSubcategory, listingType, selectedCity, search, priceMin, priceMax, yearFrom, yearTo, maxKm, fuelFilter, sellerFilter, makeFilter, bodyFilter, empTypeFilter, propBedroomsFilter, propBathroomsFilter, propAreaMin, propAreaMax, propFurnishedFilter, propHas360, isVehicleCategory, isJobsCategory, isPropertyCategory]);
 
   const displayedListings = filteredListings.slice(0, displayCount);
 
