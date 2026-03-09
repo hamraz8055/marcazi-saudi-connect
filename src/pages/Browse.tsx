@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, MapPin, X, ChevronDown, ChevronRight, Eye, Heart, SlidersHorizontal, ArrowUpDown } from "lucide-react";
 import JobListingCard from "@/components/JobListingCard";
+import PropertyListingCard from "@/components/PropertyListingCard";
 import { useI18n } from "@/lib/i18n";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { categories } from "@/lib/categories";
