@@ -120,6 +120,30 @@ const Browse = () => {
       result = result.filter(l => l.employment_type && empTypeFilter.includes(l.employment_type));
     }
 
+    // Property filters
+    if (isPropertyCategory) {
+      if (propBedroomsFilter) {
+        if (propBedroomsFilter === "studio") {
+          result = result.filter(l => l.bedrooms === 0);
+        } else if (propBedroomsFilter === "5+") {
+          result = result.filter(l => (l.bedrooms || 0) >= 5);
+        } else {
+          result = result.filter(l => l.bedrooms === Number(propBedroomsFilter));
+        }
+      }
+      if (propBathroomsFilter) {
+        if (propBathroomsFilter === "4+") {
+          result = result.filter(l => (l.bathrooms || 0) >= 4);
+        } else {
+          result = result.filter(l => l.bathrooms === Number(propBathroomsFilter));
+        }
+      }
+      if (propAreaMin) result = result.filter(l => (l.area_sqm || 0) >= Number(propAreaMin));
+      if (propAreaMax) result = result.filter(l => (l.area_sqm || 0) <= Number(propAreaMax));
+      if (propFurnishedFilter.length > 0) result = result.filter(l => l.furnished && propFurnishedFilter.includes(l.furnished));
+      if (propHas360) result = result.filter(l => l.tour_360_url && l.tour_360_url.trim() !== "");
+    }
+
     return result;
   }, [dbListings, allListings, selectedCategory, selectedSubcategory, listingType, selectedCity, search, priceMin, priceMax, yearFrom, yearTo, maxKm, fuelFilter, sellerFilter, makeFilter, bodyFilter, empTypeFilter, isVehicleCategory, isJobsCategory]);
 
