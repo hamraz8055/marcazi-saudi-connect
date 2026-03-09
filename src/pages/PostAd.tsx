@@ -23,6 +23,12 @@ import CompanyLogoUpload from "@/components/post/CompanyLogoUpload";
 import VehicleFields from "@/components/post/VehicleFields";
 import ContactDetailsCard from "@/components/post/ContactDetailsCard";
 import PropertyDetailsStep from "@/components/post/PropertyDetailsStep";
+import ClassifiedsFields from "@/components/post/ClassifiedsFields";
+import CommunityFields from "@/components/post/CommunityFields";
+import BusinessIndustrialFields from "@/components/post/BusinessIndustrialFields";
+import HomeAppliancesFields from "@/components/post/HomeAppliancesFields";
+import FurnitureFields from "@/components/post/FurnitureFields";
+import MobilesFields from "@/components/post/MobilesFields";
 import type { EmploymentType } from "@/lib/jobSkillSuggestions";
 
 const PostAd = () => {
@@ -102,6 +108,60 @@ const PostAd = () => {
     projectName: "",
     tour360Url: "",
     parkingSpaces: "",
+    // New category fields
+    condition: "",
+    listingTypeItem: "sale",
+    swapFor: "",
+    quantity: "1",
+    hasWarranty: false,
+    warrantyExpiry: "",
+    warrantyType: "",
+    reasonSelling: "",
+    brand: "",
+    itemModel: "",
+    itemColor: "",
+    itemSize: "",
+    itemMaterial: "",
+    itemType: "",
+    processor: "",
+    ram: "",
+    storageCapacity: "",
+    storageType: "",
+    gpu: "",
+    screenSize: "",
+    operatingSystem: "",
+    batteryHealth: "",
+    networkType: [] as string[],
+    simType: "",
+    unlocked: null as boolean | null,
+    accessoriesIncluded: [] as string[],
+    serviceDirection: "offering",
+    pricingType: "fixed",
+    serviceAvailability: [] as string[],
+    serviceLocationArr: [] as string[],
+    experienceLevel: "",
+    serviceLanguages: [] as string[],
+    portfolioUrl: "",
+    businessType: "",
+    annualRevenue: "",
+    monthlyRent: "",
+    leaseRemaining: "",
+    employeeCount: "",
+    yearsInOperation: "",
+    businessIncludesArr: [] as string[],
+    unitOfMeasurement: "",
+    minOrderQuantity: "",
+    deliveryAvailable: "",
+    stockStatus: "",
+    dimensionsW: "",
+    dimensionsH: "",
+    dimensionsD: "",
+    assemblyRequired: "",
+    itemSet: false,
+    setPieces: "",
+    energyRating: "",
+    smartDevice: false,
+    hasCertificate: "",
   });
 
   // Auto-fill contact info from profile/auth
@@ -132,10 +192,18 @@ const PostAd = () => {
   const isJobs = formData.category === "jobs";
   const isVehicle = formData.category === "heavy-equipment" || formData.category === "motors";
   const isProperty = formData.category === "property";
+  const isClassifieds = formData.category === "classifieds";
+  const isCommunity = formData.category === "community";
+  const isBusinessIndustrial = formData.category === "business-industrial";
+  const isHomeAppliances = formData.category === "home-appliances";
+  const isFurniture = formData.category === "furniture-home-garden";
+  const isMobiles = formData.category === "mobiles-tablets-laptops";
+  const hasSpecificFields = isClassifieds || isCommunity || isBusinessIndustrial || isHomeAppliances || isFurniture || isMobiles;
 
   const getSteps = () => {
     if (isJobs) return ["post.step1", "post.jobStep2", "post.step2", "post.step4"];
     if (isProperty) return ["post.step1", "post.step2", "post.step3", "post.step4"];
+    if (hasSpecificFields) return ["post.step1", "post.step2", "post.step3", "post.step4"];
     return ["post.step1", "post.step2", "post.step3", "post.step4"];
   };
   const STEPS = getSteps();
@@ -156,13 +224,21 @@ const PostAd = () => {
       case 2:
         if (isJobs) return !!formData.title && !!formData.city;
         if (isProperty) return formData.images.length > 0 || formData.contactForPrice || !!formData.price;
+        if (hasSpecificFields) return true; // category fields already filled in step 1
         return formData.contactForPrice || !!formData.price || (isVehicle && formData.listingType === "rent" && !!formData.rentalRate);
       case 3: return true;
       default: return false;
     }
   };
 
-  const maxImages = isProperty ? 20 : 10;
+  const getMaxImages = () => {
+    if (isProperty) return 20;
+    if (isBusinessIndustrial && formData.subcategory === "businesses-for-sale") return 15;
+    if (isCommunity) return 5;
+    if (isHomeAppliances) return 8;
+    return 10;
+  };
+  const maxImages = getMaxImages();
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -303,7 +379,90 @@ const PostAd = () => {
         }
       }
 
-      const { data, error } = await supabase.from("listings").insert(insertData).select().single();
+      // New category fields
+      if (hasSpecificFields) {
+        insertData.condition = formData.condition || null;
+        insertData.listing_type_item = formData.listingTypeItem || null;
+        insertData.swap_for = formData.swapFor || null;
+        insertData.quantity = formData.quantity ? Number(formData.quantity) : 1;
+        insertData.has_warranty = formData.hasWarranty || false;
+        insertData.warranty_expiry = formData.warrantyExpiry || null;
+        insertData.warranty_type = formData.warrantyType || null;
+        insertData.reason_selling = formData.reasonSelling || null;
+        insertData.brand = formData.brand || null;
+        insertData.item_model = formData.itemModel || null;
+        insertData.item_color = formData.itemColor || null;
+        insertData.item_size = formData.itemSize || null;
+        insertData.item_material = formData.itemMaterial || null;
+        insertData.item_type = formData.itemType || null;
+        insertData.price_negotiable = formData.priceNegotiable || false;
+        
+        // Handle listing type for items with sale/swap/free
+        if (formData.listingTypeItem === "free") {
+          insertData.price = 0;
+          insertData.contact_for_price = false;
+        }
+      }
+
+      if (isClassifieds || isMobiles) {
+        insertData.processor = formData.processor || null;
+        insertData.ram = formData.ram || null;
+        insertData.storage_capacity = formData.storageCapacity || null;
+        insertData.storage_type = formData.storageType || null;
+        insertData.gpu = formData.gpu || null;
+        insertData.screen_size = formData.screenSize || null;
+        insertData.operating_system = formData.operatingSystem || null;
+        insertData.battery_health = formData.batteryHealth || null;
+        insertData.network_type = formData.networkType?.length > 0 ? formData.networkType : null;
+        insertData.sim_type = formData.simType || null;
+        insertData.unlocked = formData.unlocked;
+        insertData.accessories_included = formData.accessoriesIncluded?.length > 0 ? formData.accessoriesIncluded : null;
+      }
+
+      if (isCommunity) {
+        insertData.service_direction = formData.serviceDirection || null;
+        insertData.pricing_type = formData.pricingType || null;
+        insertData.availability = formData.serviceAvailability?.length > 0 ? formData.serviceAvailability : null;
+        insertData.service_location = formData.serviceLocationArr?.length > 0 ? formData.serviceLocationArr : null;
+        insertData.experience_level = formData.experienceLevel || null;
+        insertData.service_languages = formData.serviceLanguages?.length > 0 ? formData.serviceLanguages : null;
+        insertData.portfolio_url = formData.portfolioUrl || null;
+        insertData.features = formData.features?.length > 0 ? formData.features : null;
+      }
+
+      if (isBusinessIndustrial) {
+        insertData.business_type = formData.businessType || null;
+        insertData.annual_revenue = formData.annualRevenue ? Number(formData.annualRevenue) : null;
+        insertData.monthly_rent = formData.monthlyRent ? Number(formData.monthlyRent) : null;
+        insertData.lease_remaining = formData.leaseRemaining || null;
+        insertData.employee_count = formData.employeeCount || null;
+        insertData.years_in_operation = formData.yearsInOperation || null;
+        insertData.business_includes = formData.businessIncludesArr?.length > 0 ? formData.businessIncludesArr : null;
+        insertData.unit_of_measurement = formData.unitOfMeasurement || null;
+        insertData.min_order_quantity = formData.minOrderQuantity ? Number(formData.minOrderQuantity) : null;
+        insertData.delivery_available = formData.deliveryAvailable || null;
+        insertData.stock_status = formData.stockStatus || null;
+      }
+
+      if (isFurniture) {
+        insertData.dimensions_w = formData.dimensionsW ? Number(formData.dimensionsW) : null;
+        insertData.dimensions_h = formData.dimensionsH ? Number(formData.dimensionsH) : null;
+        insertData.dimensions_d = formData.dimensionsD ? Number(formData.dimensionsD) : null;
+        insertData.assembly_required = formData.assemblyRequired || null;
+        insertData.item_set = formData.itemSet || false;
+        insertData.set_pieces = formData.setPieces || null;
+      }
+
+      if (isHomeAppliances) {
+        insertData.energy_rating = formData.energyRating || null;
+        insertData.year = formData.year ? Number(formData.year) : null;
+      }
+
+      if (isMobiles) {
+        insertData.year = formData.year ? Number(formData.year) : null;
+      }
+
+      const { data, error } = await (supabase.from("listings") as any).insert(insertData).select().single();
       if (error) throw error;
       toast.success(lang === "ar" ? "تم نشر إعلانك بنجاح!" : "Your ad has been posted successfully!");
       navigate(`/listing/${data.id}`);
@@ -443,7 +602,15 @@ const PostAd = () => {
               )}
 
               {step === 1 && !isJobs && !isProperty && (
-                <DetailsStep formData={formData} updateField={updateField} lang={lang} t={t} isVehicle={isVehicle} />
+                <div className="space-y-5">
+                  <DetailsStep formData={formData} updateField={updateField} lang={lang} t={t} isVehicle={isVehicle} />
+                  {isClassifieds && <ClassifiedsFields formData={formData} updateField={(key: string, value: any) => updateField(key as any, value)} />}
+                  {isCommunity && <CommunityFields formData={formData} updateField={(key: string, value: any) => updateField(key as any, value)} />}
+                  {isBusinessIndustrial && <BusinessIndustrialFields formData={formData} updateField={(key: string, value: any) => updateField(key as any, value)} />}
+                  {isHomeAppliances && <HomeAppliancesFields formData={formData} updateField={(key: string, value: any) => updateField(key as any, value)} />}
+                  {isFurniture && <FurnitureFields formData={formData} updateField={(key: string, value: any) => updateField(key as any, value)} />}
+                  {isMobiles && <MobilesFields formData={formData} updateField={(key: string, value: any) => updateField(key as any, value)} />}
+                </div>
               )}
 
               {/* Step 2: Details (jobs) / Photos (property) / Photos & Price (non-jobs) */}
@@ -589,9 +756,17 @@ const PostAd = () => {
                       )}
 
                       {!isJobs && !isProperty && !isVehicle && (
-                        <p className="text-2xl font-bold text-primary">
-                          {formData.contactForPrice ? t("listing.contactPrice") : formData.price ? `${Number(formData.price).toLocaleString()} ${t("listing.sar")}` : "—"}
-                        </p>
+                        <div className="text-sm text-muted-foreground space-y-1">
+                          <p className="text-2xl font-bold text-primary">
+                            {formData.contactForPrice ? t("listing.contactPrice") : formData.price ? `${Number(formData.price).toLocaleString()} ${t("listing.sar")}` : "—"}
+                          </p>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {formData.condition && <span className="rounded-md bg-muted px-2 py-0.5 text-xs">{formData.condition}</span>}
+                            {formData.brand && <span className="rounded-md bg-muted px-2 py-0.5 text-xs">{formData.brand}</span>}
+                            {formData.itemType && <span className="rounded-md bg-muted px-2 py-0.5 text-xs">{formData.itemType}</span>}
+                            {formData.experienceLevel && <span className="rounded-md bg-muted px-2 py-0.5 text-xs">{formData.experienceLevel}</span>}
+                          </div>
+                        </div>
                       )}
 
                       {formData.description && <p className="text-sm text-muted-foreground">{formData.description}</p>}
@@ -647,6 +822,7 @@ const DetailsStep = ({ formData, updateField, lang, t, isVehicle }: any) => (
       <textarea value={formData.description} onChange={(e: any) => updateField("description", e.target.value)} placeholder={t("post.descriptionPlaceholder")} rows={4}
         className="mt-1.5 w-full rounded-xl border border-border bg-card px-4 py-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors placeholder:text-muted-foreground resize-none" />
     </div>
+    {isVehicle && (
     <div>
       <label className="text-sm font-medium text-foreground">{t("post.listingType")}</label>
       <div className="mt-1.5 relative inline-flex items-center rounded-full bg-muted p-1">
@@ -662,6 +838,7 @@ const DetailsStep = ({ formData, updateField, lang, t, isVehicle }: any) => (
         </button>
       </div>
     </div>
+    )}
 
     {isVehicle && (
       <VehicleFields
