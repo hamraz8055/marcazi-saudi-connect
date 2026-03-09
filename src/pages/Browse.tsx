@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, MapPin, X, ChevronDown, ChevronRight, Eye, Heart, SlidersHorizontal, ArrowUpDown } from "lucide-react";
 import JobListingCard from "@/components/JobListingCard";
+import PropertyListingCard from "@/components/PropertyListingCard";
 import { useI18n } from "@/lib/i18n";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { categories } from "@/lib/categories";
@@ -67,6 +68,7 @@ const Browse = () => {
 
   const isVehicleCategory = selectedCategory === "motors" || selectedCategory === "heavy-equipment";
   const isJobsCategory = selectedCategory === "jobs";
+  const isPropertyCategory = selectedCategory === "property";
 
   const { listings: dbListings, loading } = useListings({
     category: selectedCategory,
@@ -525,65 +527,70 @@ const Browse = () => {
             ) : (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {displayedListings.map((listing, i) => {
-                    if (listing.category === "jobs") {
-                      return (
-                        <JobListingCard key={listing.id} listing={listing} index={i}
-                          isFavorite={isFavorite(listing.id)} onFavorite={(e: React.MouseEvent) => handleFav(e, listing.id)} />
-                      );
-                    }
-                    return (
-                      <motion.article key={listing.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.3 }}
-                        onClick={() => navigate(`/listing/${listing.id}`)}
-                        className="group cursor-pointer rounded-2xl border border-border bg-card overflow-hidden shadow-card hover:shadow-elevated transition-all duration-300">
-                        <div className="relative aspect-[4/3] overflow-hidden">
-                          <ImageFallback src={listing.images?.[0]} alt={listing.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
-                          <div className="absolute top-3 start-3">
-                            <span className={`inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-semibold ${listing.listing_type === "sale" ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"}`}>
-                              {t(`listing.${listing.listing_type}`)}
-                            </span>
-                          </div>
-                          <button onClick={e => handleFav(e, listing.id)}
-                            className="absolute top-3 end-3 flex h-8 w-8 items-center justify-center rounded-full bg-card/80 backdrop-blur-sm text-muted-foreground hover:text-destructive transition-colors"
-                            aria-label={`Save ${listing.title} to favorites`}>
-                            <Heart className={`h-4 w-4 ${isFavorite(listing.id) ? "fill-destructive text-destructive" : ""}`} />
-                          </button>
-                        </div>
-                        <div className="p-4">
-                          <h3 className="font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">{listing.title}</h3>
-                          <p className="mt-2 text-lg font-bold text-primary">
-                            {listing.rental_rate && listing.rental_period
-                              ? `${listing.rental_rate.toLocaleString()} ${t("listing.sar")}/${listing.rental_period}`
-                              : formatPrice(listing.price, listing.contact_for_price)}
-                          </p>
-                          <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <MapPin className="h-3.5 w-3.5" />
-                              {saudiCities.find(c => c.id === listing.city)?.name[lang] || listing.city}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Eye className="h-3.5 w-3.5" />
-                              {(listing.views || 0).toLocaleString()}
-                            </span>
-                          </div>
-                          {/* Vehicle badge row */}
-                          {(listing.category === "motors" || listing.category === "heavy-equipment") && (listing.year || listing.make) && (
-                            <div className="mt-2 flex items-center gap-1.5 flex-wrap">
-                              {listing.year && <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">{listing.year}</span>}
-                              {listing.make && <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">{listing.make}</span>}
-                              {listing.fuel_type && <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">{listing.fuel_type}</span>}
-                            </div>
-                          )}
-                          {/* Contact indicators */}
-                          <div className="mt-2 flex items-center gap-2 text-muted-foreground">
-                            <span className="text-xs" title={lang === "ar" ? "محادثة متاحة" : "Chat available"}>💬</span>
-                            {listing.show_phone && <span className="text-xs" title={lang === "ar" ? "اتصال متاح" : "Call available"}>📞</span>}
-                            {listing.show_phone && <span className="text-xs" title={lang === "ar" ? "واتساب متاح" : "WhatsApp available"}>💚</span>}
-                            {listing.show_email && <span className="text-xs" title={lang === "ar" ? "بريد متاح" : "Email available"}>✉️</span>}
-                          </div>
-                        </div>
-                      </motion.article>
-                    );
+                   {displayedListings.map((listing, i) => {
+                     if (listing.category === "jobs") {
+                       return (
+                         <JobListingCard key={listing.id} listing={listing} index={i}
+                           isFavorite={isFavorite(listing.id)} onFavorite={(e: React.MouseEvent) => handleFav(e, listing.id)} />
+                       );
+                     } else if (listing.category === "property") {
+                       return (
+                         <PropertyListingCard key={listing.id} listing={listing} index={i}
+                           isFavorite={isFavorite(listing.id)} onFavorite={(e: React.MouseEvent) => handleFav(e, listing.id)} />
+                       );
+                     }
+                     return (
+                       <motion.article key={listing.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.3 }}
+                         onClick={() => navigate(`/listing/${listing.id}`)}
+                         className="group cursor-pointer rounded-2xl border border-border bg-card overflow-hidden shadow-card hover:shadow-elevated transition-all duration-300">
+                         <div className="relative aspect-[4/3] overflow-hidden">
+                           <ImageFallback src={listing.images?.[0]} alt={listing.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+                           <div className="absolute top-3 start-3">
+                             <span className={`inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-semibold ${listing.listing_type === "sale" ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"}`}>
+                               {t(`listing.${listing.listing_type}`)}
+                             </span>
+                           </div>
+                           <button onClick={e => handleFav(e, listing.id)}
+                             className="absolute top-3 end-3 flex h-8 w-8 items-center justify-center rounded-full bg-card/80 backdrop-blur-sm text-muted-foreground hover:text-destructive transition-colors"
+                             aria-label={`Save ${listing.title} to favorites`}>
+                             <Heart className={`h-4 w-4 ${isFavorite(listing.id) ? "fill-destructive text-destructive" : ""}`} />
+                           </button>
+                         </div>
+                         <div className="p-4">
+                           <h3 className="font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">{listing.title}</h3>
+                           <p className="mt-2 text-lg font-bold text-primary">
+                             {listing.rental_rate && listing.rental_period
+                               ? `${listing.rental_rate.toLocaleString()} ${t("listing.sar")}/${listing.rental_period}`
+                               : formatPrice(listing.price, listing.contact_for_price)}
+                           </p>
+                           <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+                             <span className="flex items-center gap-1">
+                               <MapPin className="h-3.5 w-3.5" />
+                               {saudiCities.find(c => c.id === listing.city)?.name[lang] || listing.city}
+                             </span>
+                             <span className="flex items-center gap-1">
+                               <Eye className="h-3.5 w-3.5" />
+                               {(listing.views || 0).toLocaleString()}
+                             </span>
+                           </div>
+                           {/* Vehicle badge row */}
+                           {(listing.category === "motors" || listing.category === "heavy-equipment") && (listing.year || listing.make) && (
+                             <div className="mt-2 flex items-center gap-1.5 flex-wrap">
+                               {listing.year && <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">{listing.year}</span>}
+                               {listing.make && <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">{listing.make}</span>}
+                               {listing.fuel_type && <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">{listing.fuel_type}</span>}
+                             </div>
+                           )}
+                           {/* Contact indicators */}
+                           <div className="mt-2 flex items-center gap-2 text-muted-foreground">
+                             <span className="text-xs" title={lang === "ar" ? "محادثة متاحة" : "Chat available"}>💬</span>
+                             {listing.show_phone && <span className="text-xs" title={lang === "ar" ? "اتصال متاح" : "Call available"}>📞</span>}
+                             {listing.show_phone && <span className="text-xs" title={lang === "ar" ? "واتساب متاح" : "WhatsApp available"}>💚</span>}
+                             {listing.show_email && <span className="text-xs" title={lang === "ar" ? "بريد متاح" : "Email available"}>✉️</span>}
+                           </div>
+                         </div>
+                       </motion.article>
+                     );
                   })}
                 </div>
                 {displayCount < filteredListings.length && (
