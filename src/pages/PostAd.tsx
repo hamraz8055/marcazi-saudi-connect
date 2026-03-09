@@ -192,10 +192,18 @@ const PostAd = () => {
   const isJobs = formData.category === "jobs";
   const isVehicle = formData.category === "heavy-equipment" || formData.category === "motors";
   const isProperty = formData.category === "property";
+  const isClassifieds = formData.category === "classifieds";
+  const isCommunity = formData.category === "community";
+  const isBusinessIndustrial = formData.category === "business-industrial";
+  const isHomeAppliances = formData.category === "home-appliances";
+  const isFurniture = formData.category === "furniture-home-garden";
+  const isMobiles = formData.category === "mobiles-tablets-laptops";
+  const hasSpecificFields = isClassifieds || isCommunity || isBusinessIndustrial || isHomeAppliances || isFurniture || isMobiles;
 
   const getSteps = () => {
     if (isJobs) return ["post.step1", "post.jobStep2", "post.step2", "post.step4"];
     if (isProperty) return ["post.step1", "post.step2", "post.step3", "post.step4"];
+    if (hasSpecificFields) return ["post.step1", "post.step2", "post.step3", "post.step4"];
     return ["post.step1", "post.step2", "post.step3", "post.step4"];
   };
   const STEPS = getSteps();
@@ -216,13 +224,21 @@ const PostAd = () => {
       case 2:
         if (isJobs) return !!formData.title && !!formData.city;
         if (isProperty) return formData.images.length > 0 || formData.contactForPrice || !!formData.price;
+        if (hasSpecificFields) return true; // category fields already filled in step 1
         return formData.contactForPrice || !!formData.price || (isVehicle && formData.listingType === "rent" && !!formData.rentalRate);
       case 3: return true;
       default: return false;
     }
   };
 
-  const maxImages = isProperty ? 20 : 10;
+  const getMaxImages = () => {
+    if (isProperty) return 20;
+    if (isBusinessIndustrial && formData.subcategory === "businesses-for-sale") return 15;
+    if (isCommunity) return 5;
+    if (isHomeAppliances) return 8;
+    return 10;
+  };
+  const maxImages = getMaxImages();
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
