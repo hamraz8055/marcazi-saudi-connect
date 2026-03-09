@@ -166,9 +166,10 @@ const Browse = () => {
     if (subId) params.subcategory = subId;
     if (search) params.q = search;
     setSearchParams(params);
-    // Reset vehicle filters on category change
+    // Reset filters on category change
     setYearFrom(""); setYearTo(""); setMaxKm(""); setFuelFilter([]); setSellerFilter([]); setMakeFilter(""); setBodyFilter([]);
     setEmpTypeFilter([]);
+    setPropBedroomsFilter(null); setPropBathroomsFilter(null); setPropAreaMin(""); setPropAreaMax(""); setPropFurnishedFilter([]); setPropHas360(false);
   };
 
   const handleFav = async (e: React.MouseEvent, listingId: string) => {
