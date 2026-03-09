@@ -68,6 +68,7 @@ const Browse = () => {
 
   const isVehicleCategory = selectedCategory === "motors" || selectedCategory === "heavy-equipment";
   const isJobsCategory = selectedCategory === "jobs";
+  const isPropertyCategory = selectedCategory === "property";
 
   const { listings: dbListings, loading } = useListings({
     category: selectedCategory,
