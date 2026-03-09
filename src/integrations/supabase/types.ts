@@ -344,56 +344,92 @@ export type Database = {
       }
       listings: {
         Row: {
+          accessories_included: string[] | null
           agency_name: string | null
+          annual_revenue: number | null
           application_deadline: string | null
           area_sqm: number | null
+          assembly_required: string | null
+          availability: string[] | null
           bathrooms: number | null
+          battery_health: string | null
           bedrooms: number | null
           body_type: string | null
+          brand: string | null
+          business_includes: string[] | null
+          business_type: string | null
           call_clicks: number | null
           capacity: number | null
           category: string
           chat_starts: number | null
           city: string
           company_logo_url: string | null
+          condition: string | null
           contact_email: string | null
           contact_for_price: boolean | null
           contract_duration: string | null
           created_at: string
+          delivery_available: string | null
           description: string | null
           developer_name: string | null
+          dimensions_d: number | null
+          dimensions_h: number | null
+          dimensions_w: number | null
           district: string | null
           down_payment_pct: number | null
           email_inquiries: number | null
+          employee_count: string | null
           employment_type: string | null
+          energy_rating: string | null
+          experience_level: string | null
           features: string[] | null
           fitout_status: string | null
           floor_number: string | null
           fuel_type: string | null
           furnished: string | null
+          gpu: string | null
           handover_date: string | null
+          has_warranty: boolean | null
           hourly_rate: number | null
           id: string
           images: string[] | null
           installment_period: string | null
+          item_color: string | null
+          item_material: string | null
+          item_model: string | null
+          item_set: boolean | null
+          item_size: string | null
+          item_type: string | null
           kilometers: number | null
           land_type: string | null
           latitude: number | null
+          lease_remaining: string | null
           listing_type: string
+          listing_type_item: string | null
           longitude: number | null
           make: string | null
+          min_order_quantity: number | null
           model: string | null
+          monthly_rent: number | null
+          network_type: string[] | null
+          operating_system: string | null
           payment_plan: boolean | null
           payment_terms: string | null
           phone: string | null
           phone_country_code: string | null
           phone_number: string | null
+          portfolio_url: string | null
           poster_type: string | null
           price: number | null
           price_negotiable: boolean | null
           price_per_sqm: number | null
           price_period: string | null
+          pricing_type: string | null
+          processor: string | null
           project_name: string | null
+          quantity: number | null
+          ram: string | null
+          reason_selling: string | null
           reference_number: string | null
           rega_license: string | null
           rental_duration_type: string | null
@@ -405,71 +441,123 @@ export type Database = {
           salary_max: number | null
           salary_min: number | null
           salary_negotiable: boolean | null
+          screen_size: string | null
           seller_type: string | null
+          service_direction: string | null
+          service_languages: string[] | null
+          service_location: string[] | null
+          set_pieces: string | null
           show_email: boolean | null
           show_phone: boolean | null
+          sim_type: string | null
+          smart_device: boolean | null
           status: string | null
+          stock_status: string | null
+          storage_capacity: string | null
+          storage_type: string | null
           street: string | null
           subcategory: string | null
+          swap_for: string | null
           title: string
           tour_360_url: string | null
+          unit_of_measurement: string | null
+          unlocked: boolean | null
           updated_at: string
           user_id: string
           views: number | null
+          warranty_expiry: string | null
+          warranty_type: string | null
           whatsapp_clicks: number | null
           year: number | null
+          years_in_operation: string | null
         }
         Insert: {
+          accessories_included?: string[] | null
           agency_name?: string | null
+          annual_revenue?: number | null
           application_deadline?: string | null
           area_sqm?: number | null
+          assembly_required?: string | null
+          availability?: string[] | null
           bathrooms?: number | null
+          battery_health?: string | null
           bedrooms?: number | null
           body_type?: string | null
+          brand?: string | null
+          business_includes?: string[] | null
+          business_type?: string | null
           call_clicks?: number | null
           capacity?: number | null
           category: string
           chat_starts?: number | null
           city: string
           company_logo_url?: string | null
+          condition?: string | null
           contact_email?: string | null
           contact_for_price?: boolean | null
           contract_duration?: string | null
           created_at?: string
+          delivery_available?: string | null
           description?: string | null
           developer_name?: string | null
+          dimensions_d?: number | null
+          dimensions_h?: number | null
+          dimensions_w?: number | null
           district?: string | null
           down_payment_pct?: number | null
           email_inquiries?: number | null
+          employee_count?: string | null
           employment_type?: string | null
+          energy_rating?: string | null
+          experience_level?: string | null
           features?: string[] | null
           fitout_status?: string | null
           floor_number?: string | null
           fuel_type?: string | null
           furnished?: string | null
+          gpu?: string | null
           handover_date?: string | null
+          has_warranty?: boolean | null
           hourly_rate?: number | null
           id?: string
           images?: string[] | null
           installment_period?: string | null
+          item_color?: string | null
+          item_material?: string | null
+          item_model?: string | null
+          item_set?: boolean | null
+          item_size?: string | null
+          item_type?: string | null
           kilometers?: number | null
           land_type?: string | null
           latitude?: number | null
+          lease_remaining?: string | null
           listing_type?: string
+          listing_type_item?: string | null
           longitude?: number | null
           make?: string | null
+          min_order_quantity?: number | null
           model?: string | null
+          monthly_rent?: number | null
+          network_type?: string[] | null
+          operating_system?: string | null
           payment_plan?: boolean | null
           payment_terms?: string | null
           phone?: string | null
           phone_country_code?: string | null
           phone_number?: string | null
+          portfolio_url?: string | null
           poster_type?: string | null
           price?: number | null
           price_negotiable?: boolean | null
           price_per_sqm?: number | null
           price_period?: string | null
+          pricing_type?: string | null
+          processor?: string | null
           project_name?: string | null
+          quantity?: number | null
+          ram?: string | null
+          reason_selling?: string | null
           reference_number?: string | null
           rega_license?: string | null
           rental_duration_type?: string | null
@@ -481,71 +569,123 @@ export type Database = {
           salary_max?: number | null
           salary_min?: number | null
           salary_negotiable?: boolean | null
+          screen_size?: string | null
           seller_type?: string | null
+          service_direction?: string | null
+          service_languages?: string[] | null
+          service_location?: string[] | null
+          set_pieces?: string | null
           show_email?: boolean | null
           show_phone?: boolean | null
+          sim_type?: string | null
+          smart_device?: boolean | null
           status?: string | null
+          stock_status?: string | null
+          storage_capacity?: string | null
+          storage_type?: string | null
           street?: string | null
           subcategory?: string | null
+          swap_for?: string | null
           title: string
           tour_360_url?: string | null
+          unit_of_measurement?: string | null
+          unlocked?: boolean | null
           updated_at?: string
           user_id: string
           views?: number | null
+          warranty_expiry?: string | null
+          warranty_type?: string | null
           whatsapp_clicks?: number | null
           year?: number | null
+          years_in_operation?: string | null
         }
         Update: {
+          accessories_included?: string[] | null
           agency_name?: string | null
+          annual_revenue?: number | null
           application_deadline?: string | null
           area_sqm?: number | null
+          assembly_required?: string | null
+          availability?: string[] | null
           bathrooms?: number | null
+          battery_health?: string | null
           bedrooms?: number | null
           body_type?: string | null
+          brand?: string | null
+          business_includes?: string[] | null
+          business_type?: string | null
           call_clicks?: number | null
           capacity?: number | null
           category?: string
           chat_starts?: number | null
           city?: string
           company_logo_url?: string | null
+          condition?: string | null
           contact_email?: string | null
           contact_for_price?: boolean | null
           contract_duration?: string | null
           created_at?: string
+          delivery_available?: string | null
           description?: string | null
           developer_name?: string | null
+          dimensions_d?: number | null
+          dimensions_h?: number | null
+          dimensions_w?: number | null
           district?: string | null
           down_payment_pct?: number | null
           email_inquiries?: number | null
+          employee_count?: string | null
           employment_type?: string | null
+          energy_rating?: string | null
+          experience_level?: string | null
           features?: string[] | null
           fitout_status?: string | null
           floor_number?: string | null
           fuel_type?: string | null
           furnished?: string | null
+          gpu?: string | null
           handover_date?: string | null
+          has_warranty?: boolean | null
           hourly_rate?: number | null
           id?: string
           images?: string[] | null
           installment_period?: string | null
+          item_color?: string | null
+          item_material?: string | null
+          item_model?: string | null
+          item_set?: boolean | null
+          item_size?: string | null
+          item_type?: string | null
           kilometers?: number | null
           land_type?: string | null
           latitude?: number | null
+          lease_remaining?: string | null
           listing_type?: string
+          listing_type_item?: string | null
           longitude?: number | null
           make?: string | null
+          min_order_quantity?: number | null
           model?: string | null
+          monthly_rent?: number | null
+          network_type?: string[] | null
+          operating_system?: string | null
           payment_plan?: boolean | null
           payment_terms?: string | null
           phone?: string | null
           phone_country_code?: string | null
           phone_number?: string | null
+          portfolio_url?: string | null
           poster_type?: string | null
           price?: number | null
           price_negotiable?: boolean | null
           price_per_sqm?: number | null
           price_period?: string | null
+          pricing_type?: string | null
+          processor?: string | null
           project_name?: string | null
+          quantity?: number | null
+          ram?: string | null
+          reason_selling?: string | null
           reference_number?: string | null
           rega_license?: string | null
           rental_duration_type?: string | null
@@ -557,19 +697,35 @@ export type Database = {
           salary_max?: number | null
           salary_min?: number | null
           salary_negotiable?: boolean | null
+          screen_size?: string | null
           seller_type?: string | null
+          service_direction?: string | null
+          service_languages?: string[] | null
+          service_location?: string[] | null
+          set_pieces?: string | null
           show_email?: boolean | null
           show_phone?: boolean | null
+          sim_type?: string | null
+          smart_device?: boolean | null
           status?: string | null
+          stock_status?: string | null
+          storage_capacity?: string | null
+          storage_type?: string | null
           street?: string | null
           subcategory?: string | null
+          swap_for?: string | null
           title?: string
           tour_360_url?: string | null
+          unit_of_measurement?: string | null
+          unlocked?: boolean | null
           updated_at?: string
           user_id?: string
           views?: number | null
+          warranty_expiry?: string | null
+          warranty_type?: string | null
           whatsapp_clicks?: number | null
           year?: number | null
+          years_in_operation?: string | null
         }
         Relationships: []
       }
