@@ -756,9 +756,17 @@ const PostAd = () => {
                       )}
 
                       {!isJobs && !isProperty && !isVehicle && (
-                        <p className="text-2xl font-bold text-primary">
-                          {formData.contactForPrice ? t("listing.contactPrice") : formData.price ? `${Number(formData.price).toLocaleString()} ${t("listing.sar")}` : "—"}
-                        </p>
+                        <div className="text-sm text-muted-foreground space-y-1">
+                          <p className="text-2xl font-bold text-primary">
+                            {formData.contactForPrice ? t("listing.contactPrice") : formData.price ? `${Number(formData.price).toLocaleString()} ${t("listing.sar")}` : "—"}
+                          </p>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {formData.condition && <span className="rounded-md bg-muted px-2 py-0.5 text-xs">{formData.condition}</span>}
+                            {formData.brand && <span className="rounded-md bg-muted px-2 py-0.5 text-xs">{formData.brand}</span>}
+                            {formData.itemType && <span className="rounded-md bg-muted px-2 py-0.5 text-xs">{formData.itemType}</span>}
+                            {formData.experienceLevel && <span className="rounded-md bg-muted px-2 py-0.5 text-xs">{formData.experienceLevel}</span>}
+                          </div>
+                        </div>
                       )}
 
                       {formData.description && <p className="text-sm text-muted-foreground">{formData.description}</p>}
