@@ -65,6 +65,13 @@ const Browse = () => {
   const [bodyFilter, setBodyFilter] = useState<string[]>([]);
   // Jobs filters
   const [empTypeFilter, setEmpTypeFilter] = useState<string[]>([]);
+  // Property filters
+  const [propBedroomsFilter, setPropBedroomsFilter] = useState<string | null>(null);
+  const [propBathroomsFilter, setPropBathroomsFilter] = useState<string | null>(null);
+  const [propAreaMin, setPropAreaMin] = useState("");
+  const [propAreaMax, setPropAreaMax] = useState("");
+  const [propFurnishedFilter, setPropFurnishedFilter] = useState<string[]>([]);
+  const [propHas360, setPropHas360] = useState(false);
 
   const isVehicleCategory = selectedCategory === "motors" || selectedCategory === "heavy-equipment";
   const isJobsCategory = selectedCategory === "jobs";
@@ -113,8 +120,32 @@ const Browse = () => {
       result = result.filter(l => l.employment_type && empTypeFilter.includes(l.employment_type));
     }
 
+    // Property filters
+    if (isPropertyCategory) {
+      if (propBedroomsFilter) {
+        if (propBedroomsFilter === "studio") {
+          result = result.filter(l => l.bedrooms === 0);
+        } else if (propBedroomsFilter === "5+") {
+          result = result.filter(l => (l.bedrooms || 0) >= 5);
+        } else {
+          result = result.filter(l => l.bedrooms === Number(propBedroomsFilter));
+        }
+      }
+      if (propBathroomsFilter) {
+        if (propBathroomsFilter === "4+") {
+          result = result.filter(l => (l.bathrooms || 0) >= 4);
+        } else {
+          result = result.filter(l => l.bathrooms === Number(propBathroomsFilter));
+        }
+      }
+      if (propAreaMin) result = result.filter(l => (l.area_sqm || 0) >= Number(propAreaMin));
+      if (propAreaMax) result = result.filter(l => (l.area_sqm || 0) <= Number(propAreaMax));
+      if (propFurnishedFilter.length > 0) result = result.filter(l => l.furnished && propFurnishedFilter.includes(l.furnished));
+      if (propHas360) result = result.filter(l => l.tour_360_url && l.tour_360_url.trim() !== "");
+    }
+
     return result;
-  }, [dbListings, allListings, selectedCategory, selectedSubcategory, listingType, selectedCity, search, priceMin, priceMax, yearFrom, yearTo, maxKm, fuelFilter, sellerFilter, makeFilter, bodyFilter, empTypeFilter, isVehicleCategory, isJobsCategory]);
+  }, [dbListings, allListings, selectedCategory, selectedSubcategory, listingType, selectedCity, search, priceMin, priceMax, yearFrom, yearTo, maxKm, fuelFilter, sellerFilter, makeFilter, bodyFilter, empTypeFilter, propBedroomsFilter, propBathroomsFilter, propAreaMin, propAreaMax, propFurnishedFilter, propHas360, isVehicleCategory, isJobsCategory, isPropertyCategory]);
 
   const displayedListings = filteredListings.slice(0, displayCount);
 
@@ -135,9 +166,10 @@ const Browse = () => {
     if (subId) params.subcategory = subId;
     if (search) params.q = search;
     setSearchParams(params);
-    // Reset vehicle filters on category change
+    // Reset filters on category change
     setYearFrom(""); setYearTo(""); setMaxKm(""); setFuelFilter([]); setSellerFilter([]); setMakeFilter(""); setBodyFilter([]);
     setEmpTypeFilter([]);
+    setPropBedroomsFilter(null); setPropBathroomsFilter(null); setPropAreaMin(""); setPropAreaMax(""); setPropFurnishedFilter([]); setPropHas360(false);
   };
 
   const handleFav = async (e: React.MouseEvent, listingId: string) => {
@@ -289,6 +321,113 @@ const Browse = () => {
               <span className="text-muted-foreground text-xs">–</span>
               <input type="number" placeholder={lang === "ar" ? "إلى" : "Max"} value={priceMax} onChange={e => setPriceMax(e.target.value)} className={inputFilterClass} />
             </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (isPropertyCategory) {
+      const bedroomOptions = [
+        { value: "studio", label: { en: "Studio", ar: "استوديو" } },
+        { value: "1", label: { en: "1 BR", ar: "غرفة واحدة" } },
+        { value: "2", label: { en: "2 BR", ar: "غرفتين" } },
+        { value: "3", label: { en: "3 BR", ar: "3 غرف" } },
+        { value: "4", label: { en: "4 BR", ar: "4 غرف" } },
+        { value: "5+", label: { en: "5+ BR", ar: "5+ غرف" } },
+      ];
+
+      const bathroomOptions = [
+        { value: "1", label: { en: "1 Bath", ar: "حمام واحد" } },
+        { value: "2", label: { en: "2 Baths", ar: "حمامين" } },
+        { value: "3", label: { en: "3 Baths", ar: "3 حمامات" } },
+        { value: "4+", label: { en: "4+ Baths", ar: "4+ حمامات" } },
+      ];
+
+      const furnishedOptions = [
+        { id: "furnished", label: { en: "Furnished", ar: "مفروش" } },
+        { id: "semi", label: { en: "Semi-Furnished", ar: "شبه مفروش" } },
+        { id: "unfurnished", label: { en: "Unfurnished", ar: "غير مفروش" } },
+      ];
+
+      return (
+        <div className="mt-4 rounded-xl border border-border bg-card p-3 space-y-4">
+          <p className="text-sm font-semibold text-foreground">{lang === "ar" ? "فلاتر العقارات" : "Property Filters"}</p>
+
+          {/* Bedrooms */}
+          <div>
+            <p className="text-xs font-medium text-muted-foreground mb-1.5">{lang === "ar" ? "عدد الغرف" : "Bedrooms"}</p>
+            <div className="flex flex-wrap gap-1.5">
+              {bedroomOptions.map(option => (
+                <button 
+                  key={option.value} 
+                  onClick={() => setPropBedroomsFilter(propBedroomsFilter === option.value ? null : option.value)}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-medium border transition-colors ${propBedroomsFilter === option.value ? "border-primary bg-primary/10 text-primary" : "border-border text-foreground hover:bg-muted"}`}>
+                  {option.label[lang]}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Bathrooms */}
+          <div>
+            <p className="text-xs font-medium text-muted-foreground mb-1.5">{lang === "ar" ? "عدد الحمامات" : "Bathrooms"}</p>
+            <div className="flex flex-wrap gap-1.5">
+              {bathroomOptions.map(option => (
+                <button 
+                  key={option.value} 
+                  onClick={() => setPropBathroomsFilter(propBathroomsFilter === option.value ? null : option.value)}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-medium border transition-colors ${propBathroomsFilter === option.value ? "border-primary bg-primary/10 text-primary" : "border-border text-foreground hover:bg-muted"}`}>
+                  {option.label[lang]}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Area Range */}
+          <div>
+            <p className="text-xs font-medium text-muted-foreground mb-1.5">{lang === "ar" ? "المساحة (م²)" : "Area (sqm)"}</p>
+            <div className="flex items-center gap-2">
+              <input 
+                type="number" 
+                placeholder={lang === "ar" ? "من" : "Min"} 
+                value={propAreaMin} 
+                onChange={e => setPropAreaMin(e.target.value)} 
+                className={inputFilterClass} 
+              />
+              <span className="text-muted-foreground text-xs">–</span>
+              <input 
+                type="number" 
+                placeholder={lang === "ar" ? "إلى" : "Max"} 
+                value={propAreaMax} 
+                onChange={e => setPropAreaMax(e.target.value)} 
+                className={inputFilterClass} 
+              />
+            </div>
+          </div>
+
+          {/* Furnishing Status */}
+          <div>
+            <p className="text-xs font-medium text-muted-foreground mb-1.5">{lang === "ar" ? "حالة الأثاث" : "Furnishing"}</p>
+            <div className="flex flex-wrap gap-1.5">
+              {furnishedOptions.map(option => (
+                <button 
+                  key={option.id} 
+                  onClick={() => toggleArrayFilter(propFurnishedFilter, setPropFurnishedFilter, option.id)}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-medium border transition-colors ${propFurnishedFilter.includes(option.id) ? "border-primary bg-primary/10 text-primary" : "border-border text-foreground hover:bg-muted"}`}>
+                  {option.label[lang]}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Virtual Tour */}
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-medium text-muted-foreground">{lang === "ar" ? "جولة افتراضية 360°" : "360° Virtual Tour"}</p>
+            <button 
+              onClick={() => setPropHas360(!propHas360)}
+              className={`rounded-lg px-2.5 py-1 text-xs font-medium border transition-colors ${propHas360 ? "border-primary bg-primary/10 text-primary" : "border-border text-foreground hover:bg-muted"}`}>
+              {propHas360 ? (lang === "ar" ? "نعم" : "Yes") : (lang === "ar" ? "الكل" : "All")}
+            </button>
           </div>
         </div>
       );
