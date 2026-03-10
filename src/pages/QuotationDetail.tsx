@@ -120,11 +120,8 @@ const QuotationDetail = () => {
         awarded_to: quote.supplier_id,
         awarded_quote_id: quote.id,
       }).eq("id", dbQuotation.id);
-      // Update winning quote
-      await supabase.from("quote_responses").update({ status: "awarded" }).eq("id", quote.id);
-      // Reject others
-      await supabase.from("quote_responses").update({ status: "rejected" })
-        .eq("quotation_id", dbQuotation.id).neq("id", quote.id);
+      // Note: quote_responses table doesn't have a status column in the current schema
+      // The award is tracked on the quotations table via awarded_to and awarded_quote_id
       toast.success(lang === "ar" ? "تم ترسية العقد!" : "Contract awarded!");
       setAwardModal(null);
       navigate("/bidding");
