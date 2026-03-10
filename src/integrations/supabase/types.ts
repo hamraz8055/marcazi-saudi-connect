@@ -80,63 +80,163 @@ export type Database = {
           },
         ]
       }
+      auction_deposits: {
+        Row: {
+          amount: number | null
+          auction_id: string
+          id: string
+          paid_at: string | null
+          refunded_at: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          amount?: number | null
+          auction_id: string
+          id?: string
+          paid_at?: string | null
+          refunded_at?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number | null
+          auction_id?: string
+          id?: string
+          paid_at?: string | null
+          refunded_at?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auction_deposits_auction_id_fkey"
+            columns: ["auction_id"]
+            isOneToOne: false
+            referencedRelation: "auctions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      auction_watchers: {
+        Row: {
+          auction_id: string
+          created_at: string | null
+          user_id: string
+        }
+        Insert: {
+          auction_id: string
+          created_at?: string | null
+          user_id: string
+        }
+        Update: {
+          auction_id?: string
+          created_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auction_watchers_auction_id_fkey"
+            columns: ["auction_id"]
+            isOneToOne: false
+            referencedRelation: "auctions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       auctions: {
         Row: {
+          auto_extend_minutes: number | null
+          bid_increment: number | null
           category: string
           city: string
           condition: string | null
           created_at: string
           current_bid: number | null
+          deposit_pct: number | null
+          deposit_required: boolean | null
           description: string | null
           duration_days: number
           ends_at: string
+          extended: boolean | null
           id: string
           images: string[] | null
+          reference_no: string | null
           reserve_price: number | null
+          start_time: string | null
           starting_price: number
           status: string | null
+          subcategory: string | null
           title: string
           total_bids: number | null
+          total_views: number | null
           updated_at: string
           user_id: string
+          watchers: number | null
+          winner_id: string | null
+          winning_bid: number | null
         }
         Insert: {
+          auto_extend_minutes?: number | null
+          bid_increment?: number | null
           category: string
           city: string
           condition?: string | null
           created_at?: string
           current_bid?: number | null
+          deposit_pct?: number | null
+          deposit_required?: boolean | null
           description?: string | null
           duration_days?: number
           ends_at: string
+          extended?: boolean | null
           id?: string
           images?: string[] | null
+          reference_no?: string | null
           reserve_price?: number | null
+          start_time?: string | null
           starting_price: number
           status?: string | null
+          subcategory?: string | null
           title: string
           total_bids?: number | null
+          total_views?: number | null
           updated_at?: string
           user_id: string
+          watchers?: number | null
+          winner_id?: string | null
+          winning_bid?: number | null
         }
         Update: {
+          auto_extend_minutes?: number | null
+          bid_increment?: number | null
           category?: string
           city?: string
           condition?: string | null
           created_at?: string
           current_bid?: number | null
+          deposit_pct?: number | null
+          deposit_required?: boolean | null
           description?: string | null
           duration_days?: number
           ends_at?: string
+          extended?: boolean | null
           id?: string
           images?: string[] | null
+          reference_no?: string | null
           reserve_price?: number | null
+          start_time?: string | null
           starting_price?: number
           status?: string | null
+          subcategory?: string | null
           title?: string
           total_bids?: number | null
+          total_views?: number | null
           updated_at?: string
           user_id?: string
+          watchers?: number | null
+          winner_id?: string | null
+          winning_bid?: number | null
         }
         Relationships: []
       }
@@ -146,6 +246,10 @@ export type Database = {
           auction_id: string
           created_at: string
           id: string
+          is_auto_bid: boolean | null
+          is_winning: boolean | null
+          max_auto_bid: number | null
+          status: string | null
           user_id: string
         }
         Insert: {
@@ -153,6 +257,10 @@ export type Database = {
           auction_id: string
           created_at?: string
           id?: string
+          is_auto_bid?: boolean | null
+          is_winning?: boolean | null
+          max_auto_bid?: number | null
+          status?: string | null
           user_id: string
         }
         Update: {
@@ -160,6 +268,10 @@ export type Database = {
           auction_id?: string
           created_at?: string
           id?: string
+          is_auto_bid?: boolean | null
+          is_winning?: boolean | null
+          max_auto_bid?: number | null
+          status?: string | null
           user_id?: string
         }
         Relationships: [
@@ -761,6 +873,39 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          link: string | null
+          message: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          link?: string | null
+          message?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          link?: string | null
+          message?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: Json | null
@@ -832,8 +977,11 @@ export type Database = {
       }
       quotations: {
         Row: {
+          awarded_quote_id: string | null
+          awarded_to: string | null
           budget_max: number | null
           budget_min: number | null
+          budget_tbd: boolean | null
           category: string
           created_at: string
           deadline: string | null
@@ -841,19 +989,27 @@ export type Database = {
           delivery_required: boolean | null
           description: string | null
           id: string
+          images: string[] | null
           quantity: number | null
           quotes_count: number | null
+          reference_no: string | null
+          required_documents: string[] | null
           specifications: string | null
           status: string | null
+          subcategory: string | null
           title: string
+          total_views: number | null
           unit: string | null
           updated_at: string
           urgency: string | null
           user_id: string
         }
         Insert: {
+          awarded_quote_id?: string | null
+          awarded_to?: string | null
           budget_max?: number | null
           budget_min?: number | null
+          budget_tbd?: boolean | null
           category: string
           created_at?: string
           deadline?: string | null
@@ -861,19 +1017,27 @@ export type Database = {
           delivery_required?: boolean | null
           description?: string | null
           id?: string
+          images?: string[] | null
           quantity?: number | null
           quotes_count?: number | null
+          reference_no?: string | null
+          required_documents?: string[] | null
           specifications?: string | null
           status?: string | null
+          subcategory?: string | null
           title: string
+          total_views?: number | null
           unit?: string | null
           updated_at?: string
           urgency?: string | null
           user_id: string
         }
         Update: {
+          awarded_quote_id?: string | null
+          awarded_to?: string | null
           budget_max?: number | null
           budget_min?: number | null
+          budget_tbd?: boolean | null
           category?: string
           created_at?: string
           deadline?: string | null
@@ -881,11 +1045,16 @@ export type Database = {
           delivery_required?: boolean | null
           description?: string | null
           id?: string
+          images?: string[] | null
           quantity?: number | null
           quotes_count?: number | null
+          reference_no?: string | null
+          required_documents?: string[] | null
           specifications?: string | null
           status?: string | null
+          subcategory?: string | null
           title?: string
+          total_views?: number | null
           unit?: string | null
           updated_at?: string
           urgency?: string | null
@@ -924,6 +1093,62 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "quote_responses_quotation_id_fkey"
+            columns: ["quotation_id"]
+            isOneToOne: false
+            referencedRelation: "quotations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotes: {
+        Row: {
+          attachments: string[] | null
+          buyer_rating: number | null
+          buyer_review: string | null
+          delivery_date: string | null
+          delivery_time: string | null
+          id: string
+          notes: string | null
+          price_offer: number
+          quotation_id: string
+          status: string | null
+          submitted_at: string | null
+          supplier_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          attachments?: string[] | null
+          buyer_rating?: number | null
+          buyer_review?: string | null
+          delivery_date?: string | null
+          delivery_time?: string | null
+          id?: string
+          notes?: string | null
+          price_offer: number
+          quotation_id: string
+          status?: string | null
+          submitted_at?: string | null
+          supplier_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          attachments?: string[] | null
+          buyer_rating?: number | null
+          buyer_review?: string | null
+          delivery_date?: string | null
+          delivery_time?: string | null
+          id?: string
+          notes?: string | null
+          price_offer?: number
+          quotation_id?: string
+          status?: string | null
+          submitted_at?: string | null
+          supplier_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotes_quotation_id_fkey"
             columns: ["quotation_id"]
             isOneToOne: false
             referencedRelation: "quotations"
@@ -1169,6 +1394,8 @@ export type Database = {
       }
     }
     Functions: {
+      generate_auction_ref: { Args: never; Returns: string }
+      generate_quotation_ref: { Args: never; Returns: string }
       generate_reference_number: { Args: never; Returns: string }
     }
     Enums: {
