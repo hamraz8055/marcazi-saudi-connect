@@ -205,12 +205,13 @@ const Bidding = () => {
     }
     setQuoting(true);
     if (quoteModal.quotation.source === "db") {
-      await supabase.from("quote_responses").insert({
+      await supabase.from("quotes").insert({
         quotation_id: quoteModal.quotation.id,
         user_id: user.id,
-        price_offer: Number(quoteForm.priceOffer),
+        price: Number(quoteForm.priceOffer),
         delivery_time: quoteForm.deliveryTime || null,
         notes: quoteForm.notes || null,
+        status: "submitted",
       });
     } else {
       await new Promise(r => setTimeout(r, 500));

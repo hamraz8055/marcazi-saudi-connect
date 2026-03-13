@@ -48,7 +48,7 @@ const QuotationDetail = () => {
       if (data) {
         setDbQuotation(data);
         // Fetch quotes
-        const { data: qr } = await supabase.from("quote_responses")
+        const { data: qr } = await supabase.from("quotes")
           .select("*").eq("quotation_id", id).order("created_at", { ascending: false });
         setQuotes((qr || []) as any);
       }
