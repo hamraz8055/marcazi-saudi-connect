@@ -1,44 +1,54 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Kufi+Arabic:wght@300;400;500;600;700;800&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
+    /* Brand */
+    --brand:          #E8663D;
+    --brand-dark:     #C94E25;
+    --brand-light:    #FFF0EB;
+
+    /* Page */
+    --bg:             #F5F3EF;
+    --bg-card:        #FFFFFF;
+    --bg-input:       #FFFFFF;
+    --bg-dark-card:   #16213E;
+
+    /* Text */
+    --text-primary:   #1A1A1A;
+    --text-muted:     #9CA3AF;
+    --text-inverse:   #FFFFFF;
+
+    /* Border */
+    --border:         #EBEBEB;
+    --border-focus:   #E8663D;
+
+    /* Bidding purple — keep existing purple theme for bidding section */
+    --bid-purple:     #7C3AED;
+    --bid-purple-lt:  #F3EEFF;
+
+    /* Keep old var tokens untouched to maintain existing components */
     --background: 50 20% 97%;
     --foreground: 220 40% 10%;
-
     --card: 0 0% 100%;
     --card-foreground: 220 40% 10%;
-
     --popover: 0 0% 100%;
     --popover-foreground: 220 40% 10%;
-
     --primary: 150 60% 30%;
     --primary-foreground: 0 0% 100%;
-
     --primary-light: 150 40% 92%;
     --primary-dark: 150 65% 22%;
-
     --secondary: 40 30% 95%;
     --secondary-foreground: 220 40% 10%;
-
     --muted: 40 15% 94%;
     --muted-foreground: 220 10% 46%;
-
     --accent: 42 80% 55%;
     --accent-foreground: 220 40% 10%;
-
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-
-    --border: 40 15% 88%;
-    --input: 40 15% 88%;
     --ring: 150 60% 30%;
-
     --radius: 0.75rem;
-
     --sidebar-background: 40 15% 97%;
     --sidebar-foreground: 220 10% 26%;
     --sidebar-primary: 150 60% 30%;
@@ -47,17 +57,24 @@
     --sidebar-accent-foreground: 150 65% 22%;
     --sidebar-border: 40 15% 90%;
     --sidebar-ring: 150 60% 30%;
-
     --gold: 42 80% 55%;
     --gold-foreground: 220 40% 10%;
     --gold-light: 42 60% 92%;
-
     --hero-gradient: linear-gradient(135deg, hsl(150 60% 30%), hsl(150 65% 22%));
     --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.05), 0 1px 2px -1px hsl(0 0% 0% / 0.04);
     --shadow-elevated: 0 10px 30px -5px hsl(0 0% 0% / 0.1), 0 8px 10px -6px hsl(0 0% 0% / 0.04);
-
     --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
     --font-arabic: 'Noto Kufi Arabic', system-ui, sans-serif;
+  }
+
+  .dark {
+    --bg:             #0D0D0D;
+    --bg-card:        #1A1A1A;
+    --bg-input:       #222222;
+    --text-primary:   #F0F0F0;
+    --text-muted:     #666666;
+    --border:         rgba(255,255,255,0.06);
+    /* --brand stays #E8663D */
   }
 }
 
@@ -68,14 +85,17 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: var(--font-sans);
+    font-family: 'Plus Jakarta Sans', sans-serif;
     overscroll-behavior: none;
   }
 
-  [dir="rtl"] body,
-  [dir="rtl"] {
-    font-family: var(--font-arabic);
+  [lang="ar"] body, .ar * {
+    font-family: 'Noto Kufi Arabic', sans-serif;
     line-height: 1.8;
+  }
+
+  h1, h2, h3, .font-serif {
+    font-family: 'Fraunces', Georgia, serif;
   }
 
   button, a, nav, [role="tab"], [role="button"] {

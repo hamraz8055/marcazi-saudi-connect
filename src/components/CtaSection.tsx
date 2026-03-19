@@ -1,41 +1,43 @@
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useI18n } from "@/lib/i18n";
-import { Button } from "@/components/ui/button";
 
 const CtaSection = () => {
-  const { t } = useI18n();
   const navigate = useNavigate();
 
   return (
-    <section className="py-16 md:py-20">
-      <div className="container">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="relative overflow-hidden rounded-3xl bg-primary p-10 md:p-16 text-center"
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-primary-dark/50 to-transparent" />
-          <div className="absolute inset-0 opacity-[0.04]" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }} />
-          <div className="relative z-10">
-            <h2 className="text-2xl md:text-4xl font-bold text-primary-foreground">{t("cta.title")}</h2>
-            <p className="mx-auto mt-3 max-w-md text-primary-foreground/80">{t("cta.desc")}</p>
-            <Button
-              size="lg"
-              className="mt-8 rounded-xl bg-gold text-gold-foreground hover:bg-gold/90 font-semibold"
-              onClick={() => navigate("/post")}
-            >
-              {t("cta.start")}
-              <ArrowRight className="ms-2 h-4 w-4" />
-            </Button>
+    <section className="py-6">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+        className="mx-4 rounded-3xl overflow-hidden h-[220px] relative shadow-[0_8px_32px_rgba(0,0,0,0.1)]"
+      >
+        <img 
+          src="https://images.unsplash.com/photo-1518684079-3c830dcef090?w=800" 
+          alt="Sell Faster" 
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/85 md:from-black/90 to-transparent" />
+        
+        <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-center p-6 md:px-10 z-10 max-w-sm">
+          <div className="bg-brand text-white text-[10px] font-bold px-3 py-1 rounded-full w-fit mb-3">
+            POST FOR FREE
           </div>
-        </motion.div>
-      </div>
+          <h2 className="font-fraunces text-[32px] md:text-[36px] font-bold text-white leading-none">
+            Sell Faster.
+          </h2>
+          <p className="text-[14px] text-white/70 mt-2 font-medium">
+            Post your listing in 60 seconds and reach thousands of buyers across the Kingdom.
+          </p>
+          <button
+            className="mt-4 bg-brand text-white rounded-full px-6 py-2.5 text-[14px] font-bold w-fit hover:bg-brand-dark transition-colors shadow-[0_4px_16px_rgba(232,102,61,0.4)]"
+            onClick={() => navigate("/post")}
+          >
+            Get Started →
+          </button>
+        </div>
+      </motion.div>
     </section>
   );
 };

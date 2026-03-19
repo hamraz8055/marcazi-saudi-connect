@@ -16,8 +16,13 @@ export default {
       fontFamily: {
         sans: ["'Plus Jakarta Sans'", "system-ui", "sans-serif"],
         arabic: ["'Noto Kufi Arabic'", "system-ui", "sans-serif"],
+        fraunces: ['Fraunces', 'Georgia', 'serif'],
+        jakarta:  ['Plus Jakarta Sans', 'sans-serif'],
+        kufi:     ['Noto Kufi Arabic', 'sans-serif'],
       },
       colors: {
+        brand: { DEFAULT: '#E8663D', dark: '#C94E25', light: '#FFF0EB' },
+        page:  { DEFAULT: '#F5F3EF' },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
