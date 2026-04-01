@@ -1319,10 +1319,10 @@ export type Database = {
           model?: string | null
           payment_plan?: boolean | null
           payment_terms?: string | null
-          phone?: string | null
-          phone_country_code?: string | null
+          phone?: never
+          phone_country_code?: never
           phone_full?: never
-          phone_number?: string | null
+          phone_number?: never
           poster_type?: string | null
           price?: number | null
           price_negotiable?: boolean | null
@@ -1396,10 +1396,10 @@ export type Database = {
           model?: string | null
           payment_plan?: boolean | null
           payment_terms?: string | null
-          phone?: string | null
-          phone_country_code?: string | null
+          phone?: never
+          phone_country_code?: never
           phone_full?: never
-          phone_number?: string | null
+          phone_number?: never
           poster_type?: string | null
           price?: number | null
           price_negotiable?: boolean | null
