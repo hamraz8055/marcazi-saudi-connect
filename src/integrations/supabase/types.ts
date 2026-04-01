@@ -1158,6 +1158,47 @@ export type Database = {
       }
     }
     Views: {
+      public_bids: {
+        Row: {
+          amount: number | null
+          auction_id: string | null
+          created_at: string | null
+          id: string | null
+          is_auto_bid: boolean | null
+          is_winning: boolean | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          auction_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_auto_bid?: boolean | null
+          is_winning?: boolean | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          auction_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_auto_bid?: boolean | null
+          is_winning?: boolean | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bids_auction_id_fkey"
+            columns: ["auction_id"]
+            isOneToOne: false
+            referencedRelation: "auctions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       public_listings: {
         Row: {
           agency_name: string | null
@@ -1389,6 +1430,36 @@ export type Database = {
           views?: number | null
           whatsapp_clicks?: number | null
           year?: number | null
+        }
+        Relationships: []
+      }
+      public_profiles: {
+        Row: {
+          avatar_url: string | null
+          display_name: string | null
+          joined_at: string | null
+          nickname: string | null
+          status: string | null
+          user_id: string | null
+          verification_status: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          display_name?: string | null
+          joined_at?: string | null
+          nickname?: string | null
+          status?: string | null
+          user_id?: string | null
+          verification_status?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          display_name?: string | null
+          joined_at?: string | null
+          nickname?: string | null
+          status?: string | null
+          user_id?: string | null
+          verification_status?: string | null
         }
         Relationships: []
       }
