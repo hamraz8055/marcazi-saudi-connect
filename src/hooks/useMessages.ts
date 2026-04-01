@@ -63,7 +63,7 @@ export function useConversations() {
       let otherUser = null;
       if (participants?.[0]) {
         const { data: profile } = await supabase
-          .from("profiles")
+          .from("public_profiles" as any)
           .select("display_name, avatar_url, user_id")
           .eq("user_id", participants[0].user_id)
           .single();
