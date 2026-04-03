@@ -1468,6 +1468,14 @@ export type Database = {
       generate_auction_ref: { Args: never; Returns: string }
       generate_quotation_ref: { Args: never; Returns: string }
       generate_reference_number: { Args: never; Returns: string }
+      start_conversation: {
+        Args: {
+          p_listing_id?: string
+          p_listing_title?: string
+          p_other_user_id: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
